@@ -28,7 +28,7 @@ function World() {
   const [buyAmount, setBuyAmount] = useState<BuyAmount>(1)
 
   const badges = ledgerBadges(state)
-  const alerts = badges.capos + badges.upgrades + badges.family
+  const alerts = badges.capos + badges.upgrades + badges.family + badges.empire
   const playing = started && !ledgerOpen && !offlineReport
 
   const onKey = useEffectEvent((e: KeyboardEvent) => {

@@ -10,9 +10,20 @@ export type BuildingStatus = 'locked' | 'ready' | 'running' | 'managed'
 
 const FONT = '/fonts/Geist-Regular.ttf'
 
-const litWindow = new THREE.MeshStandardMaterial({ color: '#2a2016', emissive: '#ffc46b', emissiveIntensity: 1.4 })
-const darkWindow = new THREE.MeshStandardMaterial({ color: '#0f1215', roughness: 0.3, metalness: 0.6 })
-const boardedWindow = new THREE.MeshStandardMaterial({ color: '#3a2d22', roughness: 1 })
+const litWindow = new THREE.MeshStandardMaterial({
+  color: '#2a2016',
+  emissive: '#ffc46b',
+  emissiveIntensity: 1.4,
+})
+const darkWindow = new THREE.MeshStandardMaterial({
+  color: '#0f1215',
+  roughness: 0.3,
+  metalness: 0.6,
+})
+const boardedWindow = new THREE.MeshStandardMaterial({
+  color: '#3a2d22',
+  roughness: 1,
+})
 
 function hash(n: number) {
   const x = Math.sin(n * 127.1 + 311.7) * 43758.5453
@@ -64,7 +75,7 @@ function BuildingImpl({ placement, style, name, status, litLevel, focused, seed 
     <group position={placement.position} rotation={[0, placement.rotationY, 0]}>
       <mesh position={[0, height / 2, 0]}>
         <boxGeometry args={[width, height, depth]} />
-        <meshStandardMaterial color={locked ? '#26221f' : wall} roughness={0.95} />
+        <meshStandardMaterial color={wall} roughness={0.95} />
       </mesh>
       <mesh position={[0, height + 0.25, 0]}>
         <boxGeometry args={[width + 0.4, 0.5, depth + 0.4]} />
@@ -75,6 +86,36 @@ function BuildingImpl({ placement, style, name, status, litLevel, focused, seed 
         <meshStandardMaterial color={trim} />
       </mesh>
 
+      {/* Art-deco cornices, striped shop awnings, and brass window sills. */}
+      {[height - 0.7, 4.9].map((y) => (
+        <mesh key={y} position={[0, y, front + 0.18]}>
+          <boxGeometry args={[width + 0.3, 0.16, 0.38]} />
+          <meshStandardMaterial color="#a48a62" metalness={0.45} roughness={0.5} />
+        </mesh>
+      ))}
+      {!isCityHall &&
+        [-1, 0, 1].map((section) => (
+          <group key={section} position={[section * (width / 3), 3.8, front + 0.55]} rotation={[0.22, 0, 0]}>
+            <mesh>
+              <boxGeometry args={[width / 3 - 0.03, 0.12, 1.25]} />
+              <meshStandardMaterial color={section === 0 ? '#c6b797' : trim} roughness={0.8} />
+            </mesh>
+            <mesh position={[0, -0.15, 0.6]}>
+              <boxGeometry args={[width / 3 - 0.03, 0.35, 0.08]} />
+              <meshStandardMaterial color={section === 0 ? '#c6b797' : trim} />
+            </mesh>
+          </group>
+        ))}
+      <mesh position={[width / 2 - 0.4, height / 2, front + 0.12]}>
+        <cylinderGeometry args={[0.07, 0.07, height, 6]} />
+        <meshStandardMaterial color="#655d52" metalness={0.7} roughness={0.6} />
+      </mesh>
+      {windows.map((w) => (
+        <mesh key={`sill-${w.i}`} position={[w.x, w.y - 0.8, front + 0.14]}>
+          <boxGeometry args={[1.4, 0.12, 0.3]} />
+          <meshStandardMaterial color={trim} />
+        </mesh>
+      ))}
       {windows.map((w) => (
         <mesh
           key={w.i}
@@ -124,7 +165,7 @@ function BuildingImpl({ placement, style, name, status, litLevel, focused, seed 
         maxWidth={width - 1.4}
         anchorX="center"
         anchorY="middle"
-        color={locked ? '#6b625a' : neon}
+        color={locked ? '#b8a591' : neon}
         letterSpacing={0.04}
       >
         {name.toUpperCase()}
@@ -136,7 +177,14 @@ function BuildingImpl({ placement, style, name, status, litLevel, focused, seed 
             <boxGeometry args={[2.6, 0.8, 0.08]} />
             <meshStandardMaterial color="#d9c9a3" roughness={0.9} />
           </mesh>
-          <Text font={FONT} position={[0, 0, 0.06]} fontSize={0.36} color="#7a1f1a" anchorX="center" anchorY="middle">
+          <Text
+            font={FONT}
+            position={[0, 0, 0.06]}
+            fontSize={0.36}
+            color="#7a1f1a"
+            anchorX="center"
+            anchorY="middle"
+          >
             FOR SALE
           </Text>
         </group>

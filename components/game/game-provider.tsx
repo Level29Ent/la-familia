@@ -3,10 +3,13 @@
 import { createContext, useContext, useEffect, useReducer, useRef, useState, type ReactNode } from 'react'
 import { BUSINESSES, SAVE_KEY, UPGRADES } from '@/lib/game/config'
 import {
+  empireAction,
+  type EmpireAction,
   claimableRespect,
   computeOfflineEarnings,
   costFor,
   createInitialState,
+  restoreState,
   resolveBuyAmount,
   tick,
   type BuyAmount,
@@ -14,6 +17,7 @@ import {
 } from '@/lib/game/engine'
 
 type Action =
+  | EmpireAction
   | { type: 'tick'; dt: number }
   | { type: 'run'; id: string }
   | { type: 'buy'; id: string; amount: BuyAmount }
@@ -25,6 +29,10 @@ type Action =
 
 function reducer(state: GameState, action: Action): GameState {
   switch (action.type) {
+    case 'asset':
+    case 'operation':
+    case 'objective':
+      return empireAction(state, action)
     case 'tick':
       return tick(state, action.dt)
     case 'run': {
@@ -89,12 +97,7 @@ function loadSave(): GameState | null {
     const raw = window.localStorage.getItem(SAVE_KEY)
     if (!raw) return null
     const parsed = JSON.parse(raw) as GameState
-    const fresh = createInitialState()
-    return {
-      ...fresh,
-      ...parsed,
-      businesses: { ...fresh.businesses, ...parsed.businesses },
-    }
+    return restoreState(parsed)
   } catch {
     return null
   }

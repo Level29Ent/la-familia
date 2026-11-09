@@ -1,11 +1,13 @@
 'use client'
 
 import { BookOpen, Crown, TrendingUp } from 'lucide-react'
-import { respectMultiplier, totalIncomePerSecond, type BuyAmount } from '@/lib/game/engine'
+import { objectiveProgress, respectMultiplier, totalIncomePerSecond, type BuyAmount } from '@/lib/game/engine'
 import { formatMoney, formatNumber } from '@/lib/game/format'
 import { cn } from '@/lib/utils'
 import { FocusCard } from './focus-card'
 import { useGame } from './game-provider'
+import { MusicPlayer } from './music-player'
+import { OBJECTIVES, BUSINESSES } from '@/lib/game/config'
 import { TouchControls } from './touch-controls'
 
 const AMOUNTS: BuyAmount[] = [1, 10, 100, 'max']
@@ -25,12 +27,17 @@ export function Hud({
 }) {
   const { state } = useGame()
 
+  const objective = OBJECTIVES.find((o) => !state.objectives.includes(o.id))
+  const properties = BUSINESSES.filter((b) => state.businesses[b.id].owned > 0).length
+
   return (
     <div className="pointer-events-none absolute inset-0 flex flex-col justify-between p-4 md:p-6">
       <div className="flex items-start justify-between gap-4">
         <div className="flex flex-col gap-1 rounded-2xl border border-border bg-background/70 px-4 py-3 backdrop-blur-md">
           <p className="font-serif text-sm font-semibold tracking-wide text-muted-foreground">La Famiglia</p>
-          <p className="font-serif text-3xl font-bold text-primary tabular-nums md:text-4xl">{formatMoney(state.cash)}</p>
+          <p className="font-serif text-3xl font-bold text-primary tabular-nums md:text-4xl">
+            {formatMoney(state.cash)}
+          </p>
           <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm tabular-nums">
             <span className="flex items-center gap-1.5 text-foreground">
               <TrendingUp className="size-4 text-primary" aria-hidden="true" />
@@ -53,7 +60,9 @@ export function Hud({
           >
             <BookOpen className="size-4 text-primary" aria-hidden="true" />
             Ledger
-            <kbd className="rounded border border-border px-1.5 font-sans text-xs text-muted-foreground">M</kbd>
+            <kbd className="rounded border border-border px-1.5 font-sans text-xs text-muted-foreground">
+              M
+            </kbd>
             {alerts > 0 && (
               <span className="flex min-w-5 items-center justify-center rounded-full bg-accent px-1.5 text-xs font-bold text-accent-foreground tabular-nums">
                 {alerts}
@@ -61,7 +70,12 @@ export function Hud({
               </span>
             )}
           </button>
-          <div role="radiogroup" aria-label="Buy amount" className="flex rounded-full border border-border bg-background/70 p-1 backdrop-blur-md">
+          <MusicPlayer />
+          <div
+            role="radiogroup"
+            aria-label="Buy amount"
+            className="flex rounded-full border border-border bg-background/70 p-1 backdrop-blur-md"
+          >
             {AMOUNTS.map((amount, i) => (
               <button
                 key={amount}
@@ -72,7 +86,9 @@ export function Hud({
                 title={`Key ${i + 1}`}
                 className={cn(
                   'rounded-full px-3 py-1 text-xs font-semibold uppercase transition-colors',
-                  buyAmount === amount ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground',
+                  buyAmount === amount
+                    ? 'bg-primary text-primary-foreground'
+                    : 'text-muted-foreground hover:text-foreground',
                 )}
               >
                 {amount === 'max' ? 'Max' : `x${amount}`}
@@ -81,6 +97,22 @@ export function Hud({
           </div>
         </div>
       </div>
+
+      <button
+        type="button"
+        onClick={onOpenLedger}
+        className="pointer-events-auto absolute top-48 left-4 max-w-[60%] rounded-xl border border-primary/20 bg-background/80 p-3 text-left backdrop-blur-md md:top-44 md:left-6"
+      >
+        <p className="text-[10px] tracking-[0.18em] text-primary uppercase">
+          Little Italy · {properties}/{BUSINESSES.length} properties
+        </p>
+        <p className="mt-1 text-xs text-foreground">{objective ? objective.name : 'The city is yours'}</p>
+        <p className="mt-1 text-[11px] text-muted-foreground">
+          {objective
+            ? `${Math.min(objective.goal, Math.floor(objectiveProgress(state, objective.metric)))}/${objective.goal} · Open Empire →`
+            : 'All objectives complete'}
+        </p>
+      </button>
 
       <div
         aria-hidden="true"

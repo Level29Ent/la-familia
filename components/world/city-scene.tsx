@@ -40,14 +40,14 @@ export function CityScene({
       gl={{ antialias: true }}
       aria-label="3D city street. Walk up to a storefront to manage that racket."
     >
-      <color attach="background" args={['#0b0a0d']} />
-      <fog attach="fog" args={['#0b0a0d', 18, 95]} />
-      <ambientLight intensity={0.35} color="#8d86a8" />
-      <hemisphereLight args={['#3b3a55', '#1a120c', 0.5]} />
+      <color attach="background" args={['#0b0f19']} />
+      <fog attach="fog" args={['#0b0f19', 28, 145]} />
+      <ambientLight intensity={0.65} color="#8d9bb8" />
+      <hemisphereLight args={['#627a9f', '#22180e', 0.8]} />
       <directionalLight position={[40, 60, -100]} intensity={0.35} color="#c9c3e6" />
       <Stars radius={150} depth={40} count={2500} factor={4} fade speed={0.4} />
 
-      <Street />
+      <Street sedanOwned={state.assets.includes('sedan')} />
 
       {PLACEMENTS.map((placement, i) => {
         const config = BUSINESSES.find((b) => b.id === placement.id)!

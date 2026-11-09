@@ -18,6 +18,11 @@ export const BUILDING_STYLES: Record<string, BuildingStyle> = {
   casino: { wall: '#2f2a3d', trim: '#17141f', neon: '#e879f9', height: 16, width: 11, depth: 8 },
   docks: { wall: '#2e3a40', trim: '#151c20', neon: '#67e8f9', height: 10, width: 11, depth: 8 },
   nightclub: { wall: '#3b2333', trim: '#1c1018', neon: '#ff4fa3', height: 18, width: 11, depth: 8 },
+  bakery: { wall: '#72503b', trim: '#30231b', neon: '#ffd59b', height: 9, width: 10, depth: 8 },
+  tailor: { wall: '#304c4b', trim: '#152b2a', neon: '#8de3d5', height: 12, width: 10, depth: 8 },
+  pawn: { wall: '#514630', trim: '#292217', neon: '#e6ce79', height: 10, width: 10, depth: 8 },
+  cinema: { wall: '#4b2939', trim: '#25121c', neon: '#ff8cb1', height: 17, width: 12, depth: 8 },
+  hotel: { wall: '#38465b', trim: '#1b2533', neon: '#9ebfff', height: 24, width: 12, depth: 8 },
   cityhall: { wall: '#7d776c', trim: '#4a463f', neon: '#f5d98a', height: 20, width: 18, depth: 10 },
 }
 

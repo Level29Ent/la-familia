@@ -13,8 +13,7 @@ export function RacketsPanel() {
   const { state } = useGame()
   const [buyAmount, setBuyAmount] = useState<BuyAmount>(1)
 
-  const firstLockedIndex = BUSINESSES.findIndex((b) => state.businesses[b.id].owned === 0)
-  const visible = firstLockedIndex === -1 ? BUSINESSES : BUSINESSES.slice(0, firstLockedIndex + 2)
+  const visible = BUSINESSES
 
   return (
     <section aria-labelledby="rackets-heading" className="flex flex-col gap-4">
