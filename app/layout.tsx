@@ -10,7 +10,8 @@ export const metadata: Metadata = {
   title: 'La Famiglia — Idle Mafia Tycoon',
   description:
     'Build a 1930s crime empire. Run rackets, hire capos, buy upgrades, and retire for Respect in this idle tycoon game.',
-  generator: 'v0.app',
+  manifest: '/manifest.webmanifest',
+  appleWebApp: { capable: true, title: 'La Famiglia', statusBarStyle: 'black-translucent' },
   icons: {
     icon: [
       {

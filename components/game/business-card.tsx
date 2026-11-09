@@ -22,7 +22,7 @@ export function BusinessCard({ config, buyAmount }: { config: BusinessConfig; bu
   const owned = b.owned
   const qty = resolveBuyAmount(config, owned, state.cash, buyAmount)
   const cost = costFor(config, owned, qty)
-  const affordable = state.cash >= cost
+  const affordable = state.cash >= (owned === 0 ? costFor(config, 0, 1) : cost)
 
   if (owned === 0) {
     return (

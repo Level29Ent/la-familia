@@ -1,4 +1,7 @@
 import {
+  ASSETS,
+  OPERATIONS,
+  OBJECTIVES,
   BUSINESSES,
   MILESTONES,
   OFFLINE_CAP_SECONDS,
@@ -24,6 +27,10 @@ export type GameState = {
   lastSaved: number
   startedAt: number
   heists: number
+  assets: string[]
+  objectives: string[]
+  operationsCompleted: number
+  operation: { id: string; remainingMs: number } | null
 }
 
 export type BuyAmount = 1 | 10 | 100 | 'max'
@@ -31,7 +38,12 @@ export type BuyAmount = 1 | 10 | 100 | 'max'
 export function createInitialState(respect = 0, lifetimeEarnings = 0, heists = 0): GameState {
   const businesses: Record<string, BusinessState> = {}
   for (const b of BUSINESSES) {
-    businesses[b.id] = { owned: b.id === 'hustle' ? 1 : 0, managed: false, running: false, progress: 0 }
+    businesses[b.id] = {
+      owned: b.id === 'hustle' ? 1 : 0,
+      managed: false,
+      running: false,
+      progress: 0,
+    }
   }
   const now = Date.now()
   return {
@@ -44,6 +56,10 @@ export function createInitialState(respect = 0, lifetimeEarnings = 0, heists = 0
     lastSaved: now,
     startedAt: now,
     heists,
+    assets: [],
+    objectives: [],
+    operationsCompleted: 0,
+    operation: null,
   }
 }
 
@@ -77,6 +93,7 @@ export function profitMultiplier(state: GameState, businessId: string) {
     const up = UPGRADES.find((u) => u.id === id)
     if (up && (up.target === 'all' || up.target === businessId)) mult *= up.multiplier
   }
+  for (const asset of ASSETS) if (state.assets.includes(asset.id)) mult *= asset.multiplier
   return mult
 }
 
@@ -152,10 +169,26 @@ export function tick(state: GameState, dtMs: number): GameState {
     businesses[config.id] = { ...b, progress, running }
   }
 
+  let operation = state.operation
+  let operationsCompleted = state.operationsCompleted
+  if (operation) {
+    changed = true
+    operation = {
+      ...operation,
+      remainingMs: Math.max(0, operation.remainingMs - dtMs),
+    }
+    if (operation.remainingMs === 0) {
+      earned += OPERATIONS.find((o) => o.id === operation!.id)?.reward ?? 0
+      operationsCompleted++
+      operation = null
+    }
+  }
   if (!changed) return state
   return {
     ...state,
     businesses,
+    operation,
+    operationsCompleted,
     cash: state.cash + earned,
     runEarnings: state.runEarnings + earned,
     lifetimeEarnings: state.lifetimeEarnings + earned,
@@ -165,5 +198,69 @@ export function tick(state: GameState, dtMs: number): GameState {
 export function computeOfflineEarnings(state: GameState, now: number) {
   const elapsedSeconds = Math.min((now - state.lastSaved) / 1000, OFFLINE_CAP_SECONDS)
   if (elapsedSeconds < 10) return { earnings: 0, seconds: 0 }
-  return { earnings: totalIncomePerSecond(state) * elapsedSeconds, seconds: elapsedSeconds }
+  return {
+    earnings: totalIncomePerSecond(state) * elapsedSeconds,
+    seconds: elapsedSeconds,
+  }
+}
+
+export function objectiveProgress(state: GameState, metric: string) {
+  switch (metric) {
+    case 'earnings':
+      return state.runEarnings
+    case 'businesses':
+      return Object.values(state.businesses).filter((b) => b.owned > 0).length
+    case 'managers':
+      return Object.values(state.businesses).filter((b) => b.managed).length
+    case 'assets':
+      return state.assets.length
+    case 'operations':
+      return state.operationsCompleted
+    default:
+      return 0
+  }
+}
+
+export type EmpireAction = {
+  type: 'asset' | 'operation' | 'objective'
+  id: string
+}
+
+export function empireAction(state: GameState, action: EmpireAction): GameState {
+  if (action.type === 'asset') {
+    const asset = ASSETS.find((a) => a.id === action.id)
+    if (!asset || state.assets.includes(asset.id) || state.cash < asset.cost) return state
+    return {
+      ...state,
+      cash: state.cash - asset.cost,
+      assets: [...state.assets, asset.id],
+    }
+  }
+  if (action.type === 'operation') {
+    const op = OPERATIONS.find((o) => o.id === action.id)
+    if (!op || state.operation || state.cash < op.cost || !state.businesses[op.required]?.owned) return state
+    return {
+      ...state,
+      cash: state.cash - op.cost,
+      operation: { id: op.id, remainingMs: op.seconds * 1000 },
+    }
+  }
+  const goal = OBJECTIVES.find((o) => o.id === action.id)
+  if (!goal || state.objectives.includes(goal.id) || objectiveProgress(state, goal.metric) < goal.goal)
+    return state
+  return {
+    ...state,
+    cash: state.cash + goal.reward,
+    objectives: [...state.objectives, goal.id],
+  }
+}
+
+// Keep existing empires intact when new properties or progression systems are added.
+export function restoreState(saved: Partial<GameState>): GameState {
+  const fresh = createInitialState()
+  return {
+    ...fresh,
+    ...saved,
+    businesses: { ...fresh.businesses, ...saved.businesses },
+  }
 }

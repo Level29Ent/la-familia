@@ -1,6 +1,29 @@
-import { Car, Dices, Landmark, Music, Shield, Ship, Spade, Ticket, Wine, type LucideIcon } from 'lucide-react'
+import {
+  Croissant,
+  Scissors,
+  Gem,
+  Film,
+  Hotel,
+  Watch,
+  Car,
+  Dices,
+  Landmark,
+  Music,
+  Shield,
+  Ship,
+  Spade,
+  Ticket,
+  Wine,
+  type LucideIcon,
+} from 'lucide-react'
 
 const ICONS: Record<string, LucideIcon> = {
+  bread: Croissant,
+  scissors: Scissors,
+  gem: Gem,
+  film: Film,
+  hotel: Hotel,
+  watch: Watch,
   dice: Dices,
   ticket: Ticket,
   wine: Wine,

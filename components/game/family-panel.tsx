@@ -39,7 +39,7 @@ export function FamilyPanel() {
           <div className="flex flex-col gap-3">
             <h3 className="font-serif text-xl font-semibold text-foreground">Retire &amp; Pass the Torch</h3>
             <p className="text-pretty text-sm leading-relaxed text-muted-foreground">
-              Sell off every racket, capo, and upgrade. In return your family gains Respect, and each point permanently
+              Sell off every racket, capo, upgrade, and luxury asset. Objectives and active operations also reset. In return your family gains Respect, and each point permanently
               boosts all profits by {bonusPct}%. Respect is earned from lifetime earnings.
             </p>
             <div className="flex flex-wrap gap-6">

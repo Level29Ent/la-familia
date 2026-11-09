@@ -22,12 +22,13 @@ export function StartOverlay({ onStart }: { onStart: () => void }) {
         className="relative flex w-full max-w-lg flex-col gap-6 rounded-2xl border border-border bg-card/90 p-6 backdrop-blur-md md:p-8"
       >
         <div className="flex flex-col gap-2 text-center">
-          <p className="text-xs font-medium tracking-[0.3em] text-primary uppercase">New York, 1931</p>
+          <Image src="/icon.svg" alt="La Famiglia family crest" width={76} height={76} className="mx-auto mb-2 drop-shadow-lg" />
+          <p className="text-xs font-medium tracking-[0.3em] text-primary uppercase">Little Italy · New York, 1931</p>
           <h1 id="start-title" className="font-serif text-4xl font-bold text-balance text-foreground md:text-5xl">
             La Famiglia
           </h1>
           <p className="text-pretty text-sm text-muted-foreground">
-            You&apos;re the new boss on the block. Walk the street, shake down every storefront, and build an empire.
+            Fourteen properties. One family. Walk the neon streets, fund midnight operations, and turn your first dollar into a dynasty.
           </p>
         </div>
 
@@ -44,6 +45,7 @@ export function StartOverlay({ onStart }: { onStart: () => void }) {
           ))}
         </dl>
 
+        <p className="text-center text-xs text-primary">New: Empire objectives · Luxury assets · Original night music</p>
         <button
           type="button"
           onClick={onStart}
