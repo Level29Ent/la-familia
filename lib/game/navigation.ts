@@ -57,3 +57,32 @@ export function focusedTarget(position: { x: number; z: number }, yaw: number, n
   }
   return best
 }
+
+// Keep the orbit camera on the walkable side of walls and furniture.
+export function followCamera(
+  position: { x: number; z: number },
+  yaw: number,
+  pitch: number,
+  distance: number,
+  nav: Navigation,
+) {
+  let allowed = 0.35
+  for (let d = 0.35; d <= distance; d += 0.1) {
+    const x = position.x + Math.sin(yaw) * d
+    const z = position.z + Math.cos(yaw) * d
+    if (
+      x < nav.bounds.minX ||
+      x > nav.bounds.maxX ||
+      z < nav.bounds.minZ ||
+      z > nav.bounds.maxZ ||
+      nav.obstacles.some((o) => x > o.minX && x < o.maxX && z > o.minZ && z < o.maxZ)
+    )
+      break
+    allowed = d
+  }
+  return {
+    x: position.x + Math.sin(yaw) * allowed,
+    z: position.z + Math.cos(yaw) * allowed,
+    y: Math.min(3.9, 1.65 + Math.tan(pitch) * allowed),
+  }
+}

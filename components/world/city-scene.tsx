@@ -84,6 +84,7 @@ export function CityScene({
         seed={42}
       />
       <PlayerControls
+        character={state.character}
         navigation={returning ? STREET_RETURN_NAVIGATION : STREET_NAVIGATION}
         enabled={movementEnabled}
         onFocusChange={onFocusChange}

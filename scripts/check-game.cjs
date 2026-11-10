@@ -230,3 +230,67 @@ assert.deepEqual(createInitialState().safeHouse.decor, initialDecor())
 console.log(
   'PASS: decor purchase debits wallet once, preserves vault and income, free re-equipping, one equipped per category, unknown/unaffordable guards, old-save migration, reload, retirement inheritance, reset defaults and ownership validation.',
 )
+
+const {
+  DEFAULT_CHARACTER,
+  CHARACTER_OPTIONS,
+  restoreCharacter,
+  cameraDistance,
+} = require('../lib/game/character.ts')
+const { followCamera } = require('../lib/game/navigation.ts')
+assert.deepEqual(restoreState(old).character, DEFAULT_CHARACTER)
+const customized = restoreCharacter({
+  ...DEFAULT_CHARACTER,
+  name: 'Rosa',
+  height: 1.12,
+  build: 0.9,
+  skin: 4,
+  hair: 2,
+  hat: 0,
+  glasses: 1,
+  outfit: 1,
+  jacket: 3,
+})
+const avatarSave = { ...createInitialState(), character: customized, lifetimeEarnings: 1e9 }
+assert.deepEqual(restoreState(JSON.parse(JSON.stringify(avatarSave))).character, customized)
+assert.deepEqual(retireEmpire(avatarSave).character, customized)
+assert.deepEqual(createInitialState().character, DEFAULT_CHARACTER)
+const invalidAvatar = restoreCharacter({
+  name: ' ',
+  skin: -1,
+  hair: 999,
+  height: Infinity,
+  build: 50,
+  nose: -10,
+})
+assert.equal(invalidAvatar.name, DEFAULT_CHARACTER.name)
+assert.equal(invalidAvatar.skin, DEFAULT_CHARACTER.skin)
+assert.equal(invalidAvatar.hair, DEFAULT_CHARACTER.hair)
+assert.equal(invalidAvatar.height, 1)
+assert.equal(invalidAvatar.build, 1.2)
+assert.equal(invalidAvatar.nose, 0.8)
+assert.equal(restoreCharacter({ name: 'a'.repeat(30) }).name.length, 24)
+for (const key of Object.keys(CHARACTER_OPTIONS)) {
+  assert.equal(
+    restoreCharacter({ [key]: CHARACTER_OPTIONS[key].length - 1 })[key],
+    CHARACTER_OPTIONS[key].length - 1,
+  )
+  assert.equal(restoreCharacter({ [key]: NaN })[key], DEFAULT_CHARACTER[key])
+}
+assert.equal(cameraDistance(4, 100000), 6)
+assert.equal(cameraDistance(4, -100000), 1.8)
+const wallCam = followCamera({ x: 0, z: 6.4 }, 0, 0.5, 6, room)
+assert.ok(wallCam.z <= room.bounds.maxZ + 0.3)
+assert.ok(wallCam.y < 4, 'camera stays below safe-house ceiling')
+const sofaCam = followCamera({ x: 0, z: 0 }, -Math.PI / 2, 0.3, 6, room)
+assert.ok(sofaCam.x >= -1.3, 'camera stops before coffee table')
+const openCam = followCamera({ x: 0, z: 0 }, 0, 0.3, 4, room)
+assert.ok(openCam.z > 3.8 && openCam.z < 4.1)
+assert.equal(
+  focusedTarget({ x: 0, z: -3 }, 0, room),
+  'vault',
+  'interaction uses player position, not trailing camera',
+)
+console.log(
+  'PASS: character options validation and clamping; old-save defaults; avatar save/reload, retirement and reset; third-person camera zoom limits, wall/furniture clearance and ceiling height; player-based interaction.',
+)

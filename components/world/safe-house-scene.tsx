@@ -2,6 +2,7 @@
 
 import { Canvas } from '@react-three/fiber'
 import { Text } from '@react-three/drei'
+import type { CharacterConfig } from '@/lib/game/character'
 import { decorItem, type DecorState } from '@/lib/game/decor'
 import { ROOM_NAVIGATION } from '@/lib/game/navigation'
 import { PlayerControls } from './player-controls'
@@ -25,11 +26,13 @@ function Label({ at, children, size = 0.22 }: { at: Point; children: string; siz
 
 export function SafeHouseScene({
   decor,
+  character,
   enabled,
   vaultOpen,
   onFocusChange,
 }: {
   decor: DecorState
+  character: CharacterConfig
   enabled: boolean
   vaultOpen: boolean
   onFocusChange: (id: string | null) => void
@@ -196,7 +199,12 @@ export function SafeHouseScene({
           </Label>
         </group>
       )}
-      <PlayerControls enabled={enabled} navigation={ROOM_NAVIGATION} onFocusChange={onFocusChange} />
+      <PlayerControls
+        character={character}
+        enabled={enabled}
+        navigation={ROOM_NAVIGATION}
+        onFocusChange={onFocusChange}
+      />
     </Canvas>
   )
 }

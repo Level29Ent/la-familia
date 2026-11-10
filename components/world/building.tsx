@@ -1,5 +1,7 @@
 'use client'
 
+import { CharacterModel } from './character-model'
+import { DEFAULT_CHARACTER } from '@/lib/game/character'
 import { memo, useMemo, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { Text } from '@react-three/drei'
@@ -190,7 +192,7 @@ function BuildingImpl({ placement, style, name, status, litLevel, focused, seed 
         </group>
       )}
 
-      {status === 'managed' && <Capo position={[-1.6, 0, front + 1.1]} />}
+      {status === 'managed' && <Capo position={[-1.6, 0, front + 1.1]} seed={seed} />}
 
       {focused && (
         <mesh position={[0, 0.02, front + 1.6]} rotation={[-Math.PI / 2, 0, 0]}>
@@ -202,29 +204,19 @@ function BuildingImpl({ placement, style, name, status, litLevel, focused, seed 
   )
 }
 
-function Capo({ position }: { position: [number, number, number] }) {
+function Capo({ position, seed }: { position: [number, number, number]; seed: number }) {
   return (
     <group position={position}>
-      <mesh position={[0, 0.85, 0]}>
-        <capsuleGeometry args={[0.32, 0.9, 6, 12]} />
-        <meshStandardMaterial color="#1c1b22" roughness={0.7} />
-      </mesh>
-      <mesh position={[0, 1.72, 0]}>
-        <sphereGeometry args={[0.24, 16, 16]} />
-        <meshStandardMaterial color="#c8a27e" roughness={0.8} />
-      </mesh>
-      <mesh position={[0, 1.88, 0]}>
-        <cylinderGeometry args={[0.42, 0.42, 0.04, 20]} />
-        <meshStandardMaterial color="#111014" />
-      </mesh>
-      <mesh position={[0, 2.0, 0]}>
-        <cylinderGeometry args={[0.22, 0.26, 0.24, 20]} />
-        <meshStandardMaterial color="#111014" />
-      </mesh>
-      <mesh position={[0, 1.94, 0]}>
-        <cylinderGeometry args={[0.265, 0.265, 0.06, 20]} />
-        <meshStandardMaterial color="#7a1f1a" />
-      </mesh>
+      <CharacterModel
+        config={{
+          ...DEFAULT_CHARACTER,
+          skin: seed % 6,
+          jacket: seed % 6,
+          hair: seed % 4,
+          facialHair: seed % 3,
+          hat: seed % 3,
+        }}
+      />
     </group>
   )
 }

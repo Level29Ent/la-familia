@@ -3,27 +3,41 @@
 import { useEffect, useRef } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
 import { input, MOVE_KEYS } from '@/lib/game/input'
-import { focusedTarget, moveWithin, type Navigation } from '@/lib/game/navigation'
+import * as THREE from 'three'
+import { CharacterModel } from './character-model'
+import { cameraDistance, type CharacterConfig } from '@/lib/game/character'
+import { focusedTarget, moveWithin, followCamera, type Navigation } from '@/lib/game/navigation'
 
 const LOOK_SPEED = 0.0024
 
 export function PlayerControls({
   enabled,
   navigation,
+  character,
   onFocusChange,
 }: {
   enabled: boolean
   navigation: Navigation
+  character: CharacterConfig
   onFocusChange: (id: string | null) => void
 }) {
   const { camera, gl } = useThree()
   const look = useRef({ yaw: 0, pitch: 0 })
   const focusedRef = useRef<string | null>(null)
-  const bob = useRef(0)
+  const player = useRef<THREE.Group>(null)
+  const position = useRef({ x: navigation.start[0], z: navigation.start[2] })
+  const motion = useRef({ moving: false, sprint: false })
+  const distance = useRef(4)
+  const view = useRef(new THREE.Vector3())
 
   useEffect(() => {
     camera.rotation.order = 'YXZ'
-    camera.position.set(...navigation.start)
+    position.current = { x: navigation.start[0], z: navigation.start[2] }
+    camera.position.set(navigation.start[0], 2.7, navigation.start[2] + 4)
+    if (player.current) {
+      player.current.position.set(navigation.start[0], 0, navigation.start[2])
+      player.current.rotation.y = navigation.yaw + Math.PI
+    }
     look.current = { yaw: navigation.yaw, pitch: 0 }
     focusedRef.current = null
     onFocusChange(null)
@@ -46,7 +60,7 @@ export function PlayerControls({
 
     const rotate = (dx: number, dy: number) => {
       look.current.yaw -= dx * LOOK_SPEED
-      look.current.pitch = Math.max(-1.2, Math.min(1.2, look.current.pitch - dy * LOOK_SPEED))
+      look.current.pitch = Math.max(0.05, Math.min(0.65, look.current.pitch + dy * LOOK_SPEED))
     }
 
     const onPointerDown = (e: PointerEvent) => {
@@ -86,6 +100,12 @@ export function PlayerControls({
     const onKeyUp = (e: KeyboardEvent) => input.keys.delete(e.code)
     const onBlur = () => input.keys.clear()
 
+    const onWheel = (event: WheelEvent) => {
+      if (!input.enabled) return
+      event.preventDefault()
+      distance.current = cameraDistance(distance.current, event.deltaY)
+    }
+    el.addEventListener('wheel', onWheel, { passive: false })
     el.addEventListener('pointerdown', onPointerDown)
     window.addEventListener('pointermove', onPointerMove)
     window.addEventListener('pointerup', onPointerUp)
@@ -93,6 +113,7 @@ export function PlayerControls({
     window.addEventListener('keyup', onKeyUp)
     window.addEventListener('blur', onBlur)
     return () => {
+      el.removeEventListener('wheel', onWheel)
       el.removeEventListener('pointerdown', onPointerDown)
       window.removeEventListener('pointermove', onPointerMove)
       window.removeEventListener('pointerup', onPointerUp)
@@ -103,6 +124,7 @@ export function PlayerControls({
   }, [gl])
 
   useFrame((_, rawDt) => {
+    motion.current.moving = false
     if (!enabled) return
     const dt = Math.min(rawDt, 0.05)
     const { yaw, pitch } = look.current
@@ -125,20 +147,36 @@ export function PlayerControls({
       const speed = navigation.speed * (k.has('ShiftLeft') || k.has('ShiftRight') ? 1.7 : 1)
       mx = (mx / len) * speed * dt
       mz = (mz / len) * speed * dt
-      const next = moveWithin(camera.position, mx, mz, navigation)
-      camera.position.x = next.x
-      camera.position.z = next.z
-      bob.current += dt * 10
+      const next = moveWithin(position.current, mx, mz, navigation)
+      motion.current.moving = Math.hypot(next.x - position.current.x, next.z - position.current.z) > 0.001
+      motion.current.sprint = speed > navigation.speed
+      position.current = next
+      if (player.current && motion.current.moving) {
+        const targetYaw = Math.atan2(mx, mz)
+        const delta = Math.atan2(
+          Math.sin(targetYaw - player.current.rotation.y),
+          Math.cos(targetYaw - player.current.rotation.y),
+        )
+        player.current.rotation.y += delta * Math.min(1, dt * 12)
+      }
     }
-    camera.position.y = navigation.start[1] + (moving ? Math.sin(bob.current) * 0.05 : 0)
-    camera.rotation.set(pitch, yaw, 0)
+    if (player.current) player.current.position.set(position.current.x, 0, position.current.z)
+    const orbit = followCamera(position.current, yaw, pitch + 0.15, distance.current, navigation)
+    if (player.current)
+      player.current.visible = Math.hypot(orbit.x - position.current.x, orbit.z - position.current.z) >= 0.65
+    camera.position.set(orbit.x, orbit.y, orbit.z)
+    camera.lookAt(view.current.set(position.current.x, 1.25 * character.height, position.current.z))
 
-    const best = focusedTarget(camera.position, yaw, navigation)
+    const best = focusedTarget(position.current, yaw, navigation)
     if (best !== focusedRef.current) {
       focusedRef.current = best
       onFocusChange(best)
     }
   })
 
-  return null
+  return (
+    <group ref={player}>
+      <CharacterModel config={character} motion={motion} />
+    </group>
+  )
 }
