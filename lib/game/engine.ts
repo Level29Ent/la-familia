@@ -1,3 +1,4 @@
+import { initialDecor } from './decor'
 import { restoreSafeHouse, type SafeHouseState } from './safe-house'
 import {
   ASSETS,
@@ -50,7 +51,7 @@ export function createInitialState(respect = 0, lifetimeEarnings = 0, heists = 0
   const now = Date.now()
   return {
     cash: 0,
-    safeHouse: { balance: 0, tier: 0 },
+    safeHouse: { balance: 0, tier: 0, decor: initialDecor() },
     runEarnings: 0,
     lifetimeEarnings,
     respect,

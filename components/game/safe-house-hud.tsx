@@ -1,6 +1,6 @@
 'use client'
 
-import { House, LogOut, LockKeyhole } from 'lucide-react'
+import { House, Paintbrush, LogOut, LockKeyhole } from 'lucide-react'
 import { formatMoney } from '@/lib/game/format'
 import { VAULT_TIERS } from '@/lib/game/safe-house'
 import { useGame } from './game-provider'
@@ -9,10 +9,12 @@ import { TouchControls } from './touch-controls'
 export function SafeHouseHud({
   focusedId,
   onVault,
+  onShop,
   onExit,
 }: {
   focusedId: string | null
   onVault: () => void
+  onShop: () => void
   onExit: () => void
 }) {
   const { state } = useGame()
@@ -28,7 +30,14 @@ export function SafeHouseHud({
             Wallet {formatMoney(state.cash)} · Vault {formatMoney(state.safeHouse.balance)}
           </p>
         </div>
-        <div className="pointer-events-auto flex gap-2">
+        <div className="pointer-events-auto flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={onShop}
+            className="rounded-full border border-primary/30 bg-background/85 px-4 py-2 text-sm text-primary"
+          >
+            <Paintbrush className="mr-1 inline size-4" /> Decor Shop
+          </button>
           <button
             type="button"
             onClick={onVault}
