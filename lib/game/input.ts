@@ -12,6 +12,7 @@ export const MOVE_KEYS = new Set([
   'ArrowDown',
   'ArrowLeft',
   'ArrowRight',
+  'Space',
   'ShiftLeft',
   'ShiftRight',
 ])

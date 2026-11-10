@@ -1,5 +1,6 @@
 'use client'
 
+import { VintageCar } from './vintage-car'
 import { useMemo } from 'react'
 import { PLACEMENTS, STREET_HALF_WIDTH } from './layout'
 
@@ -13,7 +14,7 @@ function hash(n: number) {
   return x - Math.floor(x)
 }
 
-export function Street({ sedanOwned }: { sedanOwned: boolean }) {
+export function Street() {
   const dashes = useMemo(() => {
     const zs: number[] = []
     for (let z = 14; z > PLACEMENTS[PLACEMENTS.length - 1].door[1]; z -= 4) zs.push(z)
@@ -62,7 +63,6 @@ export function Street({ sedanOwned }: { sedanOwned: boolean }) {
       {[-3, -35, -73].map((z, i) => (
         <VintageCar key={z} position={[4.4, 0.18, z]} color={i % 2 ? '#572e36' : '#24383c'} />
       ))}
-      {sedanOwned && <VintageCar position={[-4.3, 0.18, 7]} color="#213f68" />}
       <Skyline />
     </group>
   )
@@ -137,43 +137,6 @@ function Skyline() {
         <sphereGeometry args={[6, 32, 32]} />
         <meshBasicMaterial color="#f3e6c4" fog={false} toneMapped={false} />
       </mesh>
-    </group>
-  )
-}
-
-function VintageCar({ position, color }: { position: [number, number, number]; color: string }) {
-  return (
-    <group position={position}>
-      <mesh position={[0, 0.6, 0]}>
-        <boxGeometry args={[1.65, 0.7, 3.7]} />
-        <meshStandardMaterial color={color} metalness={0.7} roughness={0.3} />
-      </mesh>
-      <mesh position={[0, 1.18, -0.25]}>
-        <boxGeometry args={[1.4, 0.8, 1.9]} />
-        <meshStandardMaterial color={color} metalness={0.5} roughness={0.3} />
-      </mesh>
-      <mesh position={[0, 1.24, 0.72]}>
-        <planeGeometry args={[1.15, 0.5]} />
-        <meshStandardMaterial color="#7499ad" metalness={0.65} roughness={0.15} />
-      </mesh>
-      <mesh position={[0, 0.6, 1.88]}>
-        <boxGeometry args={[0.8, 0.55, 0.08]} />
-        <meshStandardMaterial color="#a8a8a0" metalness={0.9} roughness={0.2} />
-      </mesh>
-      {[-1, 1].flatMap((side) =>
-        [-1.1, 1.1].map((z) => (
-          <mesh key={`${side}-${z}`} position={[side * 0.82, 0.35, z]} rotation={[0, 0, Math.PI / 2]}>
-            <cylinderGeometry args={[0.4, 0.4, 0.18, 16]} />
-            <meshStandardMaterial color="#101217" roughness={0.9} />
-          </mesh>
-        )),
-      )}
-      {[-0.63, 0.63].map((x) => (
-        <mesh key={x} position={[x, 0.73, 1.9]}>
-          <sphereGeometry args={[0.15, 12, 8]} />
-          <meshStandardMaterial color="#ffe9b5" emissive="#ffe9b5" emissiveIntensity={0.8} />
-        </mesh>
-      ))}
     </group>
   )
 }

@@ -1,5 +1,8 @@
 'use client'
 
+import { useMemo } from 'react'
+import { goodLifeRoomNavigation } from '@/lib/game/good-life'
+import { GoodLifeRoom } from './good-life-displays'
 import { Canvas } from '@react-three/fiber'
 import { Text } from '@react-three/drei'
 import { cashBundleCount, VAULT_TIERS, type SafeHouseState } from '@/lib/game/safe-house'
@@ -27,6 +30,7 @@ function Label({ at, children, size = 0.22 }: { at: Point; children: string; siz
 
 export function SafeHouseScene({
   decor,
+  assets,
   safeHouse,
   character,
   enabled,
@@ -34,12 +38,18 @@ export function SafeHouseScene({
   onFocusChange,
 }: {
   decor: DecorState
+  assets: string[]
   safeHouse: SafeHouseState
   character: CharacterConfig
   enabled: boolean
   vaultOpen: boolean
   onFocusChange: (id: string | null) => void
 }) {
+  const wardrobeOwned = assets.includes('wardrobe')
+  const navigation = useMemo(
+    () => goodLifeRoomNavigation(wardrobeOwned ? ['wardrobe'] : [], ROOM_NAVIGATION),
+    [wardrobeOwned],
+  )
   const wall = decorItem(decor, 'walls').color
   const sofa = decorItem(decor, 'sofa').color
   const rug = decorItem(decor, 'rug').color
@@ -207,10 +217,12 @@ export function SafeHouseScene({
           </Label>
         </group>
       )}
+      <GoodLifeRoom assets={assets} />
       <PlayerControls
+        assets={assets.filter((id) => id !== 'sedan')}
         character={character}
         enabled={enabled}
-        navigation={ROOM_NAVIGATION}
+        navigation={navigation}
         onFocusChange={onFocusChange}
       />
     </Canvas>

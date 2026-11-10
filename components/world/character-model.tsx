@@ -70,10 +70,12 @@ export function CharacterModel({
   config,
   motion,
   preview = false,
+  assets = [],
 }: {
   config: CharacterConfig
   motion?: React.RefObject<{ moving: boolean; sprint: boolean }>
   preview?: boolean
+  assets?: string[]
 }) {
   const leftLeg = useRef<THREE.Group>(null)
   const rightLeg = useRef<THREE.Group>(null)
@@ -236,6 +238,25 @@ export function CharacterModel({
               color={COLORS.jacket[config.jacket]}
             />
           ))}
+        {assets.includes('watch') && (
+          <group position={[0.17, 1.09, 0.19]}>
+            <mesh rotation={[Math.PI / 2, 0, 0]}>
+              <cylinderGeometry args={[0.045, 0.045, 0.015, 24]} />
+              <meshStandardMaterial color="#efc85f" metalness={0.8} />
+            </mesh>
+            {[0, 1, 2, 3, 4].map((i) => (
+              <Form
+                key={i}
+                at={[-0.03 - i * 0.02, 0.05 + Math.sin((i / 4) * Math.PI) * 0.04, 0]}
+                scale={[0.013, 0.013, 0.01]}
+                color="#efc85f"
+              />
+            ))}
+          </group>
+        )}
+        {assets.includes('wardrobe') && (
+          <Panel at={[-0.15, 1.39, 0.19]} size={[0.045, 0.06, 0.02]} color="#e9c76d" rotation={0.4} />
+        )}
         {[1.05, 1.16, 1.27].map((y) => (
           <Form key={y} at={[0, y, 0.16]} scale={[0.013, 0.013, 0.008]} color="#baa77e" />
         ))}

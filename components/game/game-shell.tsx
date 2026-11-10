@@ -36,6 +36,7 @@ const BUY_KEYS: Record<string, BuyAmount> = { Digit1: 1, Digit2: 10, Digit3: 100
 
 function World() {
   const { state, dispatch, offlineReport } = useGame()
+  const [driving, setDriving] = useState(false)
   const [focusedId, setFocusedId] = useState<string | null>(null)
   const [started, setStarted] = useState(false)
   const [safeHouseOpen, setSafeHouseOpen] = useState(false)
@@ -51,6 +52,7 @@ function World() {
   const alerts = badges.capos + badges.upgrades + badges.family + badges.empire
   const playing = started && !ledgerOpen && !vaultOpen && !shopOpen && !creatorOpen && !offlineReport
   const enterHouse = () => {
+    setDriving(false)
     setFocusedId(null)
     setLedgerOpen(false)
     setSafeHouseOpen(true)
@@ -105,6 +107,14 @@ function World() {
       if (e.code === 'Escape') setLedgerOpen(false)
       return
     }
+    if (driving) {
+      if (e.code === 'KeyE') setDriving(false)
+      return
+    }
+    if (focusedId === 'sedan') {
+      if (e.code === 'KeyE' && state.assets.includes('sedan')) setDriving(true)
+      return
+    }
     if (e.code in BUY_KEYS) {
       setBuyAmount(BUY_KEYS[e.code])
       return
@@ -127,10 +137,15 @@ function World() {
     return () => window.removeEventListener('keydown', handler)
   }, [])
 
+  useEffect(() => {
+    if (!state.assets.includes('sedan')) setDriving(false)
+  }, [state.assets])
+
   return (
     <main className="relative h-dvh w-full overflow-hidden bg-background select-none">
       {safeHouseOpen ? (
         <SafeHouseScene
+          assets={state.assets}
           safeHouse={state.safeHouse}
           character={state.character}
           decor={state.safeHouse.decor}
@@ -141,6 +156,7 @@ function World() {
       ) : (
         <CityScene
           state={state}
+          driving={driving && state.assets.includes('sedan')}
           returning={returning}
           focusedId={focusedId}
           movementEnabled={playing}
@@ -150,6 +166,13 @@ function World() {
       {started && !safeHouseOpen && (
         <Hud
           focusedId={focusedId}
+          driving={driving}
+          onDrive={() => {
+            if (state.assets.includes('sedan')) {
+              setDriving((value) => !value)
+              setFocusedId(null)
+            }
+          }}
           buyAmount={buyAmount}
           onBuyAmountChange={setBuyAmount}
           onOpenLedger={() => setLedgerOpen(true)}

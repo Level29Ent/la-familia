@@ -4,6 +4,8 @@ import { useEffect, useRef } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
 import { input, MOVE_KEYS } from '@/lib/game/input'
 import * as THREE from 'three'
+import { VintageCar } from './vintage-car'
+import { SEDAN_START, driveCar, carExit } from '@/lib/game/good-life'
 import { CharacterModel } from './character-model'
 import { cameraDistance, type CharacterConfig } from '@/lib/game/character'
 import { focusedTarget, moveWithin, followCamera, type Navigation } from '@/lib/game/navigation'
@@ -15,15 +17,22 @@ export function PlayerControls({
   navigation,
   character,
   onFocusChange,
+  assets = [],
+  driving = false,
 }: {
   enabled: boolean
   navigation: Navigation
   character: CharacterConfig
+  assets?: string[]
+  driving?: boolean
   onFocusChange: (id: string | null) => void
 }) {
   const { camera, gl } = useThree()
   const look = useRef({ yaw: 0, pitch: 0 })
   const focusedRef = useRef<string | null>(null)
+  const car = useRef({ ...SEDAN_START })
+  const carModel = useRef<THREE.Group>(null)
+  const wasDriving = useRef(false)
   const player = useRef<THREE.Group>(null)
   const position = useRef({ x: navigation.start[0], z: navigation.start[2] })
   const motion = useRef({ moving: false, sprint: false })
@@ -43,6 +52,20 @@ export function PlayerControls({
     onFocusChange(null)
     input.keys.clear()
   }, [camera, navigation, onFocusChange])
+
+  useEffect(() => {
+    if (driving) {
+      look.current = { yaw: car.current.yaw - Math.PI, pitch: 0.15 }
+      position.current = { x: car.current.x, z: car.current.z }
+      onFocusChange(null)
+      focusedRef.current = null
+    } else if (wasDriving.current) {
+      position.current = carExit(car.current, navigation.bounds)
+      car.current.speed = 0
+    }
+    wasDriving.current = driving
+    input.keys.clear()
+  }, [driving, navigation, onFocusChange])
 
   useEffect(() => {
     input.enabled = enabled
@@ -95,6 +118,7 @@ export function PlayerControls({
       if (!input.enabled || !MOVE_KEYS.has(e.code)) return
       if (e.target instanceof HTMLElement && e.target.closest('input, textarea, select')) return
       input.keys.add(e.code)
+      if (e.code === 'Space') e.preventDefault()
       if (e.code.startsWith('Arrow')) e.preventDefault()
     }
     const onKeyUp = (e: KeyboardEvent) => input.keys.delete(e.code)
@@ -143,7 +167,15 @@ export function PlayerControls({
     let mz = fz * forward + rz * strafe
     const len = Math.hypot(mx, mz)
     const moving = len > 0
-    if (moving) {
+    if (driving) {
+      car.current = driveCar(car.current, forward, strafe, k.has('Space'), dt, navigation.bounds)
+      position.current = { x: car.current.x, z: car.current.z }
+      look.current.yaw = car.current.yaw - Math.PI
+      if (carModel.current) {
+        carModel.current.position.set(car.current.x, 0, car.current.z)
+        carModel.current.rotation.y = car.current.yaw
+      }
+    } else if (moving) {
       const speed = navigation.speed * (k.has('ShiftLeft') || k.has('ShiftRight') ? 1.7 : 1)
       mx = (mx / len) * speed * dt
       mz = (mz / len) * speed * dt
@@ -161,13 +193,23 @@ export function PlayerControls({
       }
     }
     if (player.current) player.current.position.set(position.current.x, 0, position.current.z)
-    const orbit = followCamera(position.current, yaw, pitch + 0.15, distance.current, navigation)
+    const orbit = followCamera(
+      position.current,
+      driving ? car.current.yaw - Math.PI : yaw,
+      pitch + 0.15,
+      driving ? 6 : distance.current,
+      navigation,
+    )
     if (player.current)
-      player.current.visible = Math.hypot(orbit.x - position.current.x, orbit.z - position.current.z) >= 0.65
+      player.current.visible =
+        !driving && Math.hypot(orbit.x - position.current.x, orbit.z - position.current.z) >= 0.65
     camera.position.set(orbit.x, orbit.y, orbit.z)
     camera.lookAt(view.current.set(position.current.x, 1.25 * character.height, position.current.z))
 
-    const best = focusedTarget(position.current, yaw, navigation)
+    const nearCar =
+      assets.includes('sedan') &&
+      Math.hypot(position.current.x - car.current.x, position.current.z - car.current.z) < 3.2
+    const best = driving ? null : nearCar ? 'sedan' : focusedTarget(position.current, yaw, navigation)
     if (best !== focusedRef.current) {
       focusedRef.current = best
       onFocusChange(best)
@@ -175,8 +217,15 @@ export function PlayerControls({
   })
 
   return (
-    <group ref={player}>
-      <CharacterModel config={character} motion={motion} />
-    </group>
+    <>
+      <group ref={player}>
+        <CharacterModel config={character} motion={motion} assets={assets} />
+      </group>
+      {assets.includes('sedan') && (
+        <group ref={carModel} position={[car.current.x, 0, car.current.z]} rotation={[0, car.current.yaw, 0]}>
+          <VintageCar position={[0, 0.18, 0]} color="#213f68" />
+        </group>
+      )}
+    </>
   )
 }

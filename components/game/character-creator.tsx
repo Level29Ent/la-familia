@@ -84,7 +84,7 @@ export function CharacterCreator({ onClose }: { onClose: () => void }) {
               <ambientLight intensity={1.6} />
               <directionalLight position={[3, 5, 4]} intensity={2.5} color="#ffe5c4" />
               <directionalLight position={[-3, 2, -2]} intensity={1.5} color="#9ec3ff" />
-              <CharacterModel config={draft} preview />
+              <CharacterModel config={draft} assets={state.assets} preview />
               <OrbitControls
                 target={[0, 1.1, 0]}
                 enablePan={false}
