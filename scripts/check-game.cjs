@@ -141,3 +141,32 @@ assert.deepEqual(createInitialState().safeHouse, { balance: 0, tier: 0 })
 console.log(
   'PASS: vault deposit/withdraw conservation; invalid and insufficient transfers; capacity and max tier; upgrade spending; old-save migration and round trip; retirement inheritance and hard-reset defaults.',
 )
+
+const { ROOM_NAVIGATION, moveWithin, focusedTarget } = require('../lib/game/navigation.ts')
+const room = ROOM_NAVIGATION
+let walker = { x: room.start[0], z: room.start[2] }
+assert.equal(focusedTarget(walker, 0, room), null)
+for (let i = 0; i < 55; i++) walker = moveWithin(walker, 0, -0.15, room)
+assert.equal(focusedTarget(walker, 0, room), 'vault')
+for (let i = 0; i < 50; i++) walker = moveWithin(walker, 0, -0.15, room)
+assert.ok(walker.z >= -4.8, 'vault blocks movement through its steel front')
+assert.equal(focusedTarget(walker, Math.PI, room), null)
+let sofa = { x: 0, z: 0 }
+for (let i = 0; i < 100; i++) sofa = moveWithin(sofa, -0.1, 0, room)
+assert.ok(sofa.x >= -1.3, 'coffee table blocks movement')
+let wall = { x: 0, z: -3.5 }
+for (let i = 0; i < 100; i++) wall = moveWithin(wall, 0.15, 0, room)
+assert.equal(wall.x, room.bounds.maxX)
+let desk = { x: 3.8, z: 4.5 }
+for (let i = 0; i < 100; i++) desk = moveWithin(desk, 0, -0.1, room)
+assert.ok(desk.z >= 3.2, 'desk blocks movement')
+const doorway = { x: 0, z: 5.8 }
+assert.equal(focusedTarget(doorway, Math.PI, room), 'exit')
+assert.equal(focusedTarget(doorway, 0, room), null)
+assert.equal(focusedTarget({ x: 0, z: 6.7 }, Math.PI, room), 'exit')
+const slid = moveWithin({ x: -1.25, z: 0 }, -0.1, 0.1, room)
+assert.equal(slid.x, -1.25)
+assert.equal(slid.z, 0.1)
+console.log(
+  'PASS: walkable room path from entry to vault; facing/range interactions; walls, coffee table, desk and vault collision; wall sliding; exit target and zero-distance focus.',
+)

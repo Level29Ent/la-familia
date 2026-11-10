@@ -13,7 +13,6 @@ export function SafeHouse({ onClose }: { onClose: () => void }) {
   const { state, dispatch } = useGame()
   const [amount, setAmount] = useState('')
   const [notice, setNotice] = useState('')
-  const [vaultOpen, setVaultOpen] = useState(false)
   const dialog = useRef<HTMLDialogElement>(null)
   const vault = state.safeHouse
   const tier = VAULT_TIERS[vault.tier]
@@ -40,7 +39,6 @@ export function SafeHouse({ onClose }: { onClose: () => void }) {
     setNotice(
       `${formatMoney(value)} ${direction === 'deposit' ? 'stored in the vault' : 'returned to your wallet'}.`,
     )
-    setVaultOpen(true)
     setAmount('')
   }
 
@@ -52,7 +50,7 @@ export function SafeHouse({ onClose }: { onClose: () => void }) {
         onClose()
       }}
       aria-labelledby="safe-house-title"
-      className="fixed inset-0 m-auto max-h-[94dvh] w-[min(1100px,calc(100%_-_24px))] overflow-y-auto rounded-2xl border border-primary/25 bg-background p-0 text-foreground shadow-2xl backdrop:bg-black/80"
+      className="fixed inset-0 m-auto max-h-[94dvh] w-[min(560px,calc(100%_-_24px))] overflow-y-auto rounded-2xl border border-primary/25 bg-background p-0 text-foreground shadow-2xl backdrop:bg-black/80"
     >
       <header className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-border bg-background px-5 py-4">
         <div>
@@ -60,7 +58,7 @@ export function SafeHouse({ onClose }: { onClose: () => void }) {
             <House className="size-3" /> The Bellini residence
           </p>
           <h1 id="safe-house-title" className="font-serif text-2xl font-bold">
-            Your Safe House
+            Vault management
           </h1>
         </div>
         <button
@@ -68,144 +66,12 @@ export function SafeHouse({ onClose }: { onClose: () => void }) {
           type="button"
           onClick={onClose}
           className={buttonClass}
-          aria-label="Leave safe house"
+          aria-label="Close vault management"
         >
-          <X className="inline size-4" /> <span className="hidden sm:inline">Back to the street</span>
+          <X className="inline size-4" /> <span className="hidden sm:inline">Back to the room</span>
         </button>
       </header>
-      <div className="grid lg:grid-cols-[1.1fr_1fr]">
-        <section
-          aria-label="Safe house interior"
-          className="relative flex min-h-64 flex-col justify-end overflow-hidden border-b border-border bg-[#171d24] p-5 lg:border-r lg:border-b-0"
-        >
-          <svg
-            viewBox="0 0 600 500"
-            role="img"
-            aria-label="A private Art Deco lounge with a leather sofa, city window, brass lamp, and steel vault"
-            className="absolute inset-x-0 top-0 h-auto w-full"
-            preserveAspectRatio="xMidYMid meet"
-          >
-            <defs>
-              <linearGradient id="room-wall" x2="0" y2="1">
-                <stop stopColor="#26353b" />
-                <stop offset="1" stopColor="#111b20" />
-              </linearGradient>
-              <linearGradient id="room-floor" x2="0.3" y2="1">
-                <stop stopColor="#71513c" />
-                <stop offset="1" stopColor="#211a19" />
-              </linearGradient>
-              <radialGradient id="room-glow">
-                <stop stopColor="#ffcb77" stopOpacity=".3" />
-                <stop offset="1" stopColor="#ffcb77" stopOpacity="0" />
-              </radialGradient>
-            </defs>
-            <path d="M0 0h600v350H0z" fill="url(#room-wall)" />
-            <path d="M0 350h600v150H0z" fill="url(#room-floor)" />
-            {[30, 120, 210, 300, 390, 480, 570].map((x) => (
-              <path
-                key={x}
-                d={`M${x} 0v350M${x} 350l${(x - 300) / 2} 150`}
-                stroke="#c1a46b"
-                strokeOpacity=".18"
-              />
-            ))}
-            <path d="M0 55h600M0 61h600M0 343h600M0 352h600" stroke="#a68b59" strokeWidth="3" />
-            <rect
-              x="65"
-              y="90"
-              width="205"
-              height="185"
-              rx="2"
-              fill="#0a1425"
-              stroke="#b89760"
-              strokeWidth="6"
-            />
-            {[80, 110, 148, 180, 222].map((x, i) => (
-              <g key={x}>
-                <rect x={x} y={145 + (i % 3) * 22} width="27" height="125" fill="#253447" />
-                <path d={`M${x + 8} 205v8m0 10v8m10-20v8m0 10v8`} stroke="#cfad6a" strokeWidth="3" />
-              </g>
-            ))}
-            <circle cx="234" cy="120" r="14" fill="#eee5c4" />
-            <path d="M167 90v185M65 181h205" stroke="#b89760" strokeWidth="5" />
-            <ellipse cx="288" cy="410" rx="240" ry="49" fill="#792f35" stroke="#b58961" strokeWidth="3" />
-            <rect
-              x="60"
-              y="309"
-              width="220"
-              height="82"
-              rx="16"
-              fill="#552c28"
-              stroke="#955e46"
-              strokeWidth="3"
-            />
-            <rect x="52" y="343" width="236" height="43" rx="12" fill="#6e3b31" />
-            <path d="M74 378v22m192-22v22M167 317v52" stroke="#bd9359" strokeWidth="5" />
-            <ellipse cx="189" cy="408" rx="65" ry="20" fill="#271e1c" stroke="#b68f58" strokeWidth="3" />
-            <path d="M152 410v29m73-29v29" stroke="#b68f58" strokeWidth="5" />
-            <rect x="167" y="397" width="33" height="8" rx="2" fill="#a78858" />
-            <circle cx="324" cy="247" r="110" fill="url(#room-glow)" />
-            <path d="M325 254v130m-24 0h48" stroke="#b9985f" strokeWidth="5" />
-            <path d="M304 210h42l18 48h-78z" fill="#d7bb82" />
-            <rect
-              x="403"
-              y="153"
-              width="137"
-              height="226"
-              rx="9"
-              fill="#10191c"
-              stroke="#a18b60"
-              strokeWidth="4"
-            />
-            <rect
-              x="414"
-              y="164"
-              width="115"
-              height="202"
-              rx="6"
-              fill={vaultOpen ? '#172426' : '#3a494d'}
-              stroke="#7b9194"
-              strokeWidth="3"
-            />
-            {vaultOpen ? (
-              <g fill="#bba16c">
-                {[0, 1, 2].map((row) => (
-                  <g key={row}>
-                    {[0, 1, 2].map((col) => (
-                      <rect key={col} x={425 + col * 29} y={313 - row * 20} width="25" height="15" rx="2" />
-                    ))}
-                  </g>
-                ))}
-              </g>
-            ) : (
-              <g stroke="#b9b39d" fill="none" strokeWidth="5">
-                <circle cx="470" cy="257" r="26" />
-                <path d="M444 257h52m-26-26v52m-18-44l36 36m0-36l-36 36" />
-              </g>
-            )}
-            <path d="M520 205v80" stroke="#c1bfa9" strokeWidth="7" />
-            <rect x="434" y="181" width="72" height="15" rx="2" fill="#ae925d" />
-            <text x="470" y="192" textAnchor="middle" fill="#202528" fontSize="10" fontFamily="Georgia">
-              LA FAMIGLIA
-            </text>
-            <path d="M397 382h150" stroke="#101719" strokeWidth="9" />
-          </svg>
-          <div className="relative mt-64 rounded-xl border border-primary/20 bg-black/70 p-4 backdrop-blur-sm lg:mt-80">
-            <p className="font-serif text-lg text-primary">A place to call your own.</p>
-            <p className="mt-1 text-xs leading-relaxed text-[#d0c9b7]">
-              Your family&apos;s private retreat, just beside the starting block. Businesses keep earning
-              while you are here.
-            </p>
-            <button
-              type="button"
-              onClick={() => setVaultOpen((open) => !open)}
-              aria-pressed={vaultOpen}
-              className="mt-3 text-sm font-semibold text-primary underline underline-offset-4"
-            >
-              {vaultOpen ? 'Close vault door' : 'Open vault door'}
-            </button>
-          </div>
-        </section>
+      <div className="grid">
         <section aria-labelledby="vault-heading" className="flex flex-col gap-5 p-5 sm:p-6">
           <div className="flex items-center gap-3">
             <LockKeyhole className="size-7 text-primary" />

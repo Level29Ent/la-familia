@@ -1,3 +1,4 @@
+import type { Navigation } from '@/lib/game/navigation'
 import { BUSINESSES } from '@/lib/game/config'
 
 export type BuildingStyle = {
@@ -79,3 +80,18 @@ export const SAFE_HOUSE_STYLE: BuildingStyle = {
   depth: 8,
 }
 export const INTERACTION_PLACEMENTS = [...PLACEMENTS, SAFE_HOUSE_PLACEMENT]
+
+export const STREET_NAVIGATION: Navigation = {
+  start: PLAYER_START,
+  yaw: 0,
+  bounds: PLAYER_BOUNDS,
+  obstacles: [],
+  targets: INTERACTION_PLACEMENTS,
+  focusRange: 9,
+  speed: 6,
+}
+export const STREET_RETURN_NAVIGATION: Navigation = {
+  ...STREET_NAVIGATION,
+  start: [5, 1.7, 10],
+  yaw: Math.PI / 2,
+}
