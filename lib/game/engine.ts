@@ -1,3 +1,4 @@
+import { DEFAULT_CHARACTER, restoreCharacter, type CharacterConfig } from './character'
 import { initialDecor } from './decor'
 import { restoreSafeHouse, type SafeHouseState } from './safe-house'
 import {
@@ -21,6 +22,7 @@ export type BusinessState = {
 
 export type GameState = {
   cash: number
+  character: CharacterConfig
   safeHouse: SafeHouseState
   runEarnings: number
   lifetimeEarnings: number
@@ -51,6 +53,7 @@ export function createInitialState(respect = 0, lifetimeEarnings = 0, heists = 0
   const now = Date.now()
   return {
     cash: 0,
+    character: { ...DEFAULT_CHARACTER },
     safeHouse: { balance: 0, tier: 0, decor: initialDecor() },
     runEarnings: 0,
     lifetimeEarnings,
@@ -267,6 +270,7 @@ export function restoreState(saved: Partial<GameState>): GameState {
     ...saved,
     businesses: { ...fresh.businesses, ...saved.businesses },
     safeHouse: restoreSafeHouse(saved.safeHouse),
+    character: restoreCharacter(saved.character),
   }
 }
 
@@ -276,5 +280,6 @@ export function retireEmpire(state: GameState): GameState {
   return {
     ...createInitialState(state.respect + gained, state.lifetimeEarnings, state.heists + 1),
     safeHouse: { ...state.safeHouse },
+    character: { ...state.character },
   }
 }

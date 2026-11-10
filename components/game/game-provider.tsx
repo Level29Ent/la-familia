@@ -1,6 +1,7 @@
 'use client'
 
 import { createContext, useContext, useEffect, useReducer, useRef, useState, type ReactNode } from 'react'
+import { restoreCharacter, type CharacterConfig } from '@/lib/game/character'
 import { decorAction, type DecorAction } from '@/lib/game/decor'
 import { vaultAction, type VaultAction } from '@/lib/game/safe-house'
 import { BUSINESSES, SAVE_KEY, UPGRADES } from '@/lib/game/config'
@@ -22,6 +23,7 @@ type Action =
   | EmpireAction
   | VaultAction
   | DecorAction
+  | { type: 'character'; config: CharacterConfig }
   | { type: 'tick'; dt: number }
   | { type: 'run'; id: string }
   | { type: 'buy'; id: string; amount: BuyAmount }
@@ -37,6 +39,8 @@ function reducer(state: GameState, action: Action): GameState {
     case 'operation':
     case 'objective':
       return empireAction(state, action)
+    case 'character':
+      return { ...state, character: restoreCharacter(action.config) }
     case 'decor':
       return decorAction(state, action)
     case 'vault':

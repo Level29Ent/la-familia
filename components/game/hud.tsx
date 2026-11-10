@@ -1,6 +1,6 @@
 'use client'
 
-import { BookOpen, House, Crown, TrendingUp } from 'lucide-react'
+import { BookOpen, UserRound, House, Crown, TrendingUp } from 'lucide-react'
 import { objectiveProgress, respectMultiplier, totalIncomePerSecond, type BuyAmount } from '@/lib/game/engine'
 import { formatMoney, formatNumber } from '@/lib/game/format'
 import { cn } from '@/lib/utils'
@@ -18,6 +18,7 @@ export function Hud({
   onBuyAmountChange,
   onOpenLedger,
   onOpenSafeHouse,
+  onCharacter,
   alerts,
 }: {
   focusedId: string | null
@@ -25,6 +26,7 @@ export function Hud({
   onBuyAmountChange: (amount: BuyAmount) => void
   onOpenLedger: () => void
   onOpenSafeHouse: () => void
+  onCharacter: () => void
   alerts: number
 }) {
   const { state } = useGame()
@@ -80,6 +82,13 @@ export function Hud({
             <House className="size-4" aria-hidden="true" /> Safe house{' '}
             <kbd className="rounded border border-border px-1 text-xs">H</kbd>
           </button>
+          <button
+            type="button"
+            onClick={onCharacter}
+            className="flex items-center gap-2 rounded-full border border-border bg-background/80 px-3 py-2 text-xs text-primary"
+          >
+            <UserRound className="size-4" /> Character · C
+          </button>
           <MusicPlayer />
           <div
             role="radiogroup"
@@ -111,7 +120,7 @@ export function Hud({
       <button
         type="button"
         onClick={onOpenLedger}
-        className="pointer-events-auto absolute top-56 left-4 max-w-[60%] rounded-xl border border-primary/20 bg-background/80 p-3 text-left backdrop-blur-md md:top-44 md:left-6"
+        className="pointer-events-auto absolute top-64 left-4 max-w-[60%] rounded-xl border border-primary/20 bg-background/80 p-3 text-left backdrop-blur-md md:top-56 md:left-6"
       >
         <p className="text-[10px] tracking-[0.18em] text-primary uppercase">
           Little Italy · {properties}/{BUSINESSES.length} properties
@@ -134,7 +143,7 @@ export function Hud({
           <FocusCard focusedId={focusedId} buyAmount={buyAmount} onOpenSafeHouse={onOpenSafeHouse} />
         </div>
         <p className="hidden text-xs text-muted-foreground md:block">
-          WASD to walk · Shift to sprint · Click or drag to look · Esc to free the mouse
+          WASD to walk · Shift to sprint · Drag to orbit · Scroll to zoom · Esc to free the mouse
         </p>
         <TouchControls />
       </div>

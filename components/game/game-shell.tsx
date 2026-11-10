@@ -7,6 +7,7 @@ import { GameProvider, useGame } from './game-provider'
 import { Hud } from './hud'
 import { LedgerOverlay, ledgerBadges } from './ledger-overlay'
 import { OfflineDialog } from './offline-dialog'
+import { CharacterCreator } from './character-creator'
 import { DecorShop } from './decor-shop'
 import { SafeHouseHud } from './safe-house-hud'
 import { SafeHouse } from './safe-house'
@@ -38,6 +39,7 @@ function World() {
   const [focusedId, setFocusedId] = useState<string | null>(null)
   const [started, setStarted] = useState(false)
   const [safeHouseOpen, setSafeHouseOpen] = useState(false)
+  const [creatorOpen, setCreatorOpen] = useState(false)
   const [shopOpen, setShopOpen] = useState(false)
   const [vaultOpen, setVaultOpen] = useState(false)
   const [vaultVisited, setVaultVisited] = useState(false)
@@ -47,7 +49,7 @@ function World() {
 
   const badges = ledgerBadges(state)
   const alerts = badges.capos + badges.upgrades + badges.family + badges.empire
-  const playing = started && !ledgerOpen && !vaultOpen && !shopOpen && !offlineReport
+  const playing = started && !ledgerOpen && !vaultOpen && !shopOpen && !creatorOpen && !offlineReport
   const enterHouse = () => {
     setFocusedId(null)
     setLedgerOpen(false)
@@ -72,12 +74,17 @@ function World() {
       e.target.closest('input, textarea, select, [contenteditable=true]')
     )
       return
+    if (creatorOpen) return
     if (shopOpen) {
       if (e.code === 'Escape') setShopOpen(false)
       return
     }
     if (vaultOpen) {
       if (e.code === 'Escape') setVaultOpen(false)
+      return
+    }
+    if (e.code === 'KeyC') {
+      setCreatorOpen(true)
       return
     }
     if (safeHouseOpen) {
@@ -124,6 +131,7 @@ function World() {
     <main className="relative h-dvh w-full overflow-hidden bg-background select-none">
       {safeHouseOpen ? (
         <SafeHouseScene
+          character={state.character}
           decor={state.safeHouse.decor}
           enabled={playing}
           vaultOpen={vaultVisited}
@@ -145,14 +153,16 @@ function World() {
           onBuyAmountChange={setBuyAmount}
           onOpenLedger={() => setLedgerOpen(true)}
           onOpenSafeHouse={enterHouse}
+          onCharacter={() => setCreatorOpen(true)}
           alerts={alerts}
         />
       )}
-      {!started && <StartOverlay onStart={() => setStarted(true)} />}
+      {!started && <StartOverlay onStart={() => setStarted(true)} onCharacter={() => setCreatorOpen(true)} />}
       {ledgerOpen && <LedgerOverlay onClose={() => setLedgerOpen(false)} />}
       {safeHouseOpen && (
         <SafeHouseHud
           focusedId={focusedId}
+          onCharacter={() => setCreatorOpen(true)}
           onVault={openVault}
           onShop={() => setShopOpen(true)}
           onExit={exitHouse}
@@ -160,6 +170,7 @@ function World() {
       )}
       {vaultOpen && <SafeHouse onClose={() => setVaultOpen(false)} />}
       {shopOpen && <DecorShop onClose={() => setShopOpen(false)} />}
+      {creatorOpen && <CharacterCreator onClose={() => setCreatorOpen(false)} />}
       <OfflineDialog />
     </main>
   )
