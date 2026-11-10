@@ -38,7 +38,7 @@ export function Hud({
     <div className="pointer-events-none absolute inset-0 flex flex-col justify-between p-4 md:p-6">
       <div className="flex items-start justify-between gap-4">
         <div className="flex flex-col gap-1 rounded-2xl border border-border bg-background/70 px-4 py-3 backdrop-blur-md">
-          <p className="font-serif text-sm font-semibold tracking-wide text-muted-foreground">La Famiglia</p>
+          <p className="font-serif text-sm font-semibold tracking-wide text-muted-foreground">La Familia</p>
           <p className="font-serif text-3xl font-bold text-primary tabular-nums md:text-4xl">
             {formatMoney(state.cash)}
           </p>
