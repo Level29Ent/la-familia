@@ -7,11 +7,11 @@ const geist = Geist({ subsets: ['latin'], variable: '--font-geist' })
 const playfair = Playfair_Display({ subsets: ['latin'], variable: '--font-playfair' })
 
 export const metadata: Metadata = {
-  title: 'La Famiglia — Idle Mafia Tycoon',
+  title: 'La Familia — Idle Mafia Tycoon',
   description:
     'Build a 1930s crime empire. Run rackets, hire capos, buy upgrades, and retire for Respect in this idle tycoon game.',
   manifest: '/manifest.webmanifest',
-  appleWebApp: { capable: true, title: 'La Famiglia', statusBarStyle: 'black-translucent' },
+  appleWebApp: { capable: true, title: 'La Familia', statusBarStyle: 'black-translucent' },
   icons: {
     icon: [
       {

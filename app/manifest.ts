@@ -2,8 +2,8 @@ import type { MetadataRoute } from 'next'
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'La Famiglia — Idle Mafia Tycoon',
-    short_name: 'La Famiglia',
+    name: 'La Familia — Idle Mafia Tycoon',
+    short_name: 'La Familia',
     description: 'Build your family empire, one neighborhood at a time.',
     start_url: '/',
     display: 'standalone',

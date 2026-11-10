@@ -33,7 +33,7 @@ export function StartOverlay({ onStart, onCharacter }: { onStart: () => void; on
         <div className="flex flex-col gap-2 text-center">
           <Image
             src="/icon.svg"
-            alt="La Famiglia family crest"
+            alt="La Familia family crest"
             width={76}
             height={76}
             className="mx-auto mb-2 drop-shadow-lg"
@@ -45,7 +45,7 @@ export function StartOverlay({ onStart, onCharacter }: { onStart: () => void; on
             id="start-title"
             className="font-serif text-4xl font-bold text-balance text-foreground md:text-5xl"
           >
-            La Famiglia
+            La Familia
           </h1>
           <p className="text-pretty text-sm text-muted-foreground">
             Fourteen properties. One family. Walk the neon streets, fund midnight operations, and turn your
