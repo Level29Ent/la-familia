@@ -294,3 +294,70 @@ assert.equal(
 console.log(
   'PASS: character options validation and clamping; old-save defaults; avatar save/reload, retirement and reset; third-person camera zoom limits, wall/furniture clearance and ceiling height; player-based interaction.',
 )
+
+const { characterPreset, characterShape } = require('../lib/game/character.ts')
+const { cashBundleCount } = require('../lib/game/safe-house.ts')
+const woman = characterPreset(1)
+assert.equal(woman.gender, 1)
+assert.equal(woman.outfit, 3)
+assert.equal(woman.hair, 4)
+assert.equal(woman.hat, 0)
+assert.equal(woman.facialHair, 0)
+const oldAvatar = { ...DEFAULT_CHARACTER, name: 'Existing Boss', jacket: 4, hair: 2, outfit: 1, hat: 2 }
+for (const key of ['gender', 'earrings', 'necklace', 'lipstick', 'neckwear']) delete oldAvatar[key]
+const migratedAvatar = restoreCharacter(oldAvatar)
+assert.equal(migratedAvatar.gender, 0)
+assert.equal(migratedAvatar.name, 'Existing Boss')
+assert.equal(migratedAvatar.jacket, 4)
+assert.equal(migratedAvatar.hair, 2)
+assert.equal(migratedAvatar.outfit, 1)
+assert.equal(migratedAvatar.hat, 2)
+const newLook = restoreCharacter({
+  ...woman,
+  outfit: 4,
+  hair: 7,
+  hat: 3,
+  earrings: 2,
+  necklace: 2,
+  lipstick: 3,
+  neckwear: 2,
+  glasses: 3,
+})
+for (const key of [
+  'gender',
+  'outfit',
+  'hair',
+  'hat',
+  'earrings',
+  'necklace',
+  'lipstick',
+  'neckwear',
+  'glasses',
+])
+  assert.equal(
+    newLook[key],
+    { ...woman, outfit: 4, hair: 7, hat: 3, earrings: 2, necklace: 2, lipstick: 3, neckwear: 2, glasses: 3 }[
+      key
+    ],
+  )
+const womanState = { ...createInitialState(), character: newLook, lifetimeEarnings: 1e9 }
+assert.deepEqual(restoreState(JSON.parse(JSON.stringify(womanState))).character, newLook)
+assert.deepEqual(retireEmpire(womanState).character, newLook)
+assert.equal(restoreCharacter({ gender: 999, earrings: -1 }).gender, 0)
+assert.ok(
+  characterShape({ ...DEFAULT_CHARACTER, gender: 1 }).shoulders < characterShape(DEFAULT_CHARACTER).shoulders,
+)
+assert.ok(characterShape({ ...DEFAULT_CHARACTER, gender: 1 }).hips > characterShape(DEFAULT_CHARACTER).hips)
+for (const gender of [0, 1])
+  for (const outfit of [0, 1, 2, 3, 4, 5]) assert.equal(restoreCharacter({ gender, outfit }).outfit, outfit)
+assert.equal(cashBundleCount(0, 1000), 0)
+assert.equal(cashBundleCount(-1, 1000), 0)
+assert.equal(cashBundleCount(NaN, 1000), 0)
+assert.equal(cashBundleCount(1, 1000), 1)
+assert.equal(cashBundleCount(500, 1000), 9)
+assert.equal(cashBundleCount(1000, 1000), 18)
+assert.equal(cashBundleCount(2000, 1000), 18)
+assert.equal(cashBundleCount(500, 25000), 1)
+console.log(
+  'PASS: woman preset and distinct body shape; all outfits available for both characters; new option persistence; old-avatar compatibility; cash stack empty/partial/full/upgraded capacity visual counts.',
+)

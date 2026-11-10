@@ -5,10 +5,20 @@ import { Canvas } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei'
 import { X, UserRound } from 'lucide-react'
 import { CharacterModel } from '@/components/world/character-model'
-import { CHARACTER_OPTIONS, DEFAULT_CHARACTER, type CharacterChoice } from '@/lib/game/character'
+import {
+  CHARACTER_OPTIONS,
+  DEFAULT_CHARACTER,
+  characterPreset,
+  type CharacterChoice,
+} from '@/lib/game/character'
 import { useGame } from './game-provider'
 
 const LABELS: Record<CharacterChoice, string> = {
+  gender: 'Character',
+  earrings: 'Earrings',
+  necklace: 'Necklace',
+  lipstick: 'Lip color',
+  neckwear: 'Neckwear',
   skin: 'Skin tone',
   hairColor: 'Hair color',
   eyes: 'Eye color',
@@ -108,6 +118,29 @@ export function CharacterCreator({ onClose }: { onClose: () => void }) {
               className="rounded-lg border border-border bg-card p-3"
             />
           </label>
+          <fieldset className="flex flex-wrap gap-2 rounded-xl border border-primary/20 p-3">
+            <legend className="px-1 text-sm text-primary">
+              Starting looks (replaces your unsaved draft)
+            </legend>
+            <button
+              type="button"
+              onClick={() => setDraft(characterPreset(0))}
+              className="rounded-lg border border-border px-3 py-2 text-sm"
+            >
+              Man preset
+            </button>
+            <button
+              type="button"
+              onClick={() => setDraft(characterPreset(1))}
+              className="rounded-lg border border-border px-3 py-2 text-sm"
+            >
+              Woman preset
+            </button>
+            <p className="w-full text-xs text-muted-foreground">
+              Or change Character below without replacing your other choices. Every hairstyle, outfit, and
+              accessory works with either character.
+            </p>
+          </fieldset>
           <fieldset className="grid gap-4 sm:grid-cols-2">
             <legend className="mb-3 font-serif text-xl text-primary">Body & face</legend>
             {(['height', 'build', 'shoulders', 'hips', 'chest', 'face', 'nose', 'jaw'] as const).map(

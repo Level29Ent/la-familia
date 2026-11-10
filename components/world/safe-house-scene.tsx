@@ -2,6 +2,7 @@
 
 import { Canvas } from '@react-three/fiber'
 import { Text } from '@react-three/drei'
+import { cashBundleCount, VAULT_TIERS, type SafeHouseState } from '@/lib/game/safe-house'
 import type { CharacterConfig } from '@/lib/game/character'
 import { decorItem, type DecorState } from '@/lib/game/decor'
 import { ROOM_NAVIGATION } from '@/lib/game/navigation'
@@ -26,12 +27,14 @@ function Label({ at, children, size = 0.22 }: { at: Point; children: string; siz
 
 export function SafeHouseScene({
   decor,
+  safeHouse,
   character,
   enabled,
   vaultOpen,
   onFocusChange,
 }: {
   decor: DecorState
+  safeHouse: SafeHouseState
   character: CharacterConfig
   enabled: boolean
   vaultOpen: boolean
@@ -41,6 +44,7 @@ export function SafeHouseScene({
   const sofa = decorItem(decor, 'sofa').color
   const rug = decorItem(decor, 'rug').color
   const light = decorItem(decor, 'lighting').color
+  const bundleCount = cashBundleCount(safeHouse.balance, VAULT_TIERS[safeHouse.tier].capacity)
   const accent = decor.equipped.decoration
   return (
     <Canvas
@@ -126,7 +130,7 @@ export function SafeHouseScene({
           <meshStandardMaterial color="#ead0a0" emissive="#c89754" emissiveIntensity={0.3} />
         </mesh>
       </group>
-      {/* Vault front with a hinged steel door and gold reserves behind it. */}
+      {/* Vault front with a hinged steel door and banded banknote stacks behind it. */}
       <group position={[0, 0, -6]}>
         <Box at={[0, 1.65, -0.55]} size={[3.5, 3.3, 0.3]} color="#171e22" metal />
         {[-1.65, 1.65].map((x) => (
@@ -136,17 +140,21 @@ export function SafeHouseScene({
           <Box key={y} at={[0, y, 0]} size={[3.5, 0.2, 1.4]} color="#171e22" metal />
         ))}
         <Box at={[0, 1.65, 0.3]} size={[3.1, 2.95, 0.1]} color="#070e12" />
-        {[0, 1, 2].flatMap((row) =>
-          [-0.75, 0, 0.75].map((x) => (
-            <Box
-              key={`${row}-${x}`}
-              at={[x, 0.5 + row * 0.42, 0.5]}
-              size={[0.6, 0.3, 0.3]}
-              color="#d4ab52"
-              metal
-            />
-          )),
-        )}
+        {Array.from({ length: bundleCount }, (_, i) => {
+          const x = ((i % 3) - 1) * 0.85
+          const y = 0.45 + Math.floor(i / 3) * 0.22
+          return (
+            <group key={i} position={[x, y, 0.53]}>
+              <Box at={[0, 0, 0]} size={[0.7, 0.17, 0.34]} color="#c1c9a5" />
+              {[-0.055, 0, 0.055].map((line) => (
+                <Box key={line} at={[0, line, 0.173]} size={[0.68, 0.008, 0.006]} color="#697c5c" />
+              ))}
+              <Box at={[0, 0.09, 0]} size={[0.66, 0.015, 0.3]} color="#4f785c" />
+              <Box at={[0, 0.105, 0]} size={[0.16, 0.02, 0.35]} color="#e8ddbd" />
+              <Box at={[0, 0, 0.18]} size={[0.16, 0.18, 0.025]} color="#e8ddbd" />
+            </group>
+          )
+        })}
         <group position={[-1.55, 0, 0.85]} rotation={[0, vaultOpen ? -Math.PI * 0.65 : 0, 0]}>
           <Box at={[1.55, 1.65, 0]} size={[3.05, 2.9, 0.2]} color="#4b5e62" metal />
           <mesh position={[1.55, 1.65, 0.18]}>
