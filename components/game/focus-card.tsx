@@ -53,10 +53,37 @@ function ActionButton({
   )
 }
 
-export function FocusCard({ focusedId, buyAmount }: { focusedId: string | null; buyAmount: BuyAmount }) {
+export function FocusCard({
+  focusedId,
+  buyAmount,
+  onOpenSafeHouse,
+}: {
+  focusedId: string | null
+  buyAmount: BuyAmount
+  onOpenSafeHouse: () => void
+}) {
   const { state, dispatch } = useGame()
   const config = BUSINESSES.find((b) => b.id === focusedId)
 
+  if (focusedId === 'safehouse') {
+    return (
+      <section
+        aria-label="Family Safe House"
+        className="pointer-events-auto flex w-full max-w-md flex-col gap-3 rounded-2xl border border-primary/30 bg-card/95 p-4 backdrop-blur-md"
+      >
+        <h2 className="font-serif text-xl text-primary">Family Safe House</h2>
+        <p className="text-sm text-muted-foreground">
+          Your private retreat · Vault: {formatMoney(state.safeHouse.balance)}
+        </p>
+        <ActionButton
+          hotkey="E"
+          label="Enter safe house"
+          detail="Visit your vault"
+          onClick={onOpenSafeHouse}
+        />
+      </section>
+    )
+  }
   if (!config) {
     return (
       <p className="rounded-full border border-border bg-background/70 px-4 py-2 text-sm text-muted-foreground backdrop-blur-sm">
@@ -134,7 +161,14 @@ export function FocusCard({ focusedId, buyAmount }: { focusedId: string | null; 
 
       <div className="flex flex-col gap-2 sm:flex-row">
         {b.managed ? (
-          <ActionButton hotkey="E" label="Capo collecting" detail="Automatic" disabled onClick={() => {}} tone="muted" />
+          <ActionButton
+            hotkey="E"
+            label="Capo collecting"
+            detail="Automatic"
+            disabled
+            onClick={() => {}}
+            tone="muted"
+          />
         ) : (
           <ActionButton
             hotkey="E"

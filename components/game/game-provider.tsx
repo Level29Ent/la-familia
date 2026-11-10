@@ -1,11 +1,12 @@
 'use client'
 
 import { createContext, useContext, useEffect, useReducer, useRef, useState, type ReactNode } from 'react'
+import { vaultAction, type VaultAction } from '@/lib/game/safe-house'
 import { BUSINESSES, SAVE_KEY, UPGRADES } from '@/lib/game/config'
 import {
   empireAction,
   type EmpireAction,
-  claimableRespect,
+  retireEmpire,
   computeOfflineEarnings,
   costFor,
   createInitialState,
@@ -18,6 +19,7 @@ import {
 
 type Action =
   | EmpireAction
+  | VaultAction
   | { type: 'tick'; dt: number }
   | { type: 'run'; id: string }
   | { type: 'buy'; id: string; amount: BuyAmount }
@@ -33,12 +35,18 @@ function reducer(state: GameState, action: Action): GameState {
     case 'operation':
     case 'objective':
       return empireAction(state, action)
+    case 'vault':
+    case 'vaultUpgrade':
+      return vaultAction(state, action)
     case 'tick':
       return tick(state, action.dt)
     case 'run': {
       const b = state.businesses[action.id]
       if (!b || b.owned === 0 || b.running || b.managed) return state
-      return { ...state, businesses: { ...state.businesses, [action.id]: { ...b, running: true, progress: 0 } } }
+      return {
+        ...state,
+        businesses: { ...state.businesses, [action.id]: { ...b, running: true, progress: 0 } },
+      }
     }
     case 'buy': {
       const config = BUSINESSES.find((c) => c.id === action.id)
@@ -68,11 +76,8 @@ function reducer(state: GameState, action: Action): GameState {
       if (!up || state.upgrades.includes(up.id) || state.cash < up.cost) return state
       return { ...state, cash: state.cash - up.cost, upgrades: [...state.upgrades, up.id] }
     }
-    case 'prestige': {
-      const gained = claimableRespect(state)
-      if (gained <= 0) return state
-      return createInitialState(state.respect + gained, state.lifetimeEarnings, state.heists + 1)
-    }
+    case 'prestige':
+      return retireEmpire(state)
     case 'load':
       return action.state
     case 'hardReset':

@@ -1,3 +1,4 @@
+import { restoreSafeHouse, type SafeHouseState } from './safe-house'
 import {
   ASSETS,
   OPERATIONS,
@@ -19,6 +20,7 @@ export type BusinessState = {
 
 export type GameState = {
   cash: number
+  safeHouse: SafeHouseState
   runEarnings: number
   lifetimeEarnings: number
   respect: number
@@ -48,6 +50,7 @@ export function createInitialState(respect = 0, lifetimeEarnings = 0, heists = 0
   const now = Date.now()
   return {
     cash: 0,
+    safeHouse: { balance: 0, tier: 0 },
     runEarnings: 0,
     lifetimeEarnings,
     respect,
@@ -262,5 +265,15 @@ export function restoreState(saved: Partial<GameState>): GameState {
     ...fresh,
     ...saved,
     businesses: { ...fresh.businesses, ...saved.businesses },
+    safeHouse: restoreSafeHouse(saved.safeHouse),
+  }
+}
+
+export function retireEmpire(state: GameState): GameState {
+  const gained = claimableRespect(state)
+  if (gained <= 0) return state
+  return {
+    ...createInitialState(state.respect + gained, state.lifetimeEarnings, state.heists + 1),
+    safeHouse: { ...state.safeHouse },
   }
 }

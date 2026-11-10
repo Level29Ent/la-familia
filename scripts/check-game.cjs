@@ -88,3 +88,56 @@ assert.deepEqual(createInitialState(10, 1e9, 1).assets, [])
 console.log(
   'PASS: 14 properties; old-save migration; spending and stacked bonuses; objective guards; operation requirements, timing, save/resume, and single payouts; offline bonus; prestige reset.',
 )
+
+const { vaultAction, VAULT_TIERS } = require('../lib/game/safe-house.ts')
+const { retireEmpire } = require('../lib/game/engine.ts')
+let bank = createInitialState()
+assert.deepEqual(restoreState(old).safeHouse, { balance: 0, tier: 0 })
+bank = { ...bank, cash: 1500, runEarnings: 1500, lifetimeEarnings: 1500 }
+for (const amount of [0, -10, NaN, Infinity, 2000]) {
+  assert.equal(vaultAction(bank, { type: 'vault', direction: 'deposit', amount }), bank)
+}
+bank = vaultAction(bank, { type: 'vault', direction: 'deposit', amount: 100 })
+assert.equal(bank.cash, 1400)
+assert.equal(bank.safeHouse.balance, 100)
+assert.equal(bank.runEarnings, 1500)
+assert.equal(bank.lifetimeEarnings, 1500)
+bank = vaultAction(bank, { type: 'vault', direction: 'deposit', amount: 'all' })
+assert.equal(bank.safeHouse.balance, 1000)
+assert.equal(bank.cash, 500)
+assert.equal(vaultAction(bank, { type: 'vault', direction: 'deposit', amount: 1 }), bank)
+assert.equal(vaultAction(bank, { type: 'vault', direction: 'withdraw', amount: 1001 }), bank)
+bank = vaultAction(bank, { type: 'vault', direction: 'withdraw', amount: 50.5 })
+assert.equal(bank.cash, 550.5)
+assert.equal(bank.safeHouse.balance, 949.5)
+bank = vaultAction(bank, { type: 'vault', direction: 'withdraw', amount: 'all' })
+assert.equal(bank.cash, 1500)
+assert.equal(bank.safeHouse.balance, 0)
+assert.equal(vaultAction(bank, { type: 'vaultUpgrade' }), bank)
+bank = { ...bank, cash: 10000000 }
+for (let tier = 1; tier < VAULT_TIERS.length; tier++) {
+  const before = bank.cash
+  bank = vaultAction(bank, { type: 'vaultUpgrade' })
+  assert.equal(bank.cash, before - VAULT_TIERS[tier].cost)
+  assert.equal(bank.safeHouse.tier, tier)
+}
+assert.equal(vaultAction(bank, { type: 'vaultUpgrade' }), bank)
+bank = vaultAction(bank, { type: 'vault', direction: 'deposit', amount: 100 })
+const persisted = restoreState(JSON.parse(JSON.stringify(bank)))
+assert.deepEqual(persisted.safeHouse, bank.safeHouse)
+assert.equal(persisted.cash, bank.cash)
+assert.deepEqual(restoreState({ safeHouse: { tier: Infinity, balance: NaN } }).safeHouse, {
+  tier: 0,
+  balance: 0,
+})
+assert.deepEqual(restoreState({ safeHouse: { tier: -10, balance: -100 } }).safeHouse, { tier: 0, balance: 0 })
+const heir = retireEmpire({ ...bank, lifetimeEarnings: 1e9 })
+assert.equal(heir.cash, 0)
+assert.deepEqual(heir.safeHouse, bank.safeHouse)
+assert.equal(heir.respect, 10)
+assert.equal(heir.lifetimeEarnings, 1e9)
+assert.equal(heir.heists, 1)
+assert.deepEqual(createInitialState().safeHouse, { balance: 0, tier: 0 })
+console.log(
+  'PASS: vault deposit/withdraw conservation; invalid and insufficient transfers; capacity and max tier; upgrade spending; old-save migration and round trip; retirement inheritance and hard-reset defaults.',
+)

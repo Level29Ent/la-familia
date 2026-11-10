@@ -10,6 +10,7 @@ const CONTROLS = [
   ['Q', 'Hire a capo'],
   ['1 - 4', 'Buy x1, x10, x100, Max'],
   ['M', 'Open the ledger'],
+  ['H', 'Visit your safe house & vault'],
 ]
 
 export function StartOverlay({ onStart }: { onStart: () => void }) {
