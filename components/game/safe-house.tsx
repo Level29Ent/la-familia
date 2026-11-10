@@ -154,9 +154,9 @@ export function SafeHouse({ onClose }: { onClose: () => void }) {
               </button>
             </div>
             <p id="vault-help" className="text-xs leading-relaxed text-muted-foreground">
-              Stored cash cannot be spent until withdrawn. No interest or transfer fees. Vault cash and
-              upgrades survive retirement, but a hard reset erases them. Saved on this device with your
-              empire.
+              Stored cash appears as banded banknote stacks inside the vault. Stored cash cannot be spent
+              until withdrawn. No interest or transfer fees. Vault cash and upgrades survive retirement, but a
+              hard reset erases them. Saved on this device with your empire.
             </p>
             <p role="status" className="min-h-5 text-sm text-primary">
               {notice}

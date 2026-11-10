@@ -39,3 +39,9 @@ export function restoreSafeHouse(saved?: Partial<SafeHouseState>): SafeHouseStat
     : 0
   return { tier, balance, decor: restoreDecor(saved?.decor) }
 }
+
+// Visual fullness, not a denomination claim: empty vaults stay empty.
+export function cashBundleCount(balance: number, capacity: number) {
+  if (!Number.isFinite(balance) || balance <= 0 || capacity <= 0) return 0
+  return Math.min(18, Math.max(1, Math.ceil((balance / capacity) * 18)))
+}

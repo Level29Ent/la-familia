@@ -131,6 +131,7 @@ function World() {
     <main className="relative h-dvh w-full overflow-hidden bg-background select-none">
       {safeHouseOpen ? (
         <SafeHouseScene
+          safeHouse={state.safeHouse}
           character={state.character}
           decor={state.safeHouse.decor}
           enabled={playing}
