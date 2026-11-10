@@ -5,7 +5,14 @@ import { Stars } from '@react-three/drei'
 import { BUSINESSES } from '@/lib/game/config'
 import type { GameState } from '@/lib/game/engine'
 import { Building, type BuildingStatus } from './building'
-import { BUILDING_STYLES, PLACEMENTS, SAFE_HOUSE_PLACEMENT, SAFE_HOUSE_STYLE } from './layout'
+import {
+  BUILDING_STYLES,
+  PLACEMENTS,
+  SAFE_HOUSE_PLACEMENT,
+  SAFE_HOUSE_STYLE,
+  STREET_NAVIGATION,
+  STREET_RETURN_NAVIGATION,
+} from './layout'
 import { PlayerControls } from './player-controls'
 import { Street } from './street'
 
@@ -23,11 +30,13 @@ function litLevelFor(owned: number) {
 
 export function CityScene({
   state,
+  returning = false,
   focusedId,
   movementEnabled,
   onFocusChange,
 }: {
   state: GameState
+  returning?: boolean
   focusedId: string | null
   movementEnabled: boolean
   onFocusChange: (id: string | null) => void
@@ -74,7 +83,11 @@ export function CityScene({
         focused={focusedId === 'safehouse'}
         seed={42}
       />
-      <PlayerControls enabled={movementEnabled} onFocusChange={onFocusChange} />
+      <PlayerControls
+        navigation={returning ? STREET_RETURN_NAVIGATION : STREET_NAVIGATION}
+        enabled={movementEnabled}
+        onFocusChange={onFocusChange}
+      />
     </Canvas>
   )
 }

@@ -3,18 +3,17 @@
 import { useEffect, useRef } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
 import { input, MOVE_KEYS } from '@/lib/game/input'
-import { INTERACTION_PLACEMENTS, PLAYER_BOUNDS, PLAYER_START } from './layout'
+import { focusedTarget, moveWithin, type Navigation } from '@/lib/game/navigation'
 
 const LOOK_SPEED = 0.0024
-const WALK_SPEED = 6
-const SPRINT_SPEED = 11
-const FOCUS_RANGE = 9
 
 export function PlayerControls({
   enabled,
+  navigation,
   onFocusChange,
 }: {
   enabled: boolean
+  navigation: Navigation
   onFocusChange: (id: string | null) => void
 }) {
   const { camera, gl } = useThree()
@@ -24,8 +23,12 @@ export function PlayerControls({
 
   useEffect(() => {
     camera.rotation.order = 'YXZ'
-    camera.position.set(...PLAYER_START)
-  }, [camera])
+    camera.position.set(...navigation.start)
+    look.current = { yaw: navigation.yaw, pitch: 0 }
+    focusedRef.current = null
+    onFocusChange(null)
+    input.keys.clear()
+  }, [camera, navigation, onFocusChange])
 
   useEffect(() => {
     input.enabled = enabled
@@ -100,11 +103,14 @@ export function PlayerControls({
   }, [gl])
 
   useFrame((_, rawDt) => {
+    if (!enabled) return
     const dt = Math.min(rawDt, 0.05)
     const { yaw, pitch } = look.current
     const k = input.keys
-    const forward = (k.has('KeyW') || k.has('ArrowUp') ? 1 : 0) - (k.has('KeyS') || k.has('ArrowDown') ? 1 : 0)
-    const strafe = (k.has('KeyD') || k.has('ArrowRight') ? 1 : 0) - (k.has('KeyA') || k.has('ArrowLeft') ? 1 : 0)
+    const forward =
+      (k.has('KeyW') || k.has('ArrowUp') ? 1 : 0) - (k.has('KeyS') || k.has('ArrowDown') ? 1 : 0)
+    const strafe =
+      (k.has('KeyD') || k.has('ArrowRight') ? 1 : 0) - (k.has('KeyA') || k.has('ArrowLeft') ? 1 : 0)
 
     const fx = -Math.sin(yaw)
     const fz = -Math.cos(yaw)
@@ -116,31 +122,18 @@ export function PlayerControls({
     const len = Math.hypot(mx, mz)
     const moving = len > 0
     if (moving) {
-      const speed = k.has('ShiftLeft') || k.has('ShiftRight') ? SPRINT_SPEED : WALK_SPEED
+      const speed = navigation.speed * (k.has('ShiftLeft') || k.has('ShiftRight') ? 1.7 : 1)
       mx = (mx / len) * speed * dt
       mz = (mz / len) * speed * dt
-      camera.position.x = Math.max(PLAYER_BOUNDS.minX, Math.min(PLAYER_BOUNDS.maxX, camera.position.x + mx))
-      camera.position.z = Math.max(PLAYER_BOUNDS.minZ, Math.min(PLAYER_BOUNDS.maxZ, camera.position.z + mz))
+      const next = moveWithin(camera.position, mx, mz, navigation)
+      camera.position.x = next.x
+      camera.position.z = next.z
       bob.current += dt * 10
     }
-    camera.position.y = PLAYER_START[1] + (moving ? Math.sin(bob.current) * 0.05 : 0)
+    camera.position.y = navigation.start[1] + (moving ? Math.sin(bob.current) * 0.05 : 0)
     camera.rotation.set(pitch, yaw, 0)
 
-    let best: string | null = null
-    let bestDist = Infinity
-    for (const p of INTERACTION_PLACEMENTS) {
-      const dx = p.door[0] - camera.position.x
-      const dz = p.door[1] - camera.position.z
-      const dist = Math.hypot(dx, dz)
-      if (dist > FOCUS_RANGE) continue
-      const facing = (dx * fx + dz * fz) / dist
-      if (facing < 0.35) continue
-      const score = dist * (1.6 - facing)
-      if (score < bestDist) {
-        bestDist = score
-        best = p.id
-      }
-    }
+    const best = focusedTarget(camera.position, yaw, navigation)
     if (best !== focusedRef.current) {
       focusedRef.current = best
       onFocusChange(best)
