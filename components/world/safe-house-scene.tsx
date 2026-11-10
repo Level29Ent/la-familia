@@ -117,13 +117,19 @@ export function SafeHouseScene({
       </group>
       {/* Vault front with a hinged steel door and gold reserves behind it. */}
       <group position={[0, 0, -6]}>
-        <Box at={[0, 1.65, 0]} size={[3.5, 3.3, 1.4]} color="#171e22" metal />
-        <Box at={[0, 1.65, 0.73]} size={[3.1, 2.95, 0.1]} color="#070e12" />
+        <Box at={[0, 1.65, -0.55]} size={[3.5, 3.3, 0.3]} color="#171e22" metal />
+        {[-1.65, 1.65].map((x) => (
+          <Box key={x} at={[x, 1.65, 0]} size={[0.2, 3.3, 1.4]} color="#171e22" metal />
+        ))}
+        {[0.1, 3.2].map((y) => (
+          <Box key={y} at={[0, y, 0]} size={[3.5, 0.2, 1.4]} color="#171e22" metal />
+        ))}
+        <Box at={[0, 1.65, 0.3]} size={[3.1, 2.95, 0.1]} color="#070e12" />
         {[0, 1, 2].flatMap((row) =>
           [-0.75, 0, 0.75].map((x) => (
             <Box
               key={`${row}-${x}`}
-              at={[x, 0.5 + row * 0.42, 0.83]}
+              at={[x, 0.5 + row * 0.42, 0.5]}
               size={[0.6, 0.3, 0.3]}
               color="#d4ab52"
               metal
