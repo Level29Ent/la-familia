@@ -10,7 +10,7 @@ const PAD: { code: string; label: string; icon: LucideIcon; className: string }[
   { code: 'KeyD', label: 'Step right', icon: ArrowRight, className: 'col-start-3 row-start-2' },
 ]
 
-export function TouchControls() {
+export function TouchControls({ driving = false }: { driving?: boolean }) {
   const press = (code: string) => {
     if (input.enabled) input.keys.add(code)
   }
@@ -18,11 +18,33 @@ export function TouchControls() {
 
   return (
     <div className="pointer-events-auto hidden grid-cols-3 grid-rows-2 gap-2 self-start pointer-coarse:grid">
+      {driving && (
+        <button
+          type="button"
+          aria-label="Brake"
+          onPointerDown={() => press('Space')}
+          onPointerUp={() => release('Space')}
+          onPointerLeave={() => release('Space')}
+          onPointerCancel={() => release('Space')}
+          className="col-start-3 row-start-1 flex size-14 touch-none items-center justify-center rounded-xl border border-border bg-background/90 text-xs text-primary"
+        >
+          Brake
+        </button>
+      )}
       {PAD.map(({ code, label, icon: Icon, className }) => (
         <button
           key={code}
           type="button"
-          aria-label={label}
+          aria-label={
+            driving
+              ? (
+                  { KeyW: 'Accelerate', KeyS: 'Reverse', KeyA: 'Steer left', KeyD: 'Steer right' } as Record<
+                    string,
+                    string
+                  >
+                )[code]
+              : label
+          }
           onPointerDown={() => press(code)}
           onPointerUp={() => release(code)}
           onPointerLeave={() => release(code)}

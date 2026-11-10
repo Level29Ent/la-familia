@@ -12,6 +12,7 @@ const CONTROLS = [
   ['M', 'Open the ledger'],
   ['H', 'Visit your safe house & vault'],
   ['C', 'Customize your character'],
+  ['E / Space', 'Enter or exit owned sedan / brake'],
 ]
 
 export function StartOverlay({ onStart, onCharacter }: { onStart: () => void; onCharacter: () => void }) {

@@ -1,5 +1,6 @@
 'use client'
 
+import { ASSET_LOCATIONS } from '@/lib/game/good-life'
 import { ASSETS, OBJECTIVES, OPERATIONS } from '@/lib/game/config'
 import { objectiveProgress } from '@/lib/game/engine'
 import { formatMoney } from '@/lib/game/format'
@@ -114,7 +115,8 @@ export function EmpirePanel() {
           The good life
         </h3>
         <p className="text-sm text-muted-foreground">
-          One of each. Profit bonuses multiply together and apply to every business, including offline income.
+          One of each. Purchases appear in your world as described below. Profit bonuses multiply together and
+          apply to every business, including offline income.
         </p>
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
           {ASSETS.map((asset) => {
@@ -127,6 +129,7 @@ export function EmpirePanel() {
                 <BusinessIcon icon={asset.icon} className="size-7 text-primary" />
                 <h4 className="font-serif text-lg">{asset.name}</h4>
                 <p className="flex-1 text-sm text-muted-foreground">{asset.description}</p>
+                <p className="text-xs leading-relaxed text-muted-foreground">{ASSET_LOCATIONS[asset.id]}</p>
                 <p className="text-sm text-primary">All profits ×{asset.multiplier}</p>
                 <button
                   className={buttonClass}

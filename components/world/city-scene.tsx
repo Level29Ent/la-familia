@@ -1,5 +1,6 @@
 'use client'
 
+import { GoodLifeLandmarks } from './good-life-displays'
 import { Canvas } from '@react-three/fiber'
 import { Stars } from '@react-three/drei'
 import { BUSINESSES } from '@/lib/game/config'
@@ -30,12 +31,14 @@ function litLevelFor(owned: number) {
 
 export function CityScene({
   state,
+  driving = false,
   returning = false,
   focusedId,
   movementEnabled,
   onFocusChange,
 }: {
   state: GameState
+  driving?: boolean
   returning?: boolean
   focusedId: string | null
   movementEnabled: boolean
@@ -56,7 +59,8 @@ export function CityScene({
       <directionalLight position={[40, 60, -100]} intensity={0.35} color="#c9c3e6" />
       <Stars radius={150} depth={40} count={2500} factor={4} fade speed={0.4} />
 
-      <Street sedanOwned={state.assets.includes('sedan')} />
+      <Street />
+      <GoodLifeLandmarks assets={state.assets} endZ={STREET_NAVIGATION.bounds.minZ} />
 
       {PLACEMENTS.map((placement, i) => {
         const config = BUSINESSES.find((b) => b.id === placement.id)!
@@ -84,6 +88,8 @@ export function CityScene({
         seed={42}
       />
       <PlayerControls
+        assets={state.assets}
+        driving={driving}
         character={state.character}
         navigation={returning ? STREET_RETURN_NAVIGATION : STREET_NAVIGATION}
         enabled={movementEnabled}

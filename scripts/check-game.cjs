@@ -361,3 +361,49 @@ assert.equal(cashBundleCount(500, 25000), 1)
 console.log(
   'PASS: woman preset and distinct body shape; all outfits available for both characters; new option persistence; old-avatar compatibility; cash stack empty/partial/full/upgraded capacity visual counts.',
 )
+
+const {
+  ASSET_LOCATIONS,
+  SEDAN_START,
+  driveCar,
+  carExit,
+  goodLifeRoomNavigation,
+} = require('../lib/game/good-life.ts')
+const bounds = { minX: -6.3, maxX: 6.3, minZ: -96, maxZ: 14 }
+for (const asset of ASSETS) assert.ok(ASSET_LOCATIONS[asset.id], `${asset.name} has an in-world location`)
+let ride = { ...SEDAN_START }
+for (let i = 0; i < 40; i++) ride = driveCar(ride, 1, 0, false, 0.05, bounds)
+assert.ok(ride.z < SEDAN_START.z - 5)
+assert.ok(ride.speed > 0 && ride.speed <= 16)
+const turning = driveCar(ride, 1, 1, false, 0.05, bounds)
+assert.notEqual(turning.yaw, ride.yaw)
+const brake = driveCar(ride, 0, 0, true, 0.05, bounds)
+assert.ok(brake.speed < ride.speed)
+const coast = driveCar(ride, 0, 0, false, 0.05, bounds)
+assert.ok(coast.speed < ride.speed && coast.speed > brake.speed)
+const reverse = driveCar({ ...SEDAN_START, speed: 0 }, -1, 0, false, 0.05, bounds)
+assert.ok(reverse.z > SEDAN_START.z && reverse.speed < 0)
+const edge = { x: bounds.maxX - 2, z: -10, yaw: Math.PI / 2, speed: 10 }
+assert.equal(driveCar(edge, 1, 0, false, 0.05, bounds).x, edge.x)
+assert.equal(driveCar(edge, 1, 0, false, 0.05, bounds).speed, 0)
+const parkedCollision = driveCar({ x: 2.6, z: -3, yaw: Math.PI / 2, speed: 8 }, 1, 0, false, 0.05, bounds)
+assert.equal(parkedCollision.speed, 0)
+for (const yaw of [0, Math.PI / 2, Math.PI, -Math.PI / 2]) {
+  const exit = carExit({ x: 0, z: -30, yaw, speed: 0 }, bounds)
+  assert.ok(Math.abs(Math.hypot(exit.x, exit.z + 30) - 1.7) < 0.001)
+  assert.ok(exit.x >= bounds.minX && exit.x <= bounds.maxX)
+}
+assert.deepEqual(goodLifeRoomNavigation([], room), room)
+const furnished = goodLifeRoomNavigation(['wardrobe'], room)
+assert.equal(furnished.obstacles.length, room.obstacles.length + 1)
+const againstWardrobe = moveWithin({ x: -5.65, z: 4.5 }, -0.1, 0, furnished)
+assert.equal(againstWardrobe.x, -5.65)
+let collection = { ...createInitialState(), cash: 1e9 }
+for (const asset of ASSETS) collection = empireAction(collection, { type: 'asset', id: asset.id })
+assert.deepEqual(restoreState(JSON.parse(JSON.stringify(collection))).assets, collection.assets)
+assert.equal(collection.assets.length, ASSETS.length)
+assert.ok(profitMultiplier(collection, 'hustle') > 4)
+assert.deepEqual(retireEmpire({ ...collection, lifetimeEarnings: 1e9 }).assets, [])
+console.log(
+  'PASS: all six assets have locations; sedan acceleration, reverse, steering, braking, coasting and collision; safe exits; wardrobe collision; asset purchase/save persistence and retirement reset with bonuses unchanged.',
+)
