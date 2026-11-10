@@ -5,7 +5,7 @@ import { Stars } from '@react-three/drei'
 import { BUSINESSES } from '@/lib/game/config'
 import type { GameState } from '@/lib/game/engine'
 import { Building, type BuildingStatus } from './building'
-import { BUILDING_STYLES, PLACEMENTS } from './layout'
+import { BUILDING_STYLES, PLACEMENTS, SAFE_HOUSE_PLACEMENT, SAFE_HOUSE_STYLE } from './layout'
 import { PlayerControls } from './player-controls'
 import { Street } from './street'
 
@@ -65,6 +65,15 @@ export function CityScene({
         )
       })}
 
+      <Building
+        placement={SAFE_HOUSE_PLACEMENT}
+        style={SAFE_HOUSE_STYLE}
+        name="Family Safe House"
+        status="managed"
+        litLevel={0.9}
+        focused={focusedId === 'safehouse'}
+        seed={42}
+      />
       <PlayerControls enabled={movementEnabled} onFocusChange={onFocusChange} />
     </Canvas>
   )

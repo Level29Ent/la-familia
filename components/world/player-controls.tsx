@@ -3,7 +3,7 @@
 import { useEffect, useRef } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
 import { input, MOVE_KEYS } from '@/lib/game/input'
-import { PLACEMENTS, PLAYER_BOUNDS, PLAYER_START } from './layout'
+import { INTERACTION_PLACEMENTS, PLAYER_BOUNDS, PLAYER_START } from './layout'
 
 const LOOK_SPEED = 0.0024
 const WALK_SPEED = 6
@@ -128,7 +128,7 @@ export function PlayerControls({
 
     let best: string | null = null
     let bestDist = Infinity
-    for (const p of PLACEMENTS) {
+    for (const p of INTERACTION_PLACEMENTS) {
       const dx = p.door[0] - camera.position.x
       const dz = p.door[1] - camera.position.z
       const dist = Math.hypot(dx, dz)

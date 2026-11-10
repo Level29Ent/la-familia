@@ -33,23 +33,35 @@ export function FamilyPanel() {
 
       <div className="flex flex-col overflow-hidden rounded-xl border border-border bg-card md:flex-row">
         <div className="relative aspect-square w-full md:w-72 md:shrink-0">
-          <Image src="/images/the-don.png" alt="Portrait of the Don in shadow" fill sizes="(min-width: 768px) 18rem, 100vw" className="object-cover" />
+          <Image
+            src="/images/the-don.png"
+            alt="Portrait of the Don in shadow"
+            fill
+            sizes="(min-width: 768px) 18rem, 100vw"
+            className="object-cover"
+          />
         </div>
         <div className="flex flex-1 flex-col justify-between gap-6 p-6">
           <div className="flex flex-col gap-3">
             <h3 className="font-serif text-xl font-semibold text-foreground">Retire &amp; Pass the Torch</h3>
             <p className="text-pretty text-sm leading-relaxed text-muted-foreground">
-              Sell off every racket, capo, upgrade, and luxury asset. Objectives and active operations also reset. In return your family gains Respect, and each point permanently
-              boosts all profits by {bonusPct}%. Respect is earned from lifetime earnings.
+              Sell off every racket, capo, upgrade, and luxury asset. Objectives and active operations also
+              reset. Your safe house, vault upgrades, and stored cash stay in the family. In return your
+              family gains Respect, and each point permanently boosts all profits by {bonusPct}%. Respect is
+              earned from lifetime earnings.
             </p>
             <div className="flex flex-wrap gap-6">
               <div>
                 <p className="text-xs tracking-widest text-muted-foreground uppercase">Current Respect</p>
-                <p className="font-serif text-3xl font-bold text-foreground tabular-nums">{formatNumber(state.respect)}</p>
+                <p className="font-serif text-3xl font-bold text-foreground tabular-nums">
+                  {formatNumber(state.respect)}
+                </p>
               </div>
               <div>
                 <p className="text-xs tracking-widest text-muted-foreground uppercase">On retirement</p>
-                <p className="font-serif text-3xl font-bold text-accent tabular-nums">+{formatNumber(gain)}</p>
+                <p className="font-serif text-3xl font-bold text-accent tabular-nums">
+                  +{formatNumber(gain)}
+                </p>
               </div>
             </div>
           </div>
@@ -70,7 +82,9 @@ export function FamilyPanel() {
           {stats.map((s) => (
             <div key={s.label} className="rounded-xl border border-border bg-card p-4">
               <dt className="text-xs text-muted-foreground">{s.label}</dt>
-              <dd className="mt-1 font-serif text-xl font-semibold text-foreground tabular-nums">{s.value}</dd>
+              <dd className="mt-1 font-serif text-xl font-semibold text-foreground tabular-nums">
+                {s.value}
+              </dd>
             </div>
           ))}
         </dl>

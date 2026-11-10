@@ -63,3 +63,19 @@ export const PLAYER_BOUNDS = {
 }
 
 export const PLAYER_START: [number, number, number] = [0, 1.7, 11]
+
+export const SAFE_HOUSE_PLACEMENT: Placement = {
+  id: 'safehouse',
+  position: [11, 0, 10],
+  rotationY: -Math.PI / 2,
+  door: [7, 10],
+}
+export const SAFE_HOUSE_STYLE: BuildingStyle = {
+  wall: '#43554d',
+  trim: '#1d302a',
+  neon: '#bfe6c4',
+  height: 10,
+  width: 10,
+  depth: 8,
+}
+export const INTERACTION_PLACEMENTS = [...PLACEMENTS, SAFE_HOUSE_PLACEMENT]
