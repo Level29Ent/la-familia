@@ -120,12 +120,12 @@ export function Hud({
       <button
         type="button"
         onClick={onOpenLedger}
-        className="pointer-events-auto absolute top-64 left-4 max-w-[60%] rounded-xl border border-primary/20 bg-background/80 p-3 text-left backdrop-blur-md md:top-56 md:left-6"
+        className="pointer-events-auto absolute top-56 left-4 max-w-[55%] rounded-xl border border-primary/20 bg-background/80 p-2 text-left backdrop-blur-md md:top-56 md:p-3 md:left-6"
       >
-        <p className="text-[10px] tracking-[0.18em] text-primary uppercase">
+        <p className="hidden text-[10px] tracking-[0.18em] text-primary uppercase md:block">
           Little Italy · {properties}/{BUSINESSES.length} properties
         </p>
-        <p className="mt-1 text-xs text-foreground">{objective ? objective.name : 'The city is yours'}</p>
+        <p className="text-xs text-foreground md:mt-1">{objective ? objective.name : 'The city is yours'}</p>
         <p className="mt-1 text-[11px] text-muted-foreground">
           {objective
             ? `${Math.min(objective.goal, Math.floor(objectiveProgress(state, objective.metric)))}/${objective.goal} · Open Empire →`
