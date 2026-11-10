@@ -54,7 +54,7 @@ export function SafeHouse({ onClose }: { onClose: () => void }) {
       aria-labelledby="safe-house-title"
       className="fixed inset-0 m-auto max-h-[94dvh] w-[min(1100px,calc(100%_-_24px))] overflow-y-auto rounded-2xl border border-primary/25 bg-background p-0 text-foreground shadow-2xl backdrop:bg-black/80"
     >
-      <header className="flex items-center justify-between gap-3 border-b border-border px-5 py-4">
+      <header className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-border bg-background px-5 py-4">
         <div>
           <p className="flex items-center gap-2 text-[10px] tracking-[0.25em] text-primary uppercase">
             <House className="size-3" /> The Bellini residence
@@ -82,8 +82,8 @@ export function SafeHouse({ onClose }: { onClose: () => void }) {
             viewBox="0 0 600 500"
             role="img"
             aria-label="A private Art Deco lounge with a leather sofa, city window, brass lamp, and steel vault"
-            className="absolute inset-0 h-full w-full object-cover"
-            preserveAspectRatio="xMidYMid slice"
+            className="absolute inset-x-0 top-0 h-auto w-full"
+            preserveAspectRatio="xMidYMid meet"
           >
             <defs>
               <linearGradient id="room-wall" x2="0" y2="1">
