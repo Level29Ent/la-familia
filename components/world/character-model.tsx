@@ -24,6 +24,28 @@ function Form({
     </mesh>
   )
 }
+function Tailored({
+  at,
+  top,
+  bottom,
+  length,
+  depth = 1,
+  color,
+}: {
+  at: Point
+  top: number
+  bottom: number
+  length: number
+  depth?: number
+  color: string
+}) {
+  return (
+    <mesh position={at} scale={[1, 1, depth]}>
+      <cylinderGeometry args={[top, bottom, length, 20]} />
+      <meshStandardMaterial color={color} roughness={0.85} />
+    </mesh>
+  )
+}
 function Panel({
   at,
   size,
@@ -95,8 +117,20 @@ export function CharacterModel({
           ref={side === -1 ? leftLeg : rightLeg}
           position={[side * 0.13 * config.hips, 0.91, 0]}
         >
-          <Form at={[0, -0.23, 0]} scale={[0.115, 0.27, 0.12]} color={COLORS.trousers[config.trousers]} />
-          <Form at={[0, -0.62, 0]} scale={[0.095, 0.25, 0.1]} color={COLORS.trousers[config.trousers]} />
+          <Tailored
+            at={[0, -0.23, 0]}
+            top={0.115}
+            bottom={0.095}
+            length={0.46}
+            color={COLORS.trousers[config.trousers]}
+          />
+          <Tailored
+            at={[0, -0.62, 0]}
+            top={0.095}
+            bottom={0.085}
+            length={0.38}
+            color={COLORS.trousers[config.trousers]}
+          />
           <Form
             at={[0, -0.84, 0.075]}
             scale={[0.11, 0.07, 0.21]}
@@ -107,7 +141,14 @@ export function CharacterModel({
         </group>
       ))}
       <group ref={torso}>
-        <Form at={[0, 1.17, 0]} scale={[0.28 * config.shoulders, 0.34, 0.16 * config.chest]} color={jacket} />
+        <Tailored
+          at={[0, 1.19, 0]}
+          top={0.27 * config.shoulders}
+          bottom={0.23 * config.hips}
+          length={0.55}
+          depth={0.62 * config.chest}
+          color={jacket}
+        />
         <Form
           at={[0, 0.93, 0]}
           scale={[0.245 * config.hips, 0.13, 0.15]}
@@ -138,7 +179,7 @@ export function CharacterModel({
             position={[side * 0.29 * config.shoulders, 1.43, 0]}
             rotation={[0, 0, side * 0.07]}
           >
-            <Form at={[0, -0.14, 0]} scale={[0.1, 0.21, 0.1]} color={sleeves} />
+            <Tailored at={[0, -0.14, 0]} top={0.095} bottom={0.08} length={0.38} color={sleeves} />
             <Form
               at={[side * 0.015, -0.4, 0.01]}
               scale={[0.075, 0.18, 0.08]}
@@ -162,13 +203,13 @@ export function CharacterModel({
           {[-1, 1].map((side) => (
             <group key={side}>
               <Form at={[side * 0.157, 0, 0]} scale={[0.035, 0.065, 0.032]} color={skin} />
-              <Form at={[side * 0.058, 0.025, 0.14]} scale={[0.039, 0.023, 0.014]} color="#ece3d6" />
+              <Form at={[side * 0.058, 0.025, 0.14]} scale={[0.032, 0.016, 0.014]} color="#ece3d6" />
               <Form
                 at={[side * 0.058, 0.025, 0.153]}
-                scale={[0.016, 0.018, 0.007]}
+                scale={[0.013, 0.014, 0.007]}
                 color={COLORS.eyes[config.eyes]}
               />
-              <Form at={[side * 0.058, 0.025, 0.16]} scale={[0.007, 0.011, 0.004]} color="#161514" />
+              <Form at={[side * 0.058, 0.025, 0.16]} scale={[0.006, 0.009, 0.004]} color="#161514" />
               <Panel
                 at={[side * 0.058, 0.068, 0.145]}
                 size={[0.075, 0.013, 0.014]}
