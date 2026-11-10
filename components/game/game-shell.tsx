@@ -7,6 +7,7 @@ import { GameProvider, useGame } from './game-provider'
 import { Hud } from './hud'
 import { LedgerOverlay, ledgerBadges } from './ledger-overlay'
 import { OfflineDialog } from './offline-dialog'
+import { DecorShop } from './decor-shop'
 import { SafeHouseHud } from './safe-house-hud'
 import { SafeHouse } from './safe-house'
 import { StartOverlay } from './start-overlay'
@@ -37,6 +38,7 @@ function World() {
   const [focusedId, setFocusedId] = useState<string | null>(null)
   const [started, setStarted] = useState(false)
   const [safeHouseOpen, setSafeHouseOpen] = useState(false)
+  const [shopOpen, setShopOpen] = useState(false)
   const [vaultOpen, setVaultOpen] = useState(false)
   const [vaultVisited, setVaultVisited] = useState(false)
   const [returning, setReturning] = useState(false)
@@ -45,7 +47,7 @@ function World() {
 
   const badges = ledgerBadges(state)
   const alerts = badges.capos + badges.upgrades + badges.family + badges.empire
-  const playing = started && !ledgerOpen && !vaultOpen && !offlineReport
+  const playing = started && !ledgerOpen && !vaultOpen && !shopOpen && !offlineReport
   const enterHouse = () => {
     setFocusedId(null)
     setLedgerOpen(false)
@@ -54,6 +56,7 @@ function World() {
   const exitHouse = () => {
     setFocusedId(null)
     setVaultOpen(false)
+    setShopOpen(false)
     setSafeHouseOpen(false)
     setReturning(true)
   }
@@ -69,6 +72,10 @@ function World() {
       e.target.closest('input, textarea, select, [contenteditable=true]')
     )
       return
+    if (shopOpen) {
+      if (e.code === 'Escape') setShopOpen(false)
+      return
+    }
     if (vaultOpen) {
       if (e.code === 'Escape') setVaultOpen(false)
       return
@@ -116,7 +123,12 @@ function World() {
   return (
     <main className="relative h-dvh w-full overflow-hidden bg-background select-none">
       {safeHouseOpen ? (
-        <SafeHouseScene enabled={playing} vaultOpen={vaultVisited} onFocusChange={setFocusedId} />
+        <SafeHouseScene
+          decor={state.safeHouse.decor}
+          enabled={playing}
+          vaultOpen={vaultVisited}
+          onFocusChange={setFocusedId}
+        />
       ) : (
         <CityScene
           state={state}
@@ -138,8 +150,16 @@ function World() {
       )}
       {!started && <StartOverlay onStart={() => setStarted(true)} />}
       {ledgerOpen && <LedgerOverlay onClose={() => setLedgerOpen(false)} />}
-      {safeHouseOpen && <SafeHouseHud focusedId={focusedId} onVault={openVault} onExit={exitHouse} />}
+      {safeHouseOpen && (
+        <SafeHouseHud
+          focusedId={focusedId}
+          onVault={openVault}
+          onShop={() => setShopOpen(true)}
+          onExit={exitHouse}
+        />
+      )}
       {vaultOpen && <SafeHouse onClose={() => setVaultOpen(false)} />}
+      {shopOpen && <DecorShop onClose={() => setShopOpen(false)} />}
       <OfflineDialog />
     </main>
   )

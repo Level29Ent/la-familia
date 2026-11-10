@@ -89,10 +89,17 @@ console.log(
   'PASS: 14 properties; old-save migration; spending and stacked bonuses; objective guards; operation requirements, timing, save/resume, and single payouts; offline bonus; prestige reset.',
 )
 
+const {
+  initialDecor,
+  decorAction,
+  restoreDecor,
+  DECOR_ITEMS,
+  DECOR_CATEGORIES,
+} = require('../lib/game/decor.ts')
 const { vaultAction, VAULT_TIERS } = require('../lib/game/safe-house.ts')
 const { retireEmpire } = require('../lib/game/engine.ts')
 let bank = createInitialState()
-assert.deepEqual(restoreState(old).safeHouse, { balance: 0, tier: 0 })
+assert.deepEqual(restoreState(old).safeHouse, { balance: 0, tier: 0, decor: initialDecor() })
 bank = { ...bank, cash: 1500, runEarnings: 1500, lifetimeEarnings: 1500 }
 for (const amount of [0, -10, NaN, Infinity, 2000]) {
   assert.equal(vaultAction(bank, { type: 'vault', direction: 'deposit', amount }), bank)
@@ -129,15 +136,20 @@ assert.equal(persisted.cash, bank.cash)
 assert.deepEqual(restoreState({ safeHouse: { tier: Infinity, balance: NaN } }).safeHouse, {
   tier: 0,
   balance: 0,
+  decor: initialDecor(),
 })
-assert.deepEqual(restoreState({ safeHouse: { tier: -10, balance: -100 } }).safeHouse, { tier: 0, balance: 0 })
+assert.deepEqual(restoreState({ safeHouse: { tier: -10, balance: -100 } }).safeHouse, {
+  tier: 0,
+  balance: 0,
+  decor: initialDecor(),
+})
 const heir = retireEmpire({ ...bank, lifetimeEarnings: 1e9 })
 assert.equal(heir.cash, 0)
 assert.deepEqual(heir.safeHouse, bank.safeHouse)
 assert.equal(heir.respect, 10)
 assert.equal(heir.lifetimeEarnings, 1e9)
 assert.equal(heir.heists, 1)
-assert.deepEqual(createInitialState().safeHouse, { balance: 0, tier: 0 })
+assert.deepEqual(createInitialState().safeHouse, { balance: 0, tier: 0, decor: initialDecor() })
 console.log(
   'PASS: vault deposit/withdraw conservation; invalid and insufficient transfers; capacity and max tier; upgrade spending; old-save migration and round trip; retirement inheritance and hard-reset defaults.',
 )
@@ -169,4 +181,52 @@ assert.equal(slid.x, -1.25)
 assert.equal(slid.z, 0.1)
 console.log(
   'PASS: walkable room path from entry to vault; facing/range interactions; walls, coffee table, desk and vault collision; wall sliding; exit target and zero-distance focus.',
+)
+
+let home = createInitialState()
+assert.equal(decorAction(home, { type: 'decor', id: 'walls-burgundy' }), home)
+assert.equal(decorAction(home, { type: 'decor', id: 'unknown' }), home)
+home = { ...home, cash: 10000, runEarnings: 123, lifetimeEarnings: 1e9 }
+home.safeHouse.balance = 321
+const beforeShop = home.cash
+home = decorAction(home, { type: 'decor', id: 'walls-burgundy' })
+assert.equal(home.cash, beforeShop - 75)
+assert.equal(home.safeHouse.decor.equipped.walls, 'walls-burgundy')
+assert.equal(home.safeHouse.balance, 321)
+assert.equal(home.runEarnings, 123)
+assert.equal(home.lifetimeEarnings, 1e9)
+assert.equal(decorAction(home, { type: 'decor', id: 'walls-burgundy' }), home)
+home = decorAction(home, { type: 'decor', id: 'walls-classic' })
+assert.equal(home.cash, beforeShop - 75)
+home = decorAction(home, { type: 'decor', id: 'walls-burgundy' })
+assert.equal(home.cash, beforeShop - 75)
+for (const category of DECOR_CATEGORIES) {
+  const item = DECOR_ITEMS.find((i) => i.category === category && i.cost > 0)
+  home = decorAction(home, { type: 'decor', id: item.id })
+  assert.equal(home.safeHouse.decor.equipped[category], item.id)
+}
+const reloadHome = restoreState(JSON.parse(JSON.stringify(home)))
+assert.deepEqual(reloadHome.safeHouse, home.safeHouse)
+assert.deepEqual(retireEmpire(home).safeHouse.decor, home.safeHouse.decor)
+assert.deepEqual(restoreState({ safeHouse: { tier: 1, balance: 500 } }).safeHouse, {
+  tier: 1,
+  balance: 500,
+  decor: initialDecor(),
+})
+assert.deepEqual(
+  restoreDecor({
+    owned: ['missing', 'walls-burgundy', 'walls-burgundy'],
+    equipped: { walls: 'sofa-emerald', sofa: 'sofa-ivory' },
+  }).equipped,
+  initialDecor().equipped,
+)
+assert.equal(
+  restoreDecor({ owned: ['missing', 'walls-burgundy', 'walls-burgundy'] }).owned.filter(
+    (id) => id === 'walls-burgundy',
+  ).length,
+  1,
+)
+assert.deepEqual(createInitialState().safeHouse.decor, initialDecor())
+console.log(
+  'PASS: decor purchase debits wallet once, preserves vault and income, free re-equipping, one equipped per category, unknown/unaffordable guards, old-save migration, reload, retirement inheritance, reset defaults and ownership validation.',
 )

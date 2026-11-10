@@ -1,6 +1,7 @@
 'use client'
 
 import { createContext, useContext, useEffect, useReducer, useRef, useState, type ReactNode } from 'react'
+import { decorAction, type DecorAction } from '@/lib/game/decor'
 import { vaultAction, type VaultAction } from '@/lib/game/safe-house'
 import { BUSINESSES, SAVE_KEY, UPGRADES } from '@/lib/game/config'
 import {
@@ -20,6 +21,7 @@ import {
 type Action =
   | EmpireAction
   | VaultAction
+  | DecorAction
   | { type: 'tick'; dt: number }
   | { type: 'run'; id: string }
   | { type: 'buy'; id: string; amount: BuyAmount }
@@ -35,6 +37,8 @@ function reducer(state: GameState, action: Action): GameState {
     case 'operation':
     case 'objective':
       return empireAction(state, action)
+    case 'decor':
+      return decorAction(state, action)
     case 'vault':
     case 'vaultUpgrade':
       return vaultAction(state, action)

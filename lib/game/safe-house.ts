@@ -1,3 +1,4 @@
+import { restoreDecor, type DecorState } from './decor'
 import type { GameState } from './engine'
 
 export const VAULT_TIERS = [
@@ -7,7 +8,7 @@ export const VAULT_TIERS = [
   { name: 'Private Reserve', capacity: 100000000, cost: 2500000 },
 ] as const
 
-export type SafeHouseState = { balance: number; tier: number }
+export type SafeHouseState = { balance: number; tier: number; decor: DecorState }
 export type VaultAction =
   | { type: 'vault'; direction: 'deposit' | 'withdraw'; amount: number | 'all' }
   | { type: 'vaultUpgrade' }
@@ -36,5 +37,5 @@ export function restoreSafeHouse(saved?: Partial<SafeHouseState>): SafeHouseStat
   const balance = Number.isFinite(saved?.balance)
     ? Math.max(0, Math.min(VAULT_TIERS[tier].capacity, saved!.balance!))
     : 0
-  return { tier, balance }
+  return { tier, balance, decor: restoreDecor(saved?.decor) }
 }

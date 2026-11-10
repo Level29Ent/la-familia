@@ -2,6 +2,7 @@
 
 import { Canvas } from '@react-three/fiber'
 import { Text } from '@react-three/drei'
+import { decorItem, type DecorState } from '@/lib/game/decor'
 import { ROOM_NAVIGATION } from '@/lib/game/navigation'
 import { PlayerControls } from './player-controls'
 
@@ -23,14 +24,21 @@ function Label({ at, children, size = 0.22 }: { at: Point; children: string; siz
 }
 
 export function SafeHouseScene({
+  decor,
   enabled,
   vaultOpen,
   onFocusChange,
 }: {
+  decor: DecorState
   enabled: boolean
   vaultOpen: boolean
   onFocusChange: (id: string | null) => void
 }) {
+  const wall = decorItem(decor, 'walls').color
+  const sofa = decorItem(decor, 'sofa').color
+  const rug = decorItem(decor, 'rug').color
+  const light = decorItem(decor, 'lighting').color
+  const accent = decor.equipped.decoration
   return (
     <Canvas
       className="absolute inset-0 touch-none"
@@ -41,17 +49,17 @@ export function SafeHouseScene({
       <color attach="background" args={['#19252b']} />
       <ambientLight intensity={1.25} color="#d2d8df" />
       <hemisphereLight args={['#ffe3b0', '#493323', 1.2]} />
-      <pointLight position={[0, 4.2, 0]} color="#ffd79b" intensity={38} distance={18} />
-      <pointLight position={[-5, 2.4, -3]} color="#ffbd6b" intensity={15} distance={9} />
+      <pointLight position={[0, 4.2, 0]} color={light} intensity={38} distance={18} />
+      <pointLight position={[-5, 2.4, -3]} color={light} intensity={15} distance={9} />
       <Box at={[0, -0.12, 0]} size={[14, 0.2, 14]} color="#604736" />
       {Array.from({ length: 15 }, (_, i) => (
         <Box key={i} at={[-7 + i, 0, 0]} size={[0.025, 0.015, 14]} color="#302b27" />
       ))}
       <Box at={[0, 4.8, 0]} size={[14, 0.2, 14]} color="#242c2c" />
-      <Box at={[0, 2.4, -7]} size={[14, 4.8, 0.2]} color="#263f3d" />
-      <Box at={[-7, 2.4, 0]} size={[0.2, 4.8, 14]} color="#263f3d" />
-      <Box at={[7, 2.4, 0]} size={[0.2, 4.8, 14]} color="#263f3d" />
-      <Box at={[0, 2.4, 7]} size={[14, 4.8, 0.2]} color="#263f3d" />
+      <Box at={[0, 2.4, -7]} size={[14, 4.8, 0.2]} color={wall} />
+      <Box at={[-7, 2.4, 0]} size={[0.2, 4.8, 14]} color={wall} />
+      <Box at={[7, 2.4, 0]} size={[0.2, 4.8, 14]} color={wall} />
+      <Box at={[0, 2.4, 7]} size={[14, 4.8, 0.2]} color={wall} />
       {[-6.8, 6.8].map((x) => (
         <group key={x}>
           <Box at={[x, 0.5, 0]} size={[0.12, 1, 14]} color="#29302a" />
@@ -67,15 +75,15 @@ export function SafeHouseScene({
         </group>
       ))}
       {/* A rug marks the clear central route from the entry door to the vault. */}
-      <Box at={[0, 0.015, 0]} size={[2.3, 0.025, 10]} color="#74343b" />
+      <Box at={[0, 0.015, 0]} size={[2.3, 0.025, 10]} color={rug} />
       {[-1.05, 1.05].map((x) => (
         <Box key={x} at={[x, 0.035, 0]} size={[0.035, 0.01, 9.8]} color="#b79760" />
       ))}
       {/* Leather lounge and coffee table, aligned with navigation collision bounds. */}
-      <Box at={[-5.2, 0.5, 0]} size={[1.8, 0.6, 3.6]} color="#64342b" />
-      <Box at={[-6.1, 1, 0]} size={[0.35, 1.1, 3.6]} color="#48251f" />
+      <Box at={[-5.2, 0.5, 0]} size={[1.8, 0.6, 3.6]} color={sofa} />
+      <Box at={[-6.1, 1, 0]} size={[0.35, 1.1, 3.6]} color={sofa} />
       {[-1.7, 1.7].map((z) => (
-        <Box key={z} at={[-5.2, 0.9, z]} size={[1.9, 0.45, 0.3]} color="#48251f" />
+        <Box key={z} at={[-5.2, 0.9, z]} size={[1.9, 0.45, 0.3]} color={sofa} />
       ))}
       <Box at={[-2.4, 0.6, 0]} size={[1.4, 0.16, 2.2]} color="#362921" />
       {[-2.9, -1.9].flatMap((x) =>
@@ -157,6 +165,37 @@ export function SafeHouseScene({
         <Box at={[0.6, 1.4, 0.12]} size={[0.1, 0.25, 0.1]} color="#cdb472" metal />
         <Label at={[0, 3.2, 0.1]}>EXIT TO LITTLE ITALY</Label>
       </group>
+      {accent === 'accent-art' && (
+        <group position={[-4.4, 2.7, -6.75]}>
+          {[-0.85, 0, 0.85].map((x, i) => (
+            <group key={x} position={[x, 0, 0]}>
+              <Box at={[0, 0, 0]} size={[0.72, 1.5, 0.12]} color="#cfb16e" metal />
+              <Box at={[0, 0, 0.08]} size={[0.59, 1.36, 0.04]} color={i % 2 ? '#285c60' : '#712f46'} />
+              <mesh position={[0, 0, 0.12]} rotation={[0, 0, Math.PI / 4]}>
+                <planeGeometry args={[0.32, 0.65]} />
+                <meshStandardMaterial color="#e2c383" metalness={0.5} />
+              </mesh>
+            </group>
+          ))}
+        </group>
+      )}
+      {accent === 'accent-clock' && (
+        <group position={[-4.4, 2.8, -6.7]}>
+          <mesh rotation={[Math.PI / 2, 0, 0]}>
+            <cylinderGeometry args={[0.8, 0.8, 0.16, 48]} />
+            <meshStandardMaterial color="#c6a65d" metalness={0.7} />
+          </mesh>
+          <mesh position={[0, 0, 0.1]}>
+            <circleGeometry args={[0.68, 48]} />
+            <meshStandardMaterial color="#ede1ba" />
+          </mesh>
+          <Box at={[0, 0.2, 0.13]} size={[0.035, 0.42, 0.03]} color="#222b2e" />
+          <Box at={[0.18, 0, 0.13]} size={[0.4, 0.035, 0.03]} color="#222b2e" />
+          <Label at={[0, -1.15, 0.1]} size={0.18}>
+            THE DON'S TIME
+          </Label>
+        </group>
+      )}
       <PlayerControls enabled={enabled} navigation={ROOM_NAVIGATION} onFocusChange={onFocusChange} />
     </Canvas>
   )
