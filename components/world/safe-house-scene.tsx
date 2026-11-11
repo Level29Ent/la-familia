@@ -8,7 +8,7 @@ import { Text } from '@react-three/drei'
 import { cashBundleCount, VAULT_TIERS, type SafeHouseState } from '@/lib/game/safe-house'
 import type { CharacterConfig } from '@/lib/game/character'
 import { decorItem, type DecorState } from '@/lib/game/decor'
-import { ROOM_NAVIGATION } from '@/lib/game/navigation'
+import { ROOM_NAVIGATION, type Navigation } from '@/lib/game/navigation'
 import { PlayerControls } from './player-controls'
 
 type Point = [number, number, number]
@@ -31,6 +31,7 @@ function Label({ at, children, size = 0.22 }: { at: Point; children: string; siz
 export function SafeHouseScene({
   decor,
   assets,
+  navigationOverride,
   safeHouse,
   character,
   enabled,
@@ -39,6 +40,7 @@ export function SafeHouseScene({
 }: {
   decor: DecorState
   assets: string[]
+  navigationOverride?: Navigation
   safeHouse: SafeHouseState
   character: CharacterConfig
   enabled: boolean
@@ -47,8 +49,8 @@ export function SafeHouseScene({
 }) {
   const wardrobeOwned = assets.includes('wardrobe')
   const navigation = useMemo(
-    () => goodLifeRoomNavigation(wardrobeOwned ? ['wardrobe'] : [], ROOM_NAVIGATION),
-    [wardrobeOwned],
+    () => goodLifeRoomNavigation(wardrobeOwned ? ['wardrobe'] : [], navigationOverride ?? ROOM_NAVIGATION),
+    [wardrobeOwned, navigationOverride],
   )
   const wall = decorItem(decor, 'walls').color
   const sofa = decorItem(decor, 'sofa').color
