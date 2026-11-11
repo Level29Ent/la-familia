@@ -18,24 +18,29 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node
+      - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "20"
 
-      - name: Setup Pages
+      - name: Configure GitHub Pages
         uses: actions/configure-pages@v4
 
+      - name: Check Node and NPM version
+        run: |
+          node -v
+          npm -v
+
       - name: Install dependencies
-        run: npm install --legacy-peer-deps --verbose
+        run: npm install --legacy-peer-deps
 
-      - name: Build Next.js app
-        run: npm run build --verbose
+      - name: Run Next.js build
+        run: npm run build
 
-      - name: Upload artifact
+      - name: Upload artifact to Pages
         uses: actions/upload-pages-artifact@v3
         with:
           path: ./out
