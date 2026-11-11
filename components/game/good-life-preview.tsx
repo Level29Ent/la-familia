@@ -2,6 +2,7 @@
 
 import dynamic from 'next/dynamic'
 import { useEffect, useMemo, useState } from 'react'
+import type { InspectionView } from '@/components/world/inspection-camera'
 import { input } from '@/lib/game/input'
 import { SEDAN_START } from '@/lib/game/good-life'
 import { ROOM_NAVIGATION, type Navigation } from '@/lib/game/navigation'
@@ -51,26 +52,40 @@ export function GoodLifePreview() {
       yaw: view === 'yacht' ? -Math.PI / 2 : view === 'penthouse' ? Math.PI / 2 : 0,
     }
   }, [room, view])
+  const shot: InspectionView | undefined =
+    driving || view === 'entry'
+      ? undefined
+      : room
+        ? view === 'wardrobe'
+          ? { position: [-2.5, 2.1, 4.4], target: [-6.4, 1.6, 4.4] }
+          : { position: [1.6, 2.7, 5], target: [3.8, 1.55, 2] }
+        : view === 'penthouse'
+          ? { position: [0, 12, -20], target: [-24, 31, -35] }
+          : view === 'yacht'
+            ? { position: [15, 5, -85], target: [20, 1, -93] }
+            : undefined
   return (
     <main className="relative h-dvh overflow-hidden bg-background">
       {room ? (
         <SafeHouseScene
+          inspectionView={shot}
           navigationOverride={navigation}
           assets={state.assets}
           safeHouse={state.safeHouse}
           character={state.character}
           decor={state.safeHouse.decor}
-          enabled
+          enabled={!shot}
           vaultOpen
           onFocusChange={setFocusedId}
         />
       ) : (
         <CityScene
           onVehicleUpdate={setPose}
+          inspectionView={shot}
           navigationOverride={navigation}
           state={state}
           driving={driving && owned}
-          movementEnabled
+          movementEnabled={!shot}
           focusedId={focusedId}
           onFocusChange={setFocusedId}
         />
@@ -81,6 +96,7 @@ export function GoodLifePreview() {
           <button
             className={button}
             onClick={() => {
+              setHeld([])
               setRoom((value) => !value)
               setDriving(false)
             }}
@@ -90,6 +106,7 @@ export function GoodLifePreview() {
           <button
             className={button}
             onClick={() => {
+              setHeld([])
               setOwned((value) => !value)
               setDriving(false)
             }}
@@ -97,7 +114,13 @@ export function GoodLifePreview() {
             {owned ? 'Remove test perks' : 'Own all test perks'}
           </button>
           {!room && owned && (
-            <button className={button} onClick={() => setDriving((value) => !value)}>
+            <button
+              className={button}
+              onClick={() => {
+                setHeld([])
+                setDriving((value) => !value)
+              }}
+            >
               {driving ? 'Park & exit test sedan' : 'Drive test sedan'}
             </button>
           )}
@@ -105,6 +128,7 @@ export function GoodLifePreview() {
             aria-label="Fixture inspection view"
             value={view}
             onChange={(event) => {
+              setHeld([])
               setView(event.target.value)
               setDriving(false)
             }}

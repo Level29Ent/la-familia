@@ -1,5 +1,7 @@
 'use client'
 
+import { InspectionCamera, type InspectionView } from './inspection-camera'
+
 import type { CarPose } from '@/lib/game/good-life'
 import type { Navigation } from '@/lib/game/navigation'
 import { GoodLifeLandmarks } from './good-life-displays'
@@ -35,6 +37,7 @@ export function CityScene({
   state,
   driving = false,
   navigationOverride,
+  inspectionView,
   onVehicleUpdate,
   returning = false,
   focusedId,
@@ -44,6 +47,7 @@ export function CityScene({
   state: GameState
   driving?: boolean
   navigationOverride?: Navigation
+  inspectionView?: InspectionView
   onVehicleUpdate?: (pose: CarPose) => void
   returning?: boolean
   focusedId: string | null
@@ -102,6 +106,7 @@ export function CityScene({
         enabled={movementEnabled}
         onFocusChange={onFocusChange}
       />
+      {inspectionView && <InspectionCamera view={inspectionView} />}
     </Canvas>
   )
 }
