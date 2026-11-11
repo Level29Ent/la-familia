@@ -6,7 +6,6 @@ import type { CarPose } from '@/lib/game/good-life'
 import type { Navigation } from '@/lib/game/navigation'
 import { GoodLifeLandmarks } from './good-life-displays'
 import { Canvas } from '@react-three/fiber'
-import { Stars } from '@react-three/drei'
 import { BUSINESSES } from '@/lib/game/config'
 import type { GameState } from '@/lib/game/engine'
 import { Building, type BuildingStatus } from './building'
@@ -62,12 +61,12 @@ export function CityScene({
       gl={{ antialias: true }}
       aria-label="3D city street. Walk up to a storefront to manage that racket."
     >
-      <color attach="background" args={['#0b0f19']} />
-      <fog attach="fog" args={['#0b0f19', 28, 145]} />
-      <ambientLight intensity={0.65} color="#8d9bb8" />
-      <hemisphereLight args={['#627a9f', '#22180e', 0.8]} />
-      <directionalLight position={[40, 60, -100]} intensity={0.35} color="#c9c3e6" />
-      <Stars radius={150} depth={40} count={2500} factor={4} fade speed={0.4} />
+      <color attach="background" args={['#a7cce5']} />
+      <fog attach="fog" args={['#b8d0dd', 65, 220]} />
+      <ambientLight intensity={1.3} color="#fff4df" />
+      <hemisphereLight args={['#d5ecff', '#a2947a', 1.65]} />
+      <directionalLight position={[40, 60, -70]} intensity={2.6} color="#fff1d0" />
+      <directionalLight position={[-35, 25, 40]} intensity={0.65} color="#c4e1ff" />
 
       <Street />
       <GoodLifeLandmarks assets={state.assets} endZ={STREET_NAVIGATION.bounds.minZ} />

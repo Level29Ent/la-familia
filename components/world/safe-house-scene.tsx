@@ -70,9 +70,9 @@ export function SafeHouseScene({
       aria-label="Walkable 3D safe house lounge with a vault and street exit"
     >
       <color attach="background" args={['#19252b']} />
-      <ambientLight intensity={1.25} color="#d2d8df" />
-      <hemisphereLight args={['#ffe3b0', '#493323', 1.2]} />
-      <pointLight position={[0, 4.2, 0]} color={light} intensity={38} distance={18} />
+      <ambientLight intensity={1.8} color="#e8e7df" />
+      <hemisphereLight args={['#fff0d4', '#79634b', 1.5]} />
+      <pointLight position={[0, 4.2, 0]} color={light} intensity={48} distance={18} />
       <pointLight position={[-5, 2.4, -3]} color={light} intensity={15} distance={9} />
       <Box at={[0, -0.12, 0]} size={[14, 0.2, 14]} color="#604736" />
       {Array.from({ length: 15 }, (_, i) => (
@@ -129,7 +129,7 @@ export function SafeHouseScene({
       </mesh>
       <group position={[6.85, 2.6, -2]} rotation={[0, -Math.PI / 2, 0]}>
         <Box at={[0, 0, 0]} size={[3.2, 2.5, 0.1]} color="#b29661" metal />
-        <Box at={[0, 0, 0.07]} size={[3, 2.3, 0.05]} color="#0d2235" />
+        <Box at={[0, 0, 0.07]} size={[3, 2.3, 0.05]} color="#9ac6df" />
         {[-1, -0.3, 0.4, 1].map((x, i) => (
           <Box key={x} at={[x, -0.5 + (i % 2) * 0.2, 0.11]} size={[0.5, 1.2, 0.04]} color="#435468" />
         ))}

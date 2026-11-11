@@ -25,20 +25,20 @@ export function Street() {
     <group>
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, STREET_CENTER_Z]}>
         <planeGeometry args={[240, STREET_LENGTH + 100]} />
-        <meshStandardMaterial color="#141210" roughness={0.28} metalness={0.45} />
+        <meshStandardMaterial color="#55565a" roughness={0.7} metalness={0.12} />
       </mesh>
 
       {[-1, 1].map((side) => (
         <mesh key={side} position={[side * (STREET_HALF_WIDTH - 0.8), 0.08, STREET_CENTER_Z]}>
           <boxGeometry args={[1.6, 0.16, STREET_LENGTH]} />
-          <meshStandardMaterial color="#2b2825" roughness={0.95} />
+          <meshStandardMaterial color="#858178" roughness={0.95} />
         </mesh>
       ))}
 
       {dashes.map((z) => (
         <mesh key={z} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.01, z]}>
           <planeGeometry args={[0.18, 1.8]} />
-          <meshStandardMaterial color="#8a7a52" roughness={0.9} />
+          <meshStandardMaterial color="#e4cf8f" roughness={0.9} />
         </mesh>
       ))}
 
@@ -79,7 +79,7 @@ function StreetLamp({ position }: { position: [number, number, number] }) {
         <sphereGeometry args={[0.28, 16, 16]} />
         <meshStandardMaterial color="#ffd89a" emissive="#ffc46b" emissiveIntensity={2.5} toneMapped={false} />
       </mesh>
-      <pointLight position={[0, 4.9, 0]} color="#ffb867" intensity={18} distance={16} decay={1.6} />
+      <pointLight position={[0, 4.9, 0]} color="#ffb867" intensity={5} distance={16} decay={1.6} />
     </group>
   )
 }
@@ -126,16 +126,16 @@ function Skyline() {
         <mesh key={i} position={[t.x, t.h / 2, t.z]}>
           <boxGeometry args={[t.w, t.h, t.d]} />
           <meshStandardMaterial
-            color="#16151a"
-            emissive={t.lit ? '#3a2a14' : '#000000'}
-            emissiveIntensity={t.lit ? 0.5 : 0}
+            color="#637783"
+            emissive={t.lit ? '#62614f' : '#000000'}
+            emissiveIntensity={t.lit ? 0.12 : 0}
             roughness={1}
           />
         </mesh>
       ))}
-      <mesh position={[50, 75, -150]}>
+      <mesh position={[50, 85, -150]}>
         <sphereGeometry args={[6, 32, 32]} />
-        <meshBasicMaterial color="#f3e6c4" fog={false} toneMapped={false} />
+        <meshBasicMaterial color="#fff3bf" fog={false} toneMapped={false} />
       </mesh>
     </group>
   )
