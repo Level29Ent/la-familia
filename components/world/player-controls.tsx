@@ -5,7 +5,7 @@ import { useFrame, useThree } from '@react-three/fiber'
 import { input, MOVE_KEYS } from '@/lib/game/input'
 import * as THREE from 'three'
 import { VintageCar } from './vintage-car'
-import { SEDAN_START, driveCar, carExit } from '@/lib/game/good-life'
+import { SEDAN_START, driveCar, carExit, type CarPose } from '@/lib/game/good-life'
 import { CharacterModel } from './character-model'
 import { cameraDistance, type CharacterConfig } from '@/lib/game/character'
 import { focusedTarget, moveWithin, followCamera, type Navigation } from '@/lib/game/navigation'
@@ -19,17 +19,20 @@ export function PlayerControls({
   onFocusChange,
   assets = [],
   driving = false,
+  onVehicleUpdate,
 }: {
   enabled: boolean
   navigation: Navigation
   character: CharacterConfig
   assets?: string[]
   driving?: boolean
+  onVehicleUpdate?: (pose: CarPose) => void
   onFocusChange: (id: string | null) => void
 }) {
   const { camera, gl } = useThree()
   const look = useRef({ yaw: 0, pitch: 0 })
   const focusedRef = useRef<string | null>(null)
+  const reportElapsed = useRef(0)
   const car = useRef({ ...SEDAN_START })
   const carModel = useRef<THREE.Group>(null)
   const wasDriving = useRef(false)
@@ -191,6 +194,11 @@ export function PlayerControls({
         )
         player.current.rotation.y += delta * Math.min(1, dt * 12)
       }
+    }
+    reportElapsed.current += dt
+    if (onVehicleUpdate && reportElapsed.current >= 0.25) {
+      reportElapsed.current = 0
+      onVehicleUpdate({ ...car.current })
     }
     if (player.current) player.current.position.set(position.current.x, 0, position.current.z)
     const orbit = followCamera(

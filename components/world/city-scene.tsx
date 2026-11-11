@@ -1,5 +1,7 @@
 'use client'
 
+import type { CarPose } from '@/lib/game/good-life'
+import type { Navigation } from '@/lib/game/navigation'
 import { GoodLifeLandmarks } from './good-life-displays'
 import { Canvas } from '@react-three/fiber'
 import { Stars } from '@react-three/drei'
@@ -32,6 +34,8 @@ function litLevelFor(owned: number) {
 export function CityScene({
   state,
   driving = false,
+  navigationOverride,
+  onVehicleUpdate,
   returning = false,
   focusedId,
   movementEnabled,
@@ -39,6 +43,8 @@ export function CityScene({
 }: {
   state: GameState
   driving?: boolean
+  navigationOverride?: Navigation
+  onVehicleUpdate?: (pose: CarPose) => void
   returning?: boolean
   focusedId: string | null
   movementEnabled: boolean
@@ -88,10 +94,11 @@ export function CityScene({
         seed={42}
       />
       <PlayerControls
+        onVehicleUpdate={onVehicleUpdate}
         assets={state.assets}
         driving={driving}
         character={state.character}
-        navigation={returning ? STREET_RETURN_NAVIGATION : STREET_NAVIGATION}
+        navigation={navigationOverride ?? (returning ? STREET_RETURN_NAVIGATION : STREET_NAVIGATION)}
         enabled={movementEnabled}
         onFocusChange={onFocusChange}
       />
