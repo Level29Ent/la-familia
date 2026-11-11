@@ -1,5 +1,7 @@
 'use client'
 
+import { InspectionCamera, type InspectionView } from './inspection-camera'
+
 import { useMemo } from 'react'
 import { goodLifeRoomNavigation } from '@/lib/game/good-life'
 import { GoodLifeRoom } from './good-life-displays'
@@ -32,6 +34,7 @@ export function SafeHouseScene({
   decor,
   assets,
   navigationOverride,
+  inspectionView,
   safeHouse,
   character,
   enabled,
@@ -41,6 +44,7 @@ export function SafeHouseScene({
   decor: DecorState
   assets: string[]
   navigationOverride?: Navigation
+  inspectionView?: InspectionView
   safeHouse: SafeHouseState
   character: CharacterConfig
   enabled: boolean
@@ -227,6 +231,7 @@ export function SafeHouseScene({
         navigation={navigation}
         onFocusChange={onFocusChange}
       />
+      {inspectionView && <InspectionCamera view={inspectionView} />}
     </Canvas>
   )
 }
