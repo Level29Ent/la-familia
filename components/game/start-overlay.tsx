@@ -49,7 +49,7 @@ export function StartOverlay({ onStart, onCharacter }: { onStart: () => void; on
             La Familia
           </h1>
           <p className="text-pretty text-sm text-muted-foreground">
-            Fourteen properties. One family. Walk the neon streets, fund midnight operations, and turn your
+            Fourteen properties. One family. Walk the sunlit streets, fund midnight operations, and turn your
             first dollar into a dynasty.
           </p>
         </div>
