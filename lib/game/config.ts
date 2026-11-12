@@ -349,6 +349,11 @@ export const OPERATIONS = [
     seconds: 90,
     required: 'cinema',
   },
+  { id: 'tailored', name: 'Commission Gala', description: 'Dress the guests for a private city gala.', cost: 1000, reward: 3200, seconds: 60, required: 'tailor' },
+  { id: 'restoration', name: 'Vintage Restoration', description: 'Restore a classic motorcar for a collector.', cost: 50000, reward: 160000, seconds: 120, required: 'chopshop' },
+  { id: 'summit', name: 'Hotel Summit', description: 'Host an exclusive weekend of family negotiations.', cost: 500000, reward: 1750000, seconds: 180, required: 'hotel' },
+  { id: 'harbor', name: 'Harbor Charter', description: 'Organize a premium cargo charter through your docks.', cost: 2000000, reward: 7000000, seconds: 240, required: 'docks' },
+
 ] as const
 
 export const OBJECTIVES = [
@@ -400,4 +405,11 @@ export const OBJECTIVES = [
     metric: 'businesses',
     reward: 50000,
   },
+  { id: 'ten-contracts', name: 'A Reliable Family', description: 'Complete 10 operations.', goal: 10, metric: 'operations', reward: 12000 },
+  { id: 'team-five', name: 'Trusted Inner Circle', description: 'Hire 5 capos.', goal: 5, metric: 'managers', reward: 100000 },
+  { id: 'millionaire', name: 'The First Million', description: 'Earn $1 million in this empire.', goal: 1000000, metric: 'earnings', reward: 150000 },
+  { id: 'city-owner', name: 'Every Corner', description: 'Own 10 different businesses.', goal: 10, metric: 'businesses', reward: 1000000 },
+  { id: 'good-life', name: 'Nothing But the Best', description: 'Purchase all 6 Good Life assets.', goal: 6, metric: 'assets', reward: 10000000 },
+  { id: 'veteran', name: 'Family Institution', description: 'Complete 50 operations.', goal: 50, metric: 'operations', reward: 5000000 },
+
 ] as const

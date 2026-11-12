@@ -407,3 +407,17 @@ assert.deepEqual(retireEmpire({ ...collection, lifetimeEarnings: 1e9 }).assets, 
 console.log(
   'PASS: all six assets have locations; sedan acceleration, reverse, steering, braking, coasting and collision; safe exits; wardrobe collision; asset purchase/save persistence and retirement reset with bonuses unchanged.',
 )
+
+const { OBJECTIVES } = require('../lib/game/config.ts')
+assert.equal(OPERATIONS.length, 7)
+assert.equal(new Set(OPERATIONS.map((op) => op.id)).size, 7)
+for (const op of OPERATIONS) assert.ok(BUSINESSES.some((b) => b.id === op.required))
+assert.equal(OBJECTIVES.length, 12)
+for (const goal of OBJECTIVES) {
+  let ready = { ...createInitialState(), runEarnings: 1e9, operationsCompleted: 100, assets: ASSETS.map((a) => a.id) }
+  for (const business of Object.values(ready.businesses)) { business.owned = 1; business.managed = true }
+  const paid = empireAction(ready, { type: 'objective', id: goal.id })
+  assert.equal(paid.cash, goal.reward)
+  assert.equal(empireAction(paid, { type: 'objective', id: goal.id }), paid)
+}
+console.log('PASS: seven unique contracts, valid property prerequisites and twelve single-claim objectives.')

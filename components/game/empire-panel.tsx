@@ -1,7 +1,7 @@
 'use client'
 
 import { ASSET_LOCATIONS } from '@/lib/game/good-life'
-import { ASSETS, OBJECTIVES, OPERATIONS } from '@/lib/game/config'
+import { ASSETS, BUSINESSES, OBJECTIVES, OPERATIONS } from '@/lib/game/config'
 import { objectiveProgress } from '@/lib/game/engine'
 import { formatMoney } from '@/lib/game/format'
 import { BusinessIcon } from './business-icon'
@@ -31,7 +31,7 @@ export function EmpirePanel() {
           Family operations
         </h3>
         <p className="text-sm text-muted-foreground">
-          One operation at a time. Timers run while the game is open; returns arrive automatically.
+          Seven family contracts, from neighborhood deliveries to harbor charters. One operation at a time. Timers run while the game is open; returns arrive automatically.
         </p>
         {active && state.operation && (
           <div role="status" className="rounded-xl border border-primary/40 bg-primary/10 p-4">
@@ -65,7 +65,7 @@ export function EmpirePanel() {
                   onClick={() => dispatch({ type: 'operation', id: op.id })}
                 >
                   {!unlocked
-                    ? 'Acquire the property first'
+                    ? `Acquire ${BUSINESSES.find((b) => b.id === op.required)?.name ?? 'the property'} first`
                     : state.operation?.id === op.id
                       ? 'In progress'
                       : `Start ${op.name}`}
