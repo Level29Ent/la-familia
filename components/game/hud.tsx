@@ -12,6 +12,7 @@ import { GUIDE } from '@/lib/game/city-play'
 import { ClockBadge } from './city-feedback'
 import { RANKS, rankIndex } from '@/lib/game/dynasty'
 import { activeVehicle } from '@/lib/game/vehicles'
+import { CitySound } from './city-sound'
 import { HARBOR_MISSIONS } from '@/lib/game/harbor'
 import { CITY_BUILDINGS } from '@/lib/game/city'
 
@@ -138,6 +139,7 @@ export function Hud({
             <span className="mt-1 block text-foreground">{HARBOR_MISSIONS[state.harbor.chapter]?.steps[state.harbor.step] ?? 'Family council'}</span>
           </button>
           <MusicPlayer />
+          <CitySound />
           <div
             role="radiogroup"
             aria-label="Buy amount"

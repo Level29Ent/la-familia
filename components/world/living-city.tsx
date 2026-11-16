@@ -3,7 +3,7 @@
 import { memo, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import type { Group, MeshBasicMaterial } from 'three'
-import { trafficPosition, trafficSignal } from '@/lib/game/city-life'
+import { trafficPosition, trafficSignal, ambientPopulation } from '@/lib/game/city-life'
 import { RECRUITS, type DynastyState } from '@/lib/game/dynasty'
 import { AVENUES } from '@/lib/game/city'
 import { VintageCar } from './vintage-car'
@@ -95,10 +95,10 @@ export const LivingCity = memo(function LivingCity({
 }) {
   return (
     <group>
-      {Array.from({ length: low ? 8 : night ? 12 : 24 }, (_, index) => (
+      {Array.from({ length: ambientPopulation(low, night).citizens }, (_, index) => (
         <Citizen key={index} index={index} active={active} heat={dynasty.heat} />
       ))}
-      {Array.from({ length: night ? 6 : low ? 3 : 5 }, (_, index) => (
+      {Array.from({ length: ambientPopulation(low, night).traffic }, (_, index) => (
         <Traffic key={index} index={index} active={active} heat={dynasty.heat} />
       ))}
       {RECRUITS.map((r, index) => {

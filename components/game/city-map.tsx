@@ -8,6 +8,7 @@ import { DynastyPanel } from './dynasty-panel'
 import { FleetPanel } from './fleet-panel'
 import { GuidePanel, TerritoryPanel, ActivityDirectory } from './city-play-panel'
 import { useGame } from './game-provider'
+import { ChallengesPanel } from './challenges-panel'
 import { ApartmentsPanel } from './apartments-panel'
 import { HarborPanel } from './harbor-panel'
 import { RivalPanel } from './rival-panel'
@@ -69,7 +70,7 @@ export function CityMap({
             City atlas & rival families
           </h2>
           <p className="text-xs text-muted-foreground">
-            15 blocks · 60 enterable buildings · 26 businesses · 30 homes · 3 rival clubs
+            16 blocks · 64 enterable buildings · 30 businesses · 30 homes · 3 rival clubs
           </p>
         </div>
         <button type="button" onClick={onClose} className="rounded border border-border px-3 py-2">
@@ -83,6 +84,7 @@ export function CityMap({
         {[
           ['map', 'Map'],
           ['harbor', 'Harbor story'],
+          ['challenges', 'Challenges'],
           ['apartments', 'Apartments'],
           ['family', 'Family & law'],
           ['garage', 'Garage'],
@@ -101,6 +103,7 @@ export function CityMap({
         ))}
       </nav>
       <div className="mt-4 grid gap-6 md:grid-cols-[1fr_0.8fr]">
+        {tab === 'challenges' && <ChallengesPanel location={currentBuildingId} onTravel={onTravel} />}
         {tab === 'apartments' && <ApartmentsPanel buildingId={currentBuildingId} currentSuiteId={currentSuiteId} onTour={onSuiteTour} />}
         {tab === 'harbor' && <HarborPanel location={currentBuildingId} onTravel={onTravel} />}
         {tab === 'map' && (

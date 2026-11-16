@@ -4,6 +4,7 @@ import { useGame } from './game-provider'
 import { CITY_BUILDINGS } from '@/lib/game/city'
 import {
   JOBS,
+  JOB_STEPS,
   GUIDE,
   guideReady,
   cityTime,
@@ -90,10 +91,7 @@ export function ActivityPanel({ location, onTravel }: { location: string; onTrav
     p = state.play,
     job = p.job,
     j = JOBS.find((j) => j.id === job?.id)
-  const steps =
-    j?.id === 'repair'
-      ? ['Inspect engine', 'Fit replacement part', 'Test repaired engine']
-      : ['Arrange set list', 'Check stage', 'Open evening show']
+  const steps = j ? JOB_STEPS[j.id] : undefined
   return (
     <section aria-label="Local business activities" className="my-3 rounded-xl border border-primary/30 p-3">
       <h2 className="font-serif text-lg text-primary">Hands-on city work</h2>
@@ -116,8 +114,7 @@ export function ActivityPanel({ location, onTravel }: { location: string; onTrav
             disabled={!!job.remainingMs || location !== j.destination || (j.id === 'taxi' && job.meters < 30)}
             onClick={() => dispatch({ type: 'jobStep', location })}
           >
-            {j.id === 'repair' || j.id === 'club' ? steps[job.step] : 'Complete delivery / fare / round'} · +$
-            {j.reward}
+            {steps?.[job.step] ?? 'Complete delivery / fare / round'}{!steps || job.step === steps.length - 1 ? ` · +$${j.reward}` : ' · Next step'}
           </button>
           {onTravel && (
             <button type="button" className={button} onClick={() => onTravel(j.destination)}>
@@ -162,7 +159,7 @@ export function ActivityPanel({ location, onTravel }: { location: string; onTrav
           {!JOBS.some((j) => j.location === location) && (
             <p className="text-xs text-muted-foreground">
               Side jobs are available at Orchard Grocers, Yellow Cab Depot, Eastside Motor Works, Rosa
-              Apartments and Blue Note Jazz Club.
+              Apartments, Blue Note Jazz Club and the new Garden Market shops.
             </p>
           )}
         </div>

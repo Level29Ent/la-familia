@@ -37,6 +37,7 @@ function Label({ at, children, size = 0.22 }: { at: Point; children: string; siz
 
 export function SafeHouseScene({
   estateTier = 2,
+  low = false,
   decor,
   assets,
   navigationOverride,
@@ -47,6 +48,7 @@ export function SafeHouseScene({
   vaultOpen,
   onFocusChange,
 }: {
+  low?: boolean
   estateTier?: number
   decor: DecorState
   assets: string[]
@@ -75,7 +77,8 @@ export function SafeHouseScene({
     <Canvas
       fallback={<SceneUnavailable />}
       className="absolute inset-0 touch-none"
-      dpr={[1, 1.5]}
+      frameloop={enabled ? 'always' : 'demand'}
+      dpr={low ? 1 : [1, 1.5]}
       camera={{ fov: 70, near: 0.1, far: 50 }}
       aria-label="Walkable 3D safe house lounge with a vault and street exit"
     >

@@ -23,10 +23,10 @@ const {
   profitMultiplier,
   computeOfflineEarnings,
 } = require('../lib/game/engine.ts')
-assert.equal(BUSINESSES.length, 26)
-assert.equal(new Set(BUSINESSES.map((b) => b.id)).size, 26)
+assert.equal(BUSINESSES.length, 30)
+assert.equal(new Set(BUSINESSES.map((b) => b.id)).size, 30)
 let state = createInitialState()
-assert.equal(Object.keys(state.businesses).length, 26)
+assert.equal(Object.keys(state.businesses).length, 30)
 assert.equal(BUSINESSES.at(-1).id, 'cityhall')
 const old = {
   cash: 1234,
@@ -86,7 +86,7 @@ assert.ok(
 )
 assert.deepEqual(createInitialState(10, 1e9, 1).assets, [])
 console.log(
-  'PASS: 26 properties; old-save migration; spending and stacked bonuses; objective guards; operation requirements, timing, save/resume, and single payouts; offline bonus; prestige reset.',
+  'PASS: 30 properties; old-save migration; spending and stacked bonuses; objective guards; operation requirements, timing, save/resume, and single payouts; offline bonus; prestige reset.',
 )
 
 const {

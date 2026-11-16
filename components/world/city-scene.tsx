@@ -16,6 +16,7 @@ import { RivalCrews } from './rival-crews'
 import { activeVehicle } from '@/lib/game/vehicles'
 import { ESTATES } from '@/lib/game/dynasty'
 import { EstateDetails } from './estate-details'
+import { GardenMarketFronts } from './market-fittings'
 import { ApartmentFrontages } from './apartment-details'
 import { NeighborhoodLife } from './neighborhood-life'
 import { LivingCity, StreetLifeDetails } from './living-city'
@@ -125,6 +126,7 @@ export function CityScene({
       ))}
       <CityStreets />
       <StreetLifeDetails />
+      <GardenMarketFronts />
       <ApartmentFrontages apartments={state.apartments} />
       <NeighborhoodLife state={state} active={movementEnabled} />
       <LivingCity

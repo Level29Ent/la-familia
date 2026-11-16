@@ -4,6 +4,7 @@ import { useEffect, useRef } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
 import { input, MOVE_KEYS } from '@/lib/game/input'
 import * as THREE from 'three'
+import { simulationSteps } from '@/lib/game/navigation'
 import type { VEHICLES } from '@/lib/game/vehicles'
 import { VintageCar } from './vintage-car'
 import { SEDAN_START, driveCar, carExit, type CarPose } from '@/lib/game/good-life'
@@ -154,7 +155,8 @@ export function PlayerControls({
   useFrame((_, rawDt) => {
     motion.current.moving = false
     if (!enabled) return
-    const dt = Math.min(rawDt, 0.05)
+    const steps = simulationSteps(rawDt)
+    const dt = steps.reduce((total, step) => total + step, 0)
     const { yaw, pitch } = look.current
     const k = input.keys
     const forward =
@@ -172,12 +174,12 @@ export function PlayerControls({
     const len = Math.hypot(mx, mz)
     const moving = len > 0
     if (driving) {
-      car.current = driveCar(
+      for (const step of steps) car.current = driveCar(
         car.current,
         forward,
         strafe,
         k.has('Space'),
-        dt,
+        step,
         navigation.bounds,
         navigation.obstacles,
         vehicle ?? undefined,
@@ -190,12 +192,10 @@ export function PlayerControls({
       }
     } else if (moving) {
       const speed = navigation.speed * (k.has('ShiftLeft') || k.has('ShiftRight') ? 1.7 : 1)
-      mx = (mx / len) * speed * dt
-      mz = (mz / len) * speed * dt
-      const next = moveWithin(position.current, mx, mz, navigation)
-      motion.current.moving = Math.hypot(next.x - position.current.x, next.z - position.current.z) > 0.001
+      const before = position.current
+      for (const step of steps) position.current = moveWithin(position.current, (mx / len) * speed * step, (mz / len) * speed * step, navigation)
+      motion.current.moving = Math.hypot(position.current.x - before.x, position.current.z - before.z) > 0.001
       motion.current.sprint = speed > navigation.speed
-      position.current = next
       if (player.current && motion.current.moving) {
         const targetYaw = Math.atan2(mx, mz)
         const delta = Math.atan2(

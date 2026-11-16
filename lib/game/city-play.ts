@@ -71,7 +71,17 @@ export const JOBS = [
     close: 6,
     description: 'Arrange the set list, check the stage, then open the evening show.',
   },
+  { id: 'coffee', title: 'The morning rush', location: 'coffeehouse', destination: 'coffeehouse', cost: 0, reward: 75, seconds: 8, open: 0, close: 24, description: 'Grind the beans, pull the espresso, then serve the waiting tables.' },
+  { id: 'barber', title: 'A cut above', location: 'barbershop', destination: 'barbershop', cost: 5, reward: 95, seconds: 10, open: 6, close: 22, description: 'Consult with the customer, shape the cut, then finish with a warm towel.' },
+  { id: 'restore', title: 'Restore a family heirloom', location: 'furniture', destination: 'furniture', cost: 15, reward: 140, seconds: 12, open: 0, close: 24, description: 'Sand the timber, repair the joints, then polish the restored cabinet.' },
 ] as const
+export const JOB_STEPS: Record<string, string[]> = {
+  repair: ['Inspect engine', 'Fit replacement part', 'Test repaired engine'],
+  club: ['Arrange set list', 'Check stage', 'Open evening show'],
+  coffee: ['Grind the beans', 'Pull the espresso', 'Serve the tables'],
+  barber: ['Consult with customer', 'Shape the cut', 'Apply warm towel'],
+  restore: ['Sand the timber', 'Repair the joints', 'Polish the cabinet'],
+}
 export type JobId = (typeof JOBS)[number]['id']
 export type JobState = { id: JobId; remainingMs: number; step: number; meters: number }
 export type Contact = {
@@ -388,18 +398,13 @@ export function playAction(state: GameState, a: PlayAction): GameState {
       (j.id === 'taxi' && (activeVehicle(state)?.id !== 'taxi' || job.meters < 30))
     )
       return state
-    if ((j.id === 'repair' || j.id === 'club') && job.step < 2)
+    const steps = JOB_STEPS[j.id]
+    if (steps && job.step < steps.length - 1)
       return {
         ...state,
         play: event(
-          { ...p, job: { ...job, step: job.step + 1 } },
-          j.id === 'repair'
-            ? job.step === 0
-              ? 'Inspection passed. Fit the replacement part.'
-              : 'Part fitted. Test the engine to finish.'
-            : job.step === 0
-              ? 'Set list arranged. Check the stage.'
-              : 'Stage ready. Open the show.',
+          { ...p, job: { ...job, step: job.step + 1, remainingMs: ['coffee', 'barber', 'restore'].includes(j.id) ? 3000 : 0 } },
+          `${steps[job.step]} complete. Next: ${steps[job.step + 1]}.`,
         ),
       }
     const contacts = p.contacts.map((c) => ({ ...c, xp: c.xp + 10 }))
