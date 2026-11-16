@@ -9,6 +9,7 @@ import { useGame } from './game-provider'
 import { MusicPlayer } from './music-player'
 import { OBJECTIVES, BUSINESSES } from '@/lib/game/config'
 import { TouchControls } from './touch-controls'
+import { RANKS, rankIndex } from '@/lib/game/dynasty'
 import { activeVehicle } from '@/lib/game/vehicles'
 import { CITY_BUILDINGS } from '@/lib/game/city'
 
@@ -50,10 +51,11 @@ export function Hud({
     <div className="pointer-events-none absolute inset-0 flex flex-col justify-between p-4 md:p-6">
       <div className="flex items-start justify-between gap-4">
         <div className="flex flex-col gap-1 rounded-2xl border border-border bg-background/70 px-4 py-3 backdrop-blur-md">
-          <p className="font-serif text-sm font-semibold tracking-wide text-muted-foreground">La Familia</p>
+          <p className="font-serif text-sm font-semibold tracking-wide text-muted-foreground">La Familia · {RANKS[rankIndex(state)].name}</p>
           <p className="font-serif text-3xl font-bold text-primary tabular-nums md:text-4xl">
             {formatMoney(state.cash)}
           </p>
+          <p className="text-[11px] text-primary">{RANKS[rankIndex(state)].name} · Heat {Math.ceil(state.dynasty.heat)}/100{state.dynasty.heat >= 60 ? ` · Arrest in ${Math.ceil(state.dynasty.arrestMs/1000)}s outside` : ''}</p>
           <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm tabular-nums">
             <span className="flex items-center gap-1.5 text-foreground">
               <TrendingUp className="size-4 text-primary" aria-hidden="true" />

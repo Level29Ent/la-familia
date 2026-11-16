@@ -1,5 +1,7 @@
 'use client'
 
+import { ESTATES } from '@/lib/game/dynasty'
+import { EstateDetails } from './estate-details'
 import { InspectionCamera, type InspectionView } from './inspection-camera'
 
 import { useMemo } from 'react'
@@ -32,6 +34,7 @@ function Label({ at, children, size = 0.22 }: { at: Point; children: string; siz
 }
 
 export function SafeHouseScene({
+  estateTier = 2,
   decor,
   assets,
   navigationOverride,
@@ -42,6 +45,7 @@ export function SafeHouseScene({
   vaultOpen,
   onFocusChange,
 }: {
+  estateTier?: number
   decor: DecorState
   assets: string[]
   navigationOverride?: Navigation
@@ -57,8 +61,9 @@ export function SafeHouseScene({
     () => goodLifeRoomNavigation(wardrobeOwned ? ['wardrobe'] : [], navigationOverride ?? ROOM_NAVIGATION),
     [wardrobeOwned, navigationOverride],
   )
-  const wall = decorItem(decor, 'walls').color
-  const sofa = decorItem(decor, 'sofa').color
+  const estate = ESTATES[Math.max(0,estateTier)]
+  const wall = estateTier < 2 ? estate.wall : decorItem(decor, 'walls').color
+  const sofa = estateTier === 0 ? '#72685a' : decorItem(decor, 'sofa').color
   const rug = decorItem(decor, 'rug').color
   const light = decorItem(decor, 'lighting').color
   const bundleCount = cashBundleCount(safeHouse.balance, VAULT_TIERS[safeHouse.tier].capacity)
@@ -71,12 +76,13 @@ export function SafeHouseScene({
       camera={{ fov: 70, near: 0.1, far: 50 }}
       aria-label="Walkable 3D safe house lounge with a vault and street exit"
     >
+      <EstateDetails tier={estateTier} />
       <color attach="background" args={['#19252b']} />
       <ambientLight intensity={1.8} color="#e8e7df" />
       <hemisphereLight args={['#fff0d4', '#79634b', 1.5]} />
-      <pointLight position={[0, 4.2, 0]} color={light} intensity={48} distance={18} />
+      <pointLight position={[0, 4.2, 0]} color={light} intensity={estateTier === 0 ? 25 : 48} distance={18} />
       <pointLight position={[-5, 2.4, -3]} color={light} intensity={15} distance={9} />
-      <Box at={[0, -0.12, 0]} size={[14, 0.2, 14]} color="#604736" />
+      <Box at={[0, -0.12, 0]} size={[14, 0.2, 14]} color={estate.floor} />
       {Array.from({ length: 15 }, (_, i) => (
         <Box key={i} at={[-7 + i, 0, 0]} size={[0.025, 0.015, 14]} color="#302b27" />
       ))}
@@ -88,21 +94,21 @@ export function SafeHouseScene({
       {[-6.8, 6.8].map((x) => (
         <group key={x}>
           <Box at={[x, 0.5, 0]} size={[0.12, 1, 14]} color="#29302a" />
-          <Box at={[x, 1.05, 0]} size={[0.15, 0.07, 14]} color="#aa8c52" metal />
-          <Box at={[x, 4.4, 0]} size={[0.15, 0.12, 14]} color="#aa8c52" metal />
+          <Box at={[x, 1.05, 0]} size={[0.15, 0.07, 14]} color={estate.trim} metal />
+          <Box at={[x, 4.4, 0]} size={[0.15, 0.12, 14]} color={estate.trim} metal />
         </group>
       ))}
       {[-6.8, 6.8].map((z) => (
         <group key={z}>
           <Box at={[0, 0.5, z]} size={[14, 1, 0.12]} color="#29302a" />
-          <Box at={[0, 1.05, z]} size={[14, 0.07, 0.15]} color="#aa8c52" metal />
-          <Box at={[0, 4.4, z]} size={[14, 0.12, 0.15]} color="#aa8c52" metal />
+          <Box at={[0, 1.05, z]} size={[14, 0.07, 0.15]} color={estate.trim} metal />
+          <Box at={[0, 4.4, z]} size={[14, 0.12, 0.15]} color={estate.trim} metal />
         </group>
       ))}
       {/* A rug marks the clear central route from the entry door to the vault. */}
       <Box at={[0, 0.015, 0]} size={[2.3, 0.025, 10]} color={rug} />
       {[-1.05, 1.05].map((x) => (
-        <Box key={x} at={[x, 0.035, 0]} size={[0.035, 0.01, 9.8]} color="#b79760" />
+        <Box key={x} at={[x, 0.035, 0]} size={[0.035, 0.01, 9.8]} color={estate.trim} />
       ))}
       {/* Leather lounge and coffee table, aligned with navigation collision bounds. */}
       <Box at={[-5.2, 0.5, 0]} size={[1.8, 0.6, 3.6]} color={sofa} />
@@ -113,7 +119,7 @@ export function SafeHouseScene({
       <Box at={[-2.4, 0.6, 0]} size={[1.4, 0.16, 2.2]} color="#362921" />
       {[-2.9, -1.9].flatMap((x) =>
         [-0.8, 0.8].map((z) => (
-          <Box key={`${x}-${z}`} at={[x, 0.3, z]} size={[0.08, 0.6, 0.08]} color="#b2955d" metal />
+          <Box key={`${x}-${z}`} at={[x, 0.3, z]} size={[0.08, 0.6, 0.08]} color={estate.trim} metal />
         )),
       )}
       <Box at={[-2.4, 0.72, 0]} size={[0.55, 0.08, 0.7]} color="#c3a575" />
@@ -121,10 +127,10 @@ export function SafeHouseScene({
       <Box at={[3.8, 1.1, 2]} size={[3.1, 0.18, 1.5]} color="#50362b" />
       {[-1.2, 1.2].flatMap((x) =>
         [-0.5, 0.5].map((z) => (
-          <Box key={`${x}-${z}`} at={[3.8 + x, 0.55, 2 + z]} size={[0.12, 1.1, 0.12]} color="#a18552" metal />
+          <Box key={`${x}-${z}`} at={[3.8 + x, 0.55, 2 + z]} size={[0.12, 1.1, 0.12]} color={estate.trim} metal />
         )),
       )}
-      <Box at={[4.7, 1.45, 2]} size={[0.06, 0.7, 0.06]} color="#c7a459" metal />
+      <Box at={[4.7, 1.45, 2]} size={[0.06, 0.7, 0.06]} color={estate.trim} metal />
       <mesh position={[4.7, 1.85, 2]}>
         <coneGeometry args={[0.35, 0.35, 24]} />
         <meshStandardMaterial color="#e2c792" emissive="#b07c36" emissiveIntensity={0.35} />

@@ -43,7 +43,7 @@ export type CityBuilding = {
   width: number
   depth: number
 }
-export const AVENUES = [-36, 0, 36, 72, 108]
+export const AVENUES = [-36, 0, 36, 72, 108, 144]
 export const CROSS_STREETS = [18, -18, -54, -90]
 const homes = [
   'Rosa Apartments',
@@ -94,12 +94,13 @@ catalog.push(
   ...EASTSIDE_BUSINESSES.map((b) => ({ id: b.id, name: b.name, kind: 'business' as const })),
   ...['Riverside Terrace', 'Eastgate Apartments', 'Foundry House', 'Station Row'].map((name, i) => ({ id: `home-${15 + i}`, name, kind: 'home' as const })),
 )
+catalog.push(...['Olive Terrace', 'Grand Central Apartments', 'Saint James Court', 'Prospect Towers', 'Maple Cottage', 'Riverton Apartments', 'Crown Heights', 'Parkside Apartments', 'Birch Row', 'Regent Apartments', 'Westbrook House', 'Sky Garden Apartments'].map((name, i) => ({ id: `home-${19+i}`, name, kind: 'home' as const })))
 // Four buildings per block; Eastside extends the original grid one column east.
 export const CITY_BUILDINGS: CityBuilding[] = catalog.map((item, i) => {
   const block = Math.floor(i / 4),
     slot = i % 4
-  const row = i < 36 ? Math.floor(block / 3) : Math.floor((i - 36) / 4),
-    column = i < 36 ? block % 3 : 3
+  const row = i < 36 ? Math.floor(block / 3) : Math.floor(((i - 36) % 12) / 4),
+    column = i < 36 ? block % 3 : i < 48 ? 3 : 4
   const x = -18 + column * 36 + (slot % 2 ? 8 : -8)
   const z = -row * 36 + (slot < 2 ? 8 : -8)
   const south = slot < 2
@@ -118,17 +119,17 @@ export const CITY_BUILDINGS: CityBuilding[] = catalog.map((item, i) => {
     ...item,
     family,
     theme,
-    district: i < 36 ? district[row] : 'Eastside',
+    district: i < 36 ? district[row] : i < 48 ? 'Eastside' : 'Garden Heights',
     position: [x, 0, z],
     rotationY: south ? 0 : Math.PI,
     door: [x, z + (south ? 6 : -6)],
     color: ['#735745', '#5f7276', '#756657', '#775551'][i % 4],
-    height: item.kind === 'home' ? 10 + (i % 3) * 3 : 9 + (i % 4) * 3,
+    height: /Apartments|Towers/.test(item.name) ? 25 + (i % 3) * 5 : item.kind === 'home' ? 10 + (i % 3) * 3 : 9 + (i % 4) * 3,
     width: 10,
     depth: 9,
   }
 })
-export const CITY_BOUNDS = { minX: -43, maxX: 115, minZ: -97, maxZ: 25 }
+export const CITY_BOUNDS = { minX: -43, maxX: 151, minZ: -97, maxZ: 25 }
 export const CITY_OBSTACLES: Obstacle[] = CITY_BUILDINGS.map((b) => ({
   minX: b.position[0] - b.width / 2 - 0.45,
   maxX: b.position[0] + b.width / 2 + 0.45,

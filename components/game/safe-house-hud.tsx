@@ -4,6 +4,8 @@ import { House, UserRound, Paintbrush, LogOut, LockKeyhole } from 'lucide-react'
 import { formatMoney } from '@/lib/game/format'
 import { VAULT_TIERS } from '@/lib/game/safe-house'
 import { useGame } from './game-provider'
+import { ESTATES } from '@/lib/game/dynasty'
+import { EstatePanel } from './dynasty-panel'
 import { TouchControls } from './touch-controls'
 
 export function SafeHouseHud({
@@ -27,7 +29,7 @@ export function SafeHouseHud({
           <p className="flex items-center gap-2 text-xs tracking-widest text-primary uppercase">
             <House className="size-4" /> Inside your safe house
           </p>
-          <h1 className="mt-1 font-serif text-2xl">The Bellini Residence</h1>
+          <h1 className="mt-1 font-serif text-2xl">{ESTATES[state.dynasty.estate]?.name ?? 'Abandoned property · For sale'}</h1>
           <p className="text-xs text-muted-foreground">
             Wallet {formatMoney(state.cash)} · Vault {formatMoney(state.safeHouse.balance)}
           </p>
@@ -42,6 +44,7 @@ export function SafeHouseHud({
           </button>
           <button
             type="button"
+            disabled={state.dynasty.estate < 0}
             onClick={onShop}
             className="rounded-full border border-primary/30 bg-background/85 px-4 py-2 text-sm text-primary"
           >
@@ -49,6 +52,7 @@ export function SafeHouseHud({
           </button>
           <button
             type="button"
+            disabled={state.dynasty.estate < 0}
             onClick={onVault}
             className="rounded-full border border-primary/30 bg-background/85 px-4 py-2 text-sm text-primary"
           >
@@ -68,9 +72,11 @@ export function SafeHouseHud({
         className="absolute top-1/2 left-1/2 size-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/80 ring-2 ring-black/40"
       />
       <div className="flex flex-col items-center gap-3">
-        {focusedId === 'vault' ? (
+        <div className="pointer-events-auto max-h-[28dvh] w-full max-w-xl self-end overflow-y-auto"><EstatePanel /></div>
+        {focusedId === 'vault' && state.dynasty.estate >= 0 ? (
           <button
             type="button"
+            disabled={state.dynasty.estate < 0}
             onClick={onVault}
             className="pointer-events-auto rounded-xl border border-primary/40 bg-background/90 p-4 text-primary"
           >

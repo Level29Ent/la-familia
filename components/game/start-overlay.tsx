@@ -50,7 +50,7 @@ export function StartOverlay({ onStart, onCharacter }: { onStart: () => void; on
             La Familia
           </h1>
           <p className="text-pretty text-sm text-muted-foreground">
-            Twelve city blocks. Forty-eight enterable buildings. Twenty-six businesses, eighteen homes, and three rival families. Build your crew and claim the city.
+            Fifteen city blocks. Sixty enterable buildings. Twenty-six businesses, thirty homes, and three rival families. Build your crew and claim the city.
           </p>
         </div>
 
@@ -68,7 +68,7 @@ export function StartOverlay({ onStart, onCharacter }: { onStart: () => void; on
         </dl>
 
         <p className="text-center text-xs text-primary">
-          New: City atlas · Walkable interiors · Rival family crews
+          New: Made Men to Godfather · Hire NPCs · Upgrade your estate · Police heat
         </p>
         <button
           type="button"
