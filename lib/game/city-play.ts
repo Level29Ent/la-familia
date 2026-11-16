@@ -413,6 +413,7 @@ export function playAction(state: GameState, a: PlayAction): GameState {
     )
   }
   if (a.type === 'territory') {
+    if (a.district === 'Harbor Quarter' && state.harbor?.chapter === 5 && state.harbor.ending === 'alliance') return state
     const t = p.territories.find((t) => t.district === a.district)
     if (!t || state.cash < 35 || state.city.stamina < 15 || t.control === 100) return state
     const win = territoryStrength(state) >= territoryEnemy(state, a.district),
@@ -516,12 +517,13 @@ export function tickPlay(state: GameState, raw: number): GameState {
       territoryMs: 120000,
       territories: p.territories.map((t, i) => {
         const f = FAMILIES[i % 3]
+        if (f.id === 'doyle' && state.harbor?.chapter === 5 && state.harbor.ending === 'alliance') return t
         if (t.control > 0 && state.city.families[f.id].truceMs === 0) {
           const guarded = state.dynasty.members.filter(
             (m) =>
               m.duty === 'guard' && !m.recoveryMs && !state.dynasty.missions.some((o) => o.memberId === m.id),
           ).length
-          const loss = Math.max(0, 15 - guarded * 5)
+          const loss = Math.max(0, 15 - guarded * 5 - (state.harbor?.investments.includes(t.district) ? 5 : 0))
           changed = changed || loss > 0
           return { ...t, control: Math.max(0, t.control - loss), attacks: t.attacks + 1 }
         }

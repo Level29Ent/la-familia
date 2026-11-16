@@ -1,3 +1,4 @@
+import { initialHarbor, restoreHarbor, type HarborState } from './harbor'
 import { initialPlay, restorePlay, tickPlay, type PlayState } from './city-play'
 import { initialDynasty, restoreDynasty, tickDynasty, type DynastyState } from './dynasty'
 import { initialFleet, restoreFleet, type FleetState } from './vehicles'
@@ -25,6 +26,7 @@ export type BusinessState = {
 }
 
 export type GameState = {
+  harbor: HarborState
   play: PlayState
   dynasty: DynastyState
   fleet: FleetState
@@ -60,6 +62,7 @@ export function createInitialState(respect = 0, lifetimeEarnings = 0, heists = 0
   }
   const now = Date.now()
   return {
+    harbor: initialHarbor(),
     play: initialPlay(),
     dynasty: initialDynasty(),
     fleet: initialFleet(),
@@ -285,6 +288,7 @@ export function restoreState(saved: Partial<GameState>): GameState {
   return {
     ...fresh,
     ...saved,
+    harbor: restoreHarbor(saved.harbor),
     play: restorePlay(saved.play),
     dynasty: restoreDynasty(saved.dynasty, !saved.dynasty && !!saved.safeHouse),
     fleet: restoreFleet(saved.fleet, Array.isArray(saved.assets) ? saved.assets : []),

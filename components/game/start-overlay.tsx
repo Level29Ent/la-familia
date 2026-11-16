@@ -68,7 +68,7 @@ export function StartOverlay({ onStart, onCharacter }: { onStart: () => void; on
         </dl>
 
         <p className="text-center text-xs text-primary">
-          New: Guided opening · City activities · Territory · Day & night · Loyalty
+          New: Trouble at the Harbor · Five story missions · Family council · Living neighborhoods
         </p>
         <button
           type="button"

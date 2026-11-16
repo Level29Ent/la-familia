@@ -198,10 +198,10 @@ export function TerritoryPanel() {
           <button
             type="button"
             className={button}
-            disabled={state.cash < 35 || state.city.stamina < 15 || t.control === 100}
+            disabled={(t.district === 'Harbor Quarter' && state.harbor.chapter === 5 && state.harbor.ending === 'alliance') || state.cash < 35 || state.city.stamina < 15 || t.control === 100}
             onClick={() => dispatch({ type: 'territory', district: t.district })}
           >
-            Contest {t.district}
+            {t.district === 'Harbor Quarter' && state.harbor.chapter === 5 && state.harbor.ending === 'alliance' ? 'Harbor alliance active' : `Contest ${t.district}`}
           </button>
         </article>
       ))}

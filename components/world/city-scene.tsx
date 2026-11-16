@@ -16,6 +16,7 @@ import { RivalCrews } from './rival-crews'
 import { activeVehicle } from '@/lib/game/vehicles'
 import { ESTATES } from '@/lib/game/dynasty'
 import { EstateDetails } from './estate-details'
+import { NeighborhoodLife } from './neighborhood-life'
 import { LivingCity, StreetLifeDetails } from './living-city'
 import { cityTime } from '@/lib/game/city-play'
 import { WorldText } from './world-text'
@@ -123,6 +124,7 @@ export function CityScene({
       ))}
       <CityStreets />
       <StreetLifeDetails />
+      <NeighborhoodLife state={state} active={movementEnabled} />
       <LivingCity
         contacts={state.play.contacts}
         night={time.night}
