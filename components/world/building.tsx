@@ -128,8 +128,8 @@ function BuildingImpl({ placement, style, name, status, litLevel, focused, seed 
 
       {isCityHall &&
         [-6, -3.6, -1.2, 1.2, 3.6, 6].map((x) => (
-          <mesh key={x} position={[x, 2.6, front + 0.8]}>
-            <cylinderGeometry args={[0.35, 0.4, 5.2, 12]} />
+          <mesh key={x} position={[(x * width) / 18, 2.6, front + 0.3]}>
+            <cylinderGeometry args={[(0.35 * width) / 18, (0.4 * width) / 18, 5.2, 12]} />
             <meshStandardMaterial color="#9a9488" roughness={0.8} />
           </mesh>
         ))}

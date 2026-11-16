@@ -1,6 +1,7 @@
 'use client'
 
 import { createContext, useContext, useEffect, useReducer, useRef, useState, type ReactNode } from 'react'
+import { cityAction, type CityAction } from '@/lib/game/rivals'
 import { restoreCharacter, type CharacterConfig } from '@/lib/game/character'
 import { decorAction, type DecorAction } from '@/lib/game/decor'
 import { vaultAction, type VaultAction } from '@/lib/game/safe-house'
@@ -20,6 +21,7 @@ import {
 } from '@/lib/game/engine'
 
 type Action =
+  | CityAction
   | EmpireAction
   | VaultAction
   | DecorAction
@@ -35,6 +37,10 @@ type Action =
 
 function reducer(state: GameState, action: Action): GameState {
   switch (action.type) {
+    case 'recruit':
+    case 'rest':
+    case 'rival':
+      return cityAction(state, action)
     case 'asset':
     case 'operation':
     case 'objective':

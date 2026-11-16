@@ -200,6 +200,12 @@ BUSINESSES.push(
     managerTitle: 'Hospitality with influence',
   },
 )
+BUSINESSES.push(
+  { id: 'diner', name: 'Midnight Diner', description: 'Hot coffee, sandwiches, and neighborhood news.', icon: 'bread', baseCost: 18, costGrowth: 1.1, baseRevenue: 4, cycleSeconds: 3, managerCost: 120, managerName: 'Maggie', managerTitle: 'Keeps the grill warm' },
+  { id: 'laundry', name: 'Canal Laundry', description: 'A legitimate laundry with a very busy back office.', icon: 'shirt', baseCost: 140, costGrowth: 1.1, baseRevenue: 24, cycleSeconds: 6, managerCost: 800, managerName: 'Eddie Press', managerTitle: 'A spotless reputation' },
+  { id: 'pharmacy', name: 'Pearl Pharmacy', description: 'An apothecary serving the whole ward.', icon: 'store', baseCost: 600, costGrowth: 1.12, baseRevenue: 90, cycleSeconds: 10, managerCost: 3000, managerName: 'Doc Pearl', managerTitle: 'Knows the regulars' },
+  { id: 'printing', name: 'Union Printing Works', description: 'Posters, newspapers, and discreet late editions.', icon: 'film', baseCost: 1800, costGrowth: 1.12, baseRevenue: 260, cycleSeconds: 14, managerCost: 9000, managerName: 'Ink Sullivan', managerTitle: 'Controls the presses' },
+)
 BUSINESSES.sort((a, b) => a.baseCost - b.baseCost)
 
 export const MILESTONES = [25, 50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000]

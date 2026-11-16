@@ -7,8 +7,8 @@ const ts = require('typescript')
 const React = require('react')
 const { renderToString } = require('react-dom/server')
 
-function load(relativePath, env = {}, mocks = {}) {
-  const source = fs.readFileSync(path.join(__dirname, '..', relativePath), 'utf8')
+function load(relativePath, env = {}, mocks = {}, sourceOverride) {
+  const source = sourceOverride ?? fs.readFileSync(path.join(__dirname, '..', relativePath), 'utf8')
   const compiled = ts.transpileModule(source, {
     compilerOptions: { module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX },
   }).outputText
@@ -64,8 +64,20 @@ test('world labels all use the non-blocking, deployment-aware font component', (
 
 
 test('Next publishes its final base path to client asset URLs', () => {
+  // CI may already have replaced the property with the actual Pages path.
+  const { default: config } = load('next.config.mjs')
+  assert.equal(typeof config.basePath, 'string')
+  assert.equal(config.env.NEXT_PUBLIC_BASE_PATH, config.basePath)
+})
+
+test('Pages-style config injection keeps client assets on the injected path', () => {
+  const source = fs.readFileSync(path.join(__dirname, '../next.config.mjs'), 'utf8')
   for (const basePath of ['', '/la-familia']) {
-    const { default: config } = load('next.config.mjs', { NEXT_PUBLIC_BASE_PATH: basePath })
+    const injected = source.replace(/basePath: [^\n]+/, `basePath: ${JSON.stringify(basePath)},`)
+    assert.notEqual(injected.indexOf(`basePath: ${JSON.stringify(basePath)},`), -1)
+    const { default: config } = load('next.config.mjs', {
+      NEXT_PUBLIC_BASE_PATH: '/must-not-override-pages',
+    }, {}, injected)
     assert.equal(config.basePath, basePath)
     assert.equal(config.env.NEXT_PUBLIC_BASE_PATH, basePath)
   }

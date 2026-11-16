@@ -7,19 +7,27 @@ import type { Navigation } from '@/lib/game/navigation'
 import { GoodLifeLandmarks } from './good-life-displays'
 import { Canvas } from '@react-three/fiber'
 import { SceneUnavailable } from '@/components/game/scene-boundary'
-import { BUSINESSES } from '@/lib/game/config'
 import type { GameState } from '@/lib/game/engine'
 import { Building, type BuildingStatus } from './building'
-import {
-  BUILDING_STYLES,
-  PLACEMENTS,
-  SAFE_HOUSE_PLACEMENT,
-  SAFE_HOUSE_STYLE,
-  STREET_NAVIGATION,
-  STREET_RETURN_NAVIGATION,
-} from './layout'
+import { STREET_NAVIGATION, STREET_RETURN_NAVIGATION } from './layout'
 import { PlayerControls } from './player-controls'
-import { Street } from './street'
+import { CityStreets } from './city-streets'
+import { RivalCrews } from './rival-crews'
+import { CITY_BUILDINGS, FAMILIES } from '@/lib/game/city'
+
+const CITY_STYLES = Object.fromEntries(
+  CITY_BUILDINGS.map((building) => [
+    building.id,
+    {
+      wall: building.color,
+      trim: '#283536',
+      neon: FAMILIES.find((f) => f.id === building.family)?.color ?? '#f5c451',
+      height: building.height,
+      width: building.width,
+      depth: building.depth,
+    },
+  ]),
+)
 
 function statusFor(state: GameState, id: string): BuildingStatus {
   const b = state.businesses[id]
@@ -40,6 +48,8 @@ export function CityScene({
   inspectionView,
   onVehicleUpdate,
   returning = false,
+  onPositionChange,
+  onFamilyEncounter,
   focusedId,
   movementEnabled,
   onFocusChange,
@@ -50,12 +60,15 @@ export function CityScene({
   inspectionView?: InspectionView
   onVehicleUpdate?: (pose: CarPose) => void
   returning?: boolean
+  onPositionChange?: (position: { x: number; z: number }) => void
+  onFamilyEncounter?: () => void
   focusedId: string | null
   movementEnabled: boolean
   onFocusChange: (id: string | null) => void
 }) {
   return (
     <Canvas
+      frameloop={movementEnabled ? 'always' : 'demand'}
       fallback={<SceneUnavailable />}
       className="absolute inset-0 touch-none"
       dpr={[1, 1.5]}
@@ -70,35 +83,32 @@ export function CityScene({
       <directionalLight position={[40, 60, -70]} intensity={2.6} color="#fff1d0" />
       <directionalLight position={[-35, 25, 40]} intensity={0.65} color="#c4e1ff" />
 
-      <Street />
-      <GoodLifeLandmarks assets={state.assets} endZ={STREET_NAVIGATION.bounds.minZ} />
+      <CityStreets />
+      <RivalCrews active={movementEnabled} onEncounter={onFamilyEncounter} />
+      <GoodLifeLandmarks city assets={state.assets} endZ={STREET_NAVIGATION.bounds.minZ} />
 
-      {PLACEMENTS.map((placement, i) => {
-        const config = BUSINESSES.find((b) => b.id === placement.id)!
+      {CITY_BUILDINGS.map((building, i) => {
+        const business = state.businesses[building.id]
         return (
           <Building
-            key={placement.id}
-            placement={placement}
-            style={BUILDING_STYLES[placement.id]}
-            name={config.name}
-            status={statusFor(state, placement.id)}
-            litLevel={litLevelFor(state.businesses[placement.id].owned)}
-            focused={focusedId === placement.id}
+            key={building.id}
+            placement={building}
+            style={CITY_STYLES[building.id]}
+            name={
+              building.id === 'home-14' && state.assets.includes('penthouse')
+                ? 'Bellini Penthouse'
+                : building.name
+            }
+            status={business ? statusFor(state, building.id) : 'ready'}
+            litLevel={business ? litLevelFor(business.owned) : 0.6}
+            focused={focusedId === building.id}
             seed={i + 1}
           />
         )
       })}
 
-      <Building
-        placement={SAFE_HOUSE_PLACEMENT}
-        style={SAFE_HOUSE_STYLE}
-        name="Family Safe House"
-        status="managed"
-        litLevel={0.9}
-        focused={focusedId === 'safehouse'}
-        seed={42}
-      />
       <PlayerControls
+        onPositionChange={onPositionChange}
         onVehicleUpdate={onVehicleUpdate}
         assets={state.assets}
         driving={driving}

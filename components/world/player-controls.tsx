@@ -20,6 +20,7 @@ export function PlayerControls({
   assets = [],
   driving = false,
   onVehicleUpdate,
+  onPositionChange,
 }: {
   enabled: boolean
   navigation: Navigation
@@ -27,6 +28,7 @@ export function PlayerControls({
   assets?: string[]
   driving?: boolean
   onVehicleUpdate?: (pose: CarPose) => void
+  onPositionChange?: (position: { x: number; z: number }) => void
   onFocusChange: (id: string | null) => void
 }) {
   const { camera, gl } = useThree()
@@ -63,7 +65,7 @@ export function PlayerControls({
       onFocusChange(null)
       focusedRef.current = null
     } else if (wasDriving.current) {
-      position.current = carExit(car.current, navigation.bounds)
+      position.current = carExit(car.current, navigation.bounds, navigation.obstacles)
       car.current.speed = 0
     }
     wasDriving.current = driving
@@ -171,7 +173,7 @@ export function PlayerControls({
     const len = Math.hypot(mx, mz)
     const moving = len > 0
     if (driving) {
-      car.current = driveCar(car.current, forward, strafe, k.has('Space'), dt, navigation.bounds)
+      car.current = driveCar(car.current, forward, strafe, k.has('Space'), dt, navigation.bounds, navigation.obstacles)
       position.current = { x: car.current.x, z: car.current.z }
       look.current.yaw = car.current.yaw - Math.PI
       if (carModel.current) {
@@ -196,9 +198,10 @@ export function PlayerControls({
       }
     }
     reportElapsed.current += dt
-    if (onVehicleUpdate && reportElapsed.current >= 0.25) {
+    if (reportElapsed.current >= 0.25) {
       reportElapsed.current = 0
-      onVehicleUpdate({ ...car.current })
+      onVehicleUpdate?.({ ...car.current })
+      onPositionChange?.({ ...position.current })
     }
     if (player.current) player.current.position.set(position.current.x, 0, position.current.z)
     const orbit = followCamera(
