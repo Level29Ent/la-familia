@@ -7,7 +7,7 @@ This fixture is compiled only when `VERCEL_ENV=preview`. Production and ordinary
 - Start with all six Good Life items owned in an isolated in-memory scene.
 - Switch between the street and safe house; remove/restore test ownership to check visibility gates.
 - Drive test sedan exercises the same player/car controller and physics as the real game. W/S accelerate/reverse, A/D steer, Space brakes. Park & exit returns to the player.
-- Street: inspect the owned sedan and penthouse, and the yacht beside City Hall at the far end of the street.
+- Street: inspect the owned sedan and penthouse, and the yacht along the Harbor Quarter waterfront.
 - Safe house: inspect the wardrobe, desk watch/yacht model, framed penthouse deed, paintings, and player watch/pin.
 - Use the ordinary game route to check wallet purchases and saved ownership. The fixture is not a substitute for engine purchase/save tests (`node scripts/check-game.cjs`).
 

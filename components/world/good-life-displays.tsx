@@ -130,10 +130,10 @@ export function GoodLifeRoom({ assets }: { assets: string[] }) {
   )
 }
 
-export function GoodLifeLandmarks({ assets, endZ }: { assets: string[]; endZ: number }) {
+export function GoodLifeLandmarks({ assets, endZ, city = false }: { assets: string[]; endZ: number; city?: boolean }) {
   return (
     <group>
-      {assets.includes('penthouse') && (
+      {!city && assets.includes('penthouse') && (
         <group position={[-24, 0, -35]}>
           <Box at={[0, 15, 0]} size={[12, 30, 12]} color="#354253" />
           <Box at={[0, 31, 0]} size={[10, 2, 10]} color="#b7ab8c" />
@@ -148,7 +148,7 @@ export function GoodLifeLandmarks({ assets, endZ }: { assets: string[]; endZ: nu
         </group>
       )}
       {assets.includes('yacht') && (
-        <group position={[20, 0, endZ + 3]}>
+        <group position={[20, 0, endZ - 7]}>
           <Box at={[0, -0.15, 0]} size={[25, 0.2, 16]} color="#122d40" />
           <Box at={[0, 0.12, 7]} size={[12, 0.2, 3]} color="#654b31" />
           <group position={[0, 0, 0]} rotation={[0, 0, 0]}>

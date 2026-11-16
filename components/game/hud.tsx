@@ -9,11 +9,15 @@ import { useGame } from './game-provider'
 import { MusicPlayer } from './music-player'
 import { OBJECTIVES, BUSINESSES } from '@/lib/game/config'
 import { TouchControls } from './touch-controls'
+import { activeVehicle } from '@/lib/game/vehicles'
+import { CITY_BUILDINGS } from '@/lib/game/city'
 
 const AMOUNTS: BuyAmount[] = [1, 10, 100, 'max']
 
 export function Hud({
   focusedId,
+  onEnterBuilding,
+  onOpenMap,
   driving,
   onDrive,
   buyAmount,
@@ -23,6 +27,8 @@ export function Hud({
   onCharacter,
   alerts,
 }: {
+  onEnterBuilding: (id: string) => void
+  onOpenMap: () => void
   focusedId: string | null
   driving: boolean
   onDrive: () => void
@@ -35,6 +41,8 @@ export function Hud({
 }) {
   const { state } = useGame()
 
+  const vehicle = activeVehicle(state)
+  const building = CITY_BUILDINGS.find((b) => b.id === focusedId)
   const objective = OBJECTIVES.find((o) => !state.objectives.includes(o.id))
   const properties = BUSINESSES.filter((b) => state.businesses[b.id].owned > 0).length
 
@@ -93,16 +101,23 @@ export function Hud({
           >
             <UserRound className="size-4" /> Character · C
           </button>
-          {state.assets.includes('sedan') && (
+          {vehicle && (
             <button
               type="button"
               onClick={onDrive}
               className="flex items-center gap-2 rounded-full border border-primary/40 bg-background/90 px-3 py-2 text-xs text-primary"
             >
               <Car className="size-4" />
-              {driving ? 'Park & exit · E' : 'Drive sedan'}
+              {driving ? 'Park & exit · E' : `Drive ${vehicle?.name}`}
             </button>
           )}
+          <button
+            type="button"
+            onClick={onOpenMap}
+            className="rounded-full border border-primary/40 bg-background/90 px-4 py-2 text-sm text-primary"
+          >
+            City map & families · G
+          </button>
           <MusicPlayer />
           <div
             role="radiogroup"
@@ -134,10 +149,10 @@ export function Hud({
       <button
         type="button"
         onClick={onOpenLedger}
-        className="pointer-events-auto absolute top-56 left-4 max-w-[55%] rounded-xl border border-primary/20 bg-background/80 p-2 text-left backdrop-blur-md md:top-56 md:p-3 md:left-6"
+        className="pointer-events-auto absolute top-80 left-4 max-w-[55%] rounded-xl border border-primary/20 bg-background/80 p-2 text-left backdrop-blur-md md:top-56 md:p-3 md:left-6"
       >
         <p className="hidden text-[10px] tracking-[0.18em] text-primary uppercase md:block">
-          Little Italy · {properties}/{BUSINESSES.length} properties
+          City empire · {properties}/{BUSINESSES.length} properties
         </p>
         <p className="text-xs text-foreground md:mt-1">{objective ? objective.name : 'The city is yours'}</p>
         <p className="mt-1 text-[11px] text-muted-foreground">
@@ -156,7 +171,7 @@ export function Hud({
         <div aria-live="polite" className="flex w-full justify-center">
           {driving ? (
             <section className="pointer-events-auto w-full max-w-md rounded-xl border border-primary/30 bg-background/95 p-3 text-center">
-              <h2 className="font-serif text-lg text-primary">Armored Sedan · Driving</h2>
+              <h2 className="font-serif text-lg text-primary">{vehicle?.name} · Driving</h2>
               <p className="mt-1 text-xs text-muted-foreground">
                 W/S or ↑/↓ accelerate / reverse · A/D or ←/→ steer · Space brakes
               </p>
@@ -165,7 +180,7 @@ export function Hud({
                 onClick={onDrive}
                 className="mt-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground"
               >
-                Park & exit sedan · E
+                Park & exit vehicle · E
               </button>
             </section>
           ) : focusedId === 'sedan' ? (
@@ -174,14 +189,29 @@ export function Hud({
               onClick={onDrive}
               className="pointer-events-auto rounded-xl border border-primary/30 bg-background/95 p-4 text-primary"
             >
-              E · Enter your Armored Sedan
+              E · Enter your {vehicle?.name}
             </button>
           ) : (
-            <FocusCard focusedId={focusedId} buyAmount={buyAmount} onOpenSafeHouse={onOpenSafeHouse} />
+            <div className="pointer-events-auto flex w-full max-w-xl flex-col gap-2">
+              {building && (
+                <button
+                  type="button"
+                  onClick={() => onEnterBuilding(building.id)}
+                  className="rounded-xl border border-primary/40 bg-background/95 px-4 py-3 text-primary"
+                >
+                  E · Enter {building.name}
+                  <span className="ml-2 text-xs text-muted-foreground">{building.district}</span>
+                </button>
+              )}
+              {(!building || building.kind === 'business' || building.kind === 'safehouse') && (
+                <FocusCard focusedId={focusedId} buyAmount={buyAmount} onOpenSafeHouse={onOpenSafeHouse} />
+              )}
+            </div>
           )}
         </div>
         <p className="hidden text-xs text-muted-foreground md:block">
-          WASD to walk · Shift to sprint · Drag to orbit · Scroll to zoom · Esc to free the mouse
+          G city map · E enter · R collect · WASD walk · Shift sprint · Drag to orbit · Scroll to zoom · Esc
+          to free the mouse
         </p>
         <TouchControls driving={driving} />
       </div>

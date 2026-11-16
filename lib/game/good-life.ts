@@ -1,3 +1,4 @@
+import { PARKED_VEHICLES } from './vehicles'
 import type { Bounds } from './navigation'
 
 export const ASSET_LOCATIONS: Record<string, string> = {
@@ -6,14 +7,15 @@ export const ASSET_LOCATIONS: Record<string, string> = {
   sedan:
     'Drive your midnight-blue sedan from the street: use Drive sedan, or E when beside it. W/S accelerate and reverse; A/D steer; Space brakes; E exits.',
   penthouse:
-    'Your illuminated Bellini penthouse tower overlooks the street; its framed deed hangs in the safe house.',
+    'Your Bellini penthouse is the enterable Harbor View residence in the city atlas; its framed deed hangs in the safe house.',
   art: 'A permanent collection of framed paintings on the safe-house walls, separate from Decor Shop accents.',
   yacht:
-    'Your moored family yacht appears at the waterfront beside City Hall; a model sits on your safe-house desk. Display only, not sailable.',
+    'Your moored family yacht appears at the Harbor Quarter waterfront; a model sits on your safe-house desk. Display only, not sailable.',
 }
 export type CarPose = { x: number; z: number; yaw: number; speed: number }
 export const SEDAN_START: CarPose = { x: -3.4, z: 7, yaw: Math.PI, speed: 0 }
-export const PARKED_CARS = [-3, -35, -73].map((z) => ({ minX: 2.7, maxX: 6.2, minZ: z - 3, maxZ: z + 3 }))
+export const PARKED_CAR_POSITIONS: [number, number][] = PARKED_VEHICLES.map((v) => [v.x, v.z])
+export const PARKED_CARS = PARKED_CAR_POSITIONS.map(([x, z]) => ({ minX: x - 1.7, maxX: x + 1.7, minZ: z - 3, maxZ: z + 3 }))
 export function driveCar(
   car: CarPose,
   throttle: number,
@@ -21,13 +23,15 @@ export function driveCar(
   brake: boolean,
   dt: number,
   bounds: Bounds,
+  obstacles: Bounds[] = [],
+  handling = { speed: 16, acceleration: 9, steering: 1.5 },
 ): CarPose {
   const step = Math.max(0, Math.min(dt, 0.05))
-  let speed = car.speed + throttle * 9 * step
+  let speed = car.speed + throttle * handling.acceleration * step
   speed *= Math.exp(-(brake ? 12 : throttle === 0 ? 2.2 : 0.35) * step)
-  speed = Math.max(-5, Math.min(16, speed))
+  speed = Math.max(-5, Math.min(handling.speed, speed))
   if (Math.abs(speed) < 0.02) speed = 0
-  const yaw = car.yaw - steering * 1.5 * step * Math.min(1, Math.abs(speed) / 3) * Math.sign(speed)
+  const yaw = car.yaw - steering * handling.steering * step * Math.min(1, Math.abs(speed) / 3) * Math.sign(speed)
   const x = car.x + Math.sin(yaw) * speed * step
   const z = car.z + Math.cos(yaw) * speed * step
   const blocked =
@@ -35,10 +39,18 @@ export function driveCar(
     x > bounds.maxX - 2 ||
     z < bounds.minZ + 2 ||
     z > bounds.maxZ - 2 ||
+    obstacles.some((o) => x > o.minX - 1 && x < o.maxX + 1 && z > o.minZ - 1 && z < o.maxZ + 1) ||
     PARKED_CARS.some((o) => x > o.minX && x < o.maxX && z > o.minZ && z < o.maxZ)
   return blocked ? { ...car, yaw, speed: 0 } : { x, z, yaw, speed }
 }
-export function carExit(car: CarPose, bounds: Bounds) {
+export function carExit(car: CarPose, bounds: Bounds, obstacles: Bounds[] = []) {
+  for (const side of [-1, 1]) {
+    const point = {
+      x: Math.max(bounds.minX, Math.min(bounds.maxX, car.x + side * Math.cos(car.yaw) * 1.7)),
+      z: Math.max(bounds.minZ, Math.min(bounds.maxZ, car.z - side * Math.sin(car.yaw) * 1.7)),
+    }
+    if (!obstacles.some((o) => point.x > o.minX && point.x < o.maxX && point.z > o.minZ && point.z < o.maxZ)) return point
+  }
   return {
     x: Math.max(bounds.minX, Math.min(bounds.maxX, car.x - Math.cos(car.yaw) * 1.7)),
     z: Math.max(bounds.minZ, Math.min(bounds.maxZ, car.z + Math.sin(car.yaw) * 1.7)),

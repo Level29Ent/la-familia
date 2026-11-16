@@ -4,6 +4,7 @@ import dynamic from 'next/dynamic'
 import { useEffect, useMemo, useState } from 'react'
 import type { InspectionView } from '@/components/world/inspection-camera'
 import { input } from '@/lib/game/input'
+import { CITY_BUILDINGS, outsideBuilding } from '@/lib/game/city'
 import { SEDAN_START } from '@/lib/game/good-life'
 import { ROOM_NAVIGATION, type Navigation } from '@/lib/game/navigation'
 import { STREET_NAVIGATION } from '@/components/world/layout'
@@ -48,7 +49,7 @@ export function GoodLifePreview() {
     return {
       ...STREET_NAVIGATION,
       start:
-        view === 'yacht' ? [4, 1.7, -92] : view === 'penthouse' ? [0, 1.7, -35] : STREET_NAVIGATION.start,
+        view === 'yacht' ? [20, 1.7, -94] : view === 'penthouse' ? outsideBuilding('home-14').start : STREET_NAVIGATION.start,
       yaw: view === 'yacht' ? -Math.PI / 2 : view === 'penthouse' ? Math.PI / 2 : 0,
     }
   }, [room, view])
@@ -60,9 +61,9 @@ export function GoodLifePreview() {
           ? { position: [-2.5, 2.1, 4.4], target: [-6.4, 1.6, 4.4] }
           : { position: [1.6, 2.7, 5], target: [3.8, 1.55, 2] }
         : view === 'penthouse'
-          ? { position: [0, 12, -20], target: [-24, 31, -35] }
+          ? { position: [CITY_BUILDINGS.find((b) => b.id === 'home-14')!.position[0], 14, -51], target: [CITY_BUILDINGS.find((b) => b.id === 'home-14')!.position[0], 7, -80] }
           : view === 'yacht'
-            ? { position: [15, 5, -85], target: [20, 1, -93] }
+            ? { position: [15, 5, -92], target: [20, 1, -104] }
             : undefined
   return (
     <main className="relative h-dvh overflow-hidden bg-background">

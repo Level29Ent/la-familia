@@ -1,5 +1,5 @@
+import { CITY_BUILDINGS, CITY_NAVIGATION, outsideBuilding } from '@/lib/game/city'
 import type { Navigation } from '@/lib/game/navigation'
-import { BUSINESSES } from '@/lib/game/config'
 
 export type BuildingStyle = {
   wall: string
@@ -35,63 +35,14 @@ export type Placement = {
 }
 
 export const STREET_HALF_WIDTH = 7
-export const SPACING = 7
-
-export const PLACEMENTS: Placement[] = BUSINESSES.map((b, i) => {
-  const style = BUILDING_STYLES[b.id]
-  if (b.id === 'cityhall') {
-    const z = -(BUSINESSES.length - 1) * SPACING - 12
-    return { id: b.id, position: [0, 0, z], rotationY: 0, door: [0, z + style.depth / 2] }
-  }
-  const side = i % 2 === 0 ? -1 : 1
-  const x = side * (STREET_HALF_WIDTH + style.depth / 2)
-  const z = -i * SPACING
-  return {
-    id: b.id,
-    position: [x, 0, z],
-    rotationY: side === -1 ? Math.PI / 2 : -Math.PI / 2,
-    door: [side * STREET_HALF_WIDTH, z],
-  }
-})
-
-const cityHall = PLACEMENTS[PLACEMENTS.length - 1]
-
-export const PLAYER_BOUNDS = {
-  minX: -STREET_HALF_WIDTH + 0.7,
-  maxX: STREET_HALF_WIDTH - 0.7,
-  minZ: cityHall.door[1] + 1.2,
-  maxZ: 14,
-}
-
-export const PLAYER_START: [number, number, number] = [0, 1.7, 11]
-
-export const SAFE_HOUSE_PLACEMENT: Placement = {
-  id: 'safehouse',
-  position: [11, 0, 10],
-  rotationY: -Math.PI / 2,
-  door: [7, 10],
-}
+export const SPACING = 36
+export const PLACEMENTS: Placement[] = CITY_BUILDINGS.filter((b) => b.kind === 'business')
+export const PLAYER_BOUNDS = CITY_NAVIGATION.bounds
+export const PLAYER_START = CITY_NAVIGATION.start
+export const SAFE_HOUSE_PLACEMENT = CITY_BUILDINGS.find((b) => b.id === 'safehouse')!
 export const SAFE_HOUSE_STYLE: BuildingStyle = {
-  wall: '#43554d',
-  trim: '#1d302a',
-  neon: '#bfe6c4',
-  height: 10,
-  width: 10,
-  depth: 8,
+  wall: '#43554d', trim: '#1d302a', neon: '#bfe6c4', height: 10, width: 10, depth: 9,
 }
-export const INTERACTION_PLACEMENTS = [...PLACEMENTS, SAFE_HOUSE_PLACEMENT]
-
-export const STREET_NAVIGATION: Navigation = {
-  start: PLAYER_START,
-  yaw: 0,
-  bounds: PLAYER_BOUNDS,
-  obstacles: [],
-  targets: INTERACTION_PLACEMENTS,
-  focusRange: 9,
-  speed: 6,
-}
-export const STREET_RETURN_NAVIGATION: Navigation = {
-  ...STREET_NAVIGATION,
-  start: [5, 1.7, 10],
-  yaw: Math.PI / 2,
-}
+export const INTERACTION_PLACEMENTS = CITY_BUILDINGS
+export const STREET_NAVIGATION: Navigation = CITY_NAVIGATION
+export const STREET_RETURN_NAVIGATION: Navigation = outsideBuilding('safehouse')

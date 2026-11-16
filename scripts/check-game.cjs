@@ -23,10 +23,10 @@ const {
   profitMultiplier,
   computeOfflineEarnings,
 } = require('../lib/game/engine.ts')
-assert.equal(BUSINESSES.length, 14)
-assert.equal(new Set(BUSINESSES.map((b) => b.id)).size, 14)
+assert.equal(BUSINESSES.length, 26)
+assert.equal(new Set(BUSINESSES.map((b) => b.id)).size, 26)
 let state = createInitialState()
-assert.equal(Object.keys(state.businesses).length, 14)
+assert.equal(Object.keys(state.businesses).length, 26)
 assert.equal(BUSINESSES.at(-1).id, 'cityhall')
 const old = {
   cash: 1234,
@@ -86,7 +86,7 @@ assert.ok(
 )
 assert.deepEqual(createInitialState(10, 1e9, 1).assets, [])
 console.log(
-  'PASS: 14 properties; old-save migration; spending and stacked bonuses; objective guards; operation requirements, timing, save/resume, and single payouts; offline bonus; prestige reset.',
+  'PASS: 26 properties; old-save migration; spending and stacked bonuses; objective guards; operation requirements, timing, save/resume, and single payouts; offline bonus; prestige reset.',
 )
 
 const {
@@ -365,6 +365,7 @@ console.log(
 const {
   ASSET_LOCATIONS,
   SEDAN_START,
+  PARKED_CARS,
   driveCar,
   carExit,
   goodLifeRoomNavigation,
@@ -386,7 +387,8 @@ assert.ok(reverse.z > SEDAN_START.z && reverse.speed < 0)
 const edge = { x: bounds.maxX - 2, z: -10, yaw: Math.PI / 2, speed: 10 }
 assert.equal(driveCar(edge, 1, 0, false, 0.05, bounds).x, edge.x)
 assert.equal(driveCar(edge, 1, 0, false, 0.05, bounds).speed, 0)
-const parkedCollision = driveCar({ x: 2.6, z: -3, yaw: Math.PI / 2, speed: 8 }, 1, 0, false, 0.05, bounds)
+const parkedCar = PARKED_CARS[0]
+const parkedCollision = driveCar({ x: parkedCar.minX - 0.1, z: (parkedCar.minZ + parkedCar.maxZ) / 2, yaw: Math.PI / 2, speed: 8 }, 1, 0, false, 0.05, { minX: -43, maxX: 79, minZ: -97, maxZ: 25 })
 assert.equal(parkedCollision.speed, 0)
 for (const yaw of [0, Math.PI / 2, Math.PI, -Math.PI / 2]) {
   const exit = carExit({ x: 0, z: -30, yaw, speed: 0 }, bounds)

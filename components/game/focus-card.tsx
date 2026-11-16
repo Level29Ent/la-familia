@@ -162,7 +162,7 @@ export function FocusCard({
       <div className="flex flex-col gap-2 sm:flex-row">
         {b.managed ? (
           <ActionButton
-            hotkey="E"
+            hotkey="R"
             label="Capo collecting"
             detail="Automatic"
             disabled
@@ -171,7 +171,7 @@ export function FocusCard({
           />
         ) : (
           <ActionButton
-            hotkey="E"
+            hotkey="R"
             label={b.running ? 'Collecting...' : 'Collect'}
             detail={b.running ? formatDuration(cycle - b.progress) : 'Ready'}
             disabled={b.running}

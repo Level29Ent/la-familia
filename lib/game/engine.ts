@@ -1,3 +1,5 @@
+import { initialFleet, restoreFleet, type FleetState } from './vehicles'
+import { initialCity, restoreCity, tickCity, type CityState } from './rivals'
 import { DEFAULT_CHARACTER, restoreCharacter, type CharacterConfig } from './character'
 import { initialDecor } from './decor'
 import { restoreSafeHouse, type SafeHouseState } from './safe-house'
@@ -21,6 +23,8 @@ export type BusinessState = {
 }
 
 export type GameState = {
+  fleet: FleetState
+  city: CityState
   cash: number
   character: CharacterConfig
   safeHouse: SafeHouseState
@@ -52,6 +56,8 @@ export function createInitialState(respect = 0, lifetimeEarnings = 0, heists = 0
   }
   const now = Date.now()
   return {
+    fleet: initialFleet(),
+    city: initialCity(),
     cash: 0,
     character: { ...DEFAULT_CHARACTER },
     safeHouse: { balance: 0, tier: 0, decor: initialDecor() },
@@ -149,13 +155,12 @@ export function claimableRespect(state: GameState) {
 
 export function tick(state: GameState, dtMs: number): GameState {
   let earned = 0
-  let changed = false
+  const city = tickCity(state.city, dtMs)
   const businesses = { ...state.businesses }
 
   for (const config of BUSINESSES) {
     const b = businesses[config.id]
     if (b.owned === 0 || (!b.running && !b.managed)) continue
-    changed = true
     const cycle = cycleTime(config, b.owned)
     let progress = b.progress + dtMs
     let running = b.running
@@ -179,7 +184,6 @@ export function tick(state: GameState, dtMs: number): GameState {
   let operation = state.operation
   let operationsCompleted = state.operationsCompleted
   if (operation) {
-    changed = true
     operation = {
       ...operation,
       remainingMs: Math.max(0, operation.remainingMs - dtMs),
@@ -190,9 +194,9 @@ export function tick(state: GameState, dtMs: number): GameState {
       operation = null
     }
   }
-  if (!changed) return state
   return {
     ...state,
+    city,
     businesses,
     operation,
     operationsCompleted,
@@ -268,6 +272,8 @@ export function restoreState(saved: Partial<GameState>): GameState {
   return {
     ...fresh,
     ...saved,
+    fleet: restoreFleet(saved.fleet, Array.isArray(saved.assets) ? saved.assets : []),
+    city: restoreCity(saved.city),
     businesses: { ...fresh.businesses, ...saved.businesses },
     safeHouse: restoreSafeHouse(saved.safeHouse),
     character: restoreCharacter(saved.character),

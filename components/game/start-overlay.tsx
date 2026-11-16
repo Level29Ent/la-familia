@@ -6,11 +6,11 @@ import { assetPath } from '@/lib/asset-path'
 const CONTROLS = [
   ['W A S D', 'Walk the street'],
   ['Mouse', 'Drag to orbit · scroll to zoom'],
-  ['E', 'Collect from a racket'],
+  ['E / R', 'Enter building / collect income'],
   ['F', 'Buy more / acquire'],
   ['Q', 'Hire a capo'],
   ['1 - 4', 'Buy x1, x10, x100, Max'],
-  ['M', 'Open the ledger'],
+  ['G / M', 'City map & rivals / ledger'],
   ['H', 'Visit your safe house & vault'],
   ['C', 'Customize your character'],
   ['E / Space', 'Enter or exit owned sedan / brake'],
@@ -50,8 +50,7 @@ export function StartOverlay({ onStart, onCharacter }: { onStart: () => void; on
             La Familia
           </h1>
           <p className="text-pretty text-sm text-muted-foreground">
-            Fourteen properties. One family. Walk the sunlit streets, fund midnight operations, and turn your
-            first dollar into a dynasty.
+            Twelve city blocks. Forty-eight enterable buildings. Twenty-six businesses, eighteen homes, and three rival families. Build your crew and claim the city.
           </p>
         </div>
 
@@ -69,7 +68,7 @@ export function StartOverlay({ onStart, onCharacter }: { onStart: () => void; on
         </dl>
 
         <p className="text-center text-xs text-primary">
-          New: Empire objectives · Luxury assets · Original night music
+          New: City atlas · Walkable interiors · Rival family crews
         </p>
         <button
           type="button"
