@@ -6,9 +6,20 @@ import type { Group } from 'three'
 import { RECRUITS, type DynastyState } from '@/lib/game/dynasty'
 import { AVENUES } from '@/lib/game/city'
 import { VintageCar } from './vintage-car'
+import { NpcHuman } from './npc-human'
+import type { Contact } from '@/lib/game/city-play'
+import { npcAppearance } from '@/lib/game/npc-appearance'
 import { WorldText } from './world-text'
 
-function Citizen({ index, active }: { index: number; active: boolean }) {
+const CITIZEN_LOOKS = Array.from({ length: 24 }, (_, i) => npcAppearance(i))
+const RECRUIT_LOOKS = RECRUITS.map((r, i) => ({
+  ...npcAppearance(i + 30),
+  gender: ['lucia', 'maria', 'ada', 'rosa'].includes(r.id) ? 1 : 0,
+}))
+
+const Citizen = memo(function Citizen({ index, active }: { index: number; active: boolean }) {
+  const motion = useRef({ moving: active, sprint: false })
+  motion.current.moving = active
   const ref = useRef<Group>(null),
     row = Math.floor(index / 8),
     x = -32 + (index % 8) * 24,
@@ -22,24 +33,19 @@ function Citizen({ index, active }: { index: number; active: boolean }) {
   })
   return (
     <group ref={ref} position={[x, 0, z]}>
-      <mesh position={[0, 1.05, 0]}>
-        <boxGeometry args={[0.42, 0.8, 0.3]} />
-        <meshStandardMaterial color={['#8a6e5d', '#6d8793', '#a48e6c', '#71765b'][index % 4]} />
-      </mesh>
-      <mesh position={[0, 1.65, 0]}>
-        <sphereGeometry args={[0.2, 8, 6]} />
-        <meshStandardMaterial color="#c49776" />
-      </mesh>
-      {[-0.13, 0.13].map((side) => (
-        <mesh key={side} position={[side, 0.4, 0]}>
-          <boxGeometry args={[0.16, 0.8, 0.2]} />
-          <meshStandardMaterial color="#44434a" />
-        </mesh>
-      ))}
+      <NpcHuman config={CITIZEN_LOOKS[index]} motion={motion} />
     </group>
   )
-}
-function Traffic({ index, active, heat }: { index: number; active: boolean; heat: number }) {
+})
+const Traffic = memo(function Traffic({
+  index,
+  active,
+  heat,
+}: {
+  index: number
+  active: boolean
+  heat: number
+}) {
   const ref = useRef<Group>(null),
     x = AVENUES[index] + (index % 2 ? 2 : -2),
     reverse = index % 2 === 1
@@ -69,25 +75,31 @@ function Traffic({ index, active, heat }: { index: number; active: boolean; heat
       )}
     </group>
   )
-}
+})
 export const LivingCity = memo(function LivingCity({
   active,
+  night = false,
+  low = false,
   dynasty,
+  contacts = [],
   onMeet,
 }: {
   active: boolean
+  night?: boolean
+  low?: boolean
+  contacts?: Contact[]
   dynasty: DynastyState
   onMeet?: (id: string) => void
 }) {
   return (
     <group>
-      {Array.from({ length: 24 }, (_, index) => (
+      {Array.from({ length: low ? 8 : night ? 12 : 24 }, (_, index) => (
         <Citizen key={index} index={index} active={active} />
       ))}
-      {Array.from({ length: 6 }, (_, index) => (
-        <Traffic key={index} index={index} active={active} heat={dynasty.heat} />
+      {Array.from({ length: night ? 6 : low ? 3 : 5 }, (_, index) => (
+        <Traffic key={index} index={index} active={active} heat={Math.max(dynasty.heat, night ? 60 : 0)} />
       ))}
-      {RECRUITS.map((r) => {
+      {RECRUITS.map((r, index) => {
         const hired = dynasty.members.some((m) => m.id === r.id),
           away = dynasty.missions.some((m) => m.memberId === r.id)
         if (away) return null
@@ -100,40 +112,17 @@ export const LivingCity = memo(function LivingCity({
               if (active) onMeet?.(r.id)
             }}
           >
-            <mesh position={[0, 1.15, 0]}>
-              <boxGeometry args={[0.55, 1, 0.35]} />
-              <meshStandardMaterial
-                color={
-                  hired
-                    ? '#d0b068'
-                    : r.role === 'hitman'
-                      ? '#584456'
-                      : r.role === 'guard'
-                        ? '#3c5e69'
-                        : '#657f59'
-                }
-              />
+            <mesh position={[0, 1.05, 0]}>
+              <cylinderGeometry args={[0.38, 0.38, 2.1, 8]} />
+              <meshBasicMaterial transparent opacity={0} depthWrite={false} />
             </mesh>
-            <mesh position={[0, 1.9, 0]}>
-              <sphereGeometry args={[0.23, 10, 8]} />
-              <meshStandardMaterial color="#cca47b" />
-            </mesh>
-            <mesh position={[0, 2.15, 0]}>
-              <cylinderGeometry args={[0.32, 0.32, 0.1, 10]} />
-              <meshStandardMaterial color="#303332" />
-            </mesh>
-            {[-0.17, 0.17].map((x) => (
-              <mesh key={x} position={[x, 0.45, 0]}>
-                <boxGeometry args={[0.2, 0.9, 0.25]} />
-                <meshStandardMaterial color="#31353b" />
-              </mesh>
-            ))}
+            <NpcHuman config={RECRUIT_LOOKS[index]} accent={hired ? '#e4c76a' : undefined} />
             <WorldText position={[0, 2.8, 0]} fontSize={0.24} color={hired ? '#edcf76' : '#c7e3bb'}>
               {r.name}
             </WorldText>
             <WorldText position={[0, 2.5, 0]} fontSize={0.18} color="#f0dfb7">
               {hired
-                ? `FAMILY · ${dynasty.members.find((m) => m.id === r.id)?.duty.toUpperCase()}`
+                ? `${['ASSOCIATE', 'MADE MAN', 'CAPO'][contacts.find((c) => c.id === r.id)?.grade ?? 0]} · ${dynasty.members.find((m) => m.id === r.id)?.duty.toUpperCase()}`
                 : `HIRE ${r.role.toUpperCase()} · $${r.cost}`}
             </WorldText>
             <mesh position={[0, 0.03, 0]} rotation={[-Math.PI / 2, 0, 0]}>

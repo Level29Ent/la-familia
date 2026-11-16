@@ -1,14 +1,15 @@
 'use client'
 
 import { Car, BookOpen, UserRound, House, Crown, TrendingUp } from 'lucide-react'
-import { objectiveProgress, respectMultiplier, totalIncomePerSecond, type BuyAmount } from '@/lib/game/engine'
+import { respectMultiplier, totalIncomePerSecond, type BuyAmount } from '@/lib/game/engine'
 import { formatMoney, formatNumber } from '@/lib/game/format'
 import { cn } from '@/lib/utils'
 import { FocusCard } from './focus-card'
 import { useGame } from './game-provider'
 import { MusicPlayer } from './music-player'
-import { OBJECTIVES, BUSINESSES } from '@/lib/game/config'
 import { TouchControls } from './touch-controls'
+import { GUIDE } from '@/lib/game/city-play'
+import { ClockBadge } from './city-feedback'
 import { RANKS, rankIndex } from '@/lib/game/dynasty'
 import { activeVehicle } from '@/lib/game/vehicles'
 import { CITY_BUILDINGS } from '@/lib/game/city'
@@ -19,6 +20,7 @@ export function Hud({
   focusedId,
   onEnterBuilding,
   onOpenMap,
+  onOpenGoals,
   driving,
   onDrive,
   buyAmount,
@@ -29,6 +31,7 @@ export function Hud({
   alerts,
 }: {
   onEnterBuilding: (id: string) => void
+  onOpenGoals: () => void
   onOpenMap: () => void
   focusedId: string | null
   driving: boolean
@@ -44,18 +47,25 @@ export function Hud({
 
   const vehicle = activeVehicle(state)
   const building = CITY_BUILDINGS.find((b) => b.id === focusedId)
-  const objective = OBJECTIVES.find((o) => !state.objectives.includes(o.id))
-  const properties = BUSINESSES.filter((b) => state.businesses[b.id].owned > 0).length
+  const goal = GUIDE.find((g) => !state.play.guide.includes(g.id))
 
   return (
     <div className="pointer-events-none absolute inset-0 flex flex-col justify-between p-4 md:p-6">
       <div className="flex items-start justify-between gap-4">
         <div className="flex flex-col gap-1 rounded-2xl border border-border bg-background/70 px-4 py-3 backdrop-blur-md">
-          <p className="font-serif text-sm font-semibold tracking-wide text-muted-foreground">La Familia · {RANKS[rankIndex(state)].name}</p>
+          <p className="font-serif text-sm font-semibold tracking-wide text-muted-foreground">
+            La Familia · {RANKS[rankIndex(state)].name}
+          </p>
           <p className="font-serif text-3xl font-bold text-primary tabular-nums md:text-4xl">
             {formatMoney(state.cash)}
           </p>
-          <p className="text-[11px] text-primary">{RANKS[rankIndex(state)].name} · Heat {Math.ceil(state.dynasty.heat)}/100{state.dynasty.heat >= 60 ? ` · Arrest in ${Math.ceil(state.dynasty.arrestMs/1000)}s outside` : ''}</p>
+          <p className="text-[11px] text-primary">
+            {RANKS[rankIndex(state)].name} · Heat {Math.ceil(state.dynasty.heat)}/100
+            {state.dynasty.heat >= 60
+              ? ` · Arrest in ${Math.ceil(state.dynasty.arrestMs / 1000)}s outside`
+              : ''}
+          </p>
+          <ClockBadge />
           <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm tabular-nums">
             <span className="flex items-center gap-1.5 text-foreground">
               <TrendingUp className="size-4 text-primary" aria-hidden="true" />
@@ -150,18 +160,13 @@ export function Hud({
 
       <button
         type="button"
-        onClick={onOpenLedger}
-        className="pointer-events-auto absolute top-80 left-4 max-w-[55%] rounded-xl border border-primary/20 bg-background/80 p-2 text-left backdrop-blur-md md:top-56 md:p-3 md:left-6"
+        aria-label="Open opening goals and settings"
+        onClick={onOpenGoals}
+        className="pointer-events-auto absolute top-80 left-4 max-w-[45%] rounded-xl border border-primary/20 bg-background/90 p-2 text-left md:left-6"
       >
-        <p className="hidden text-[10px] tracking-[0.18em] text-primary uppercase md:block">
-          City empire · {properties}/{BUSINESSES.length} properties
-        </p>
-        <p className="text-xs text-foreground md:mt-1">{objective ? objective.name : 'The city is yours'}</p>
-        <p className="mt-1 text-[11px] text-muted-foreground">
-          {objective
-            ? `${Math.min(objective.goal, Math.floor(objectiveProgress(state, objective.metric)))}/${objective.goal} · Open Empire →`
-            : 'All objectives complete'}
-        </p>
+        <p className="text-[10px] uppercase text-primary">First Fifteen Minutes</p>
+        <p className="my-1 text-xs">{goal ? goal.title : 'Opening complete'}</p>
+        <p className="text-[10px] text-muted-foreground">{state.play.guide.length}/5 · Goals & settings →</p>
       </button>
 
       <div

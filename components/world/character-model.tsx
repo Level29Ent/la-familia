@@ -296,6 +296,8 @@ export function CharacterModel({
           <Form at={[0, -0.11, 0.015]} scale={[0.12 * shape.jaw, 0.1, 0.125]} color={skin} />
           {[-1, 1].map((side) => (
             <group key={side}>
+              <Form at={[side * 0.065, -0.025, 0.1]} scale={[0.065, 0.055, 0.05]} color={skin} />
+              <Form at={[side * 0.058, 0.043, 0.141]} scale={[0.037, 0.01, 0.013]} color={skin} />
               <Form at={[side * 0.157, 0, 0]} scale={[0.035, 0.065, 0.032]} color={skin} />
               <Form at={[side * 0.058, 0.025, 0.14]} scale={[0.032, 0.016, 0.014]} color="#ece3d6" />
               <Form
@@ -313,6 +315,7 @@ export function CharacterModel({
             </group>
           ))}
           <Form at={[0, -0.015, 0.155]} scale={[0.027, 0.06, 0.045 * config.nose]} color={skin} />
+          <Form at={[0, -0.145, 0.08]} scale={[0.07, 0.035, 0.06]} color={skin} />
           <Form at={[0, -0.09, 0.133]} scale={[0.05, 0.012, 0.015]} color={lip} />
           {config.earrings !== 0 &&
             [-1, 1].map((side) =>

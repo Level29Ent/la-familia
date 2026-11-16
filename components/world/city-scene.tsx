@@ -17,6 +17,9 @@ import { activeVehicle } from '@/lib/game/vehicles'
 import { ESTATES } from '@/lib/game/dynasty'
 import { EstateDetails } from './estate-details'
 import { LivingCity, StreetLifeDetails } from './living-city'
+import { cityTime } from '@/lib/game/city-play'
+import { WorldText } from './world-text'
+import { CityAtmosphere } from './city-atmosphere'
 import { CITY_BUILDINGS, FAMILIES } from '@/lib/game/city'
 
 const CITY_STYLES = Object.fromEntries(
@@ -84,27 +87,50 @@ export function CityScene({
   movementEnabled: boolean
   onFocusChange: (id: string | null) => void
 }) {
+  const time = cityTime(state.play),
+    low = state.play.quality === 'low'
   return (
     <Canvas
       frameloop={movementEnabled ? 'always' : 'demand'}
       fallback={<SceneUnavailable />}
       className="absolute inset-0 touch-none"
-      dpr={[1, 1.5]}
+      dpr={low ? 1 : [1, 1.5]}
       camera={{ fov: 70, near: 0.1, far: 260 }}
       gl={{ antialias: true }}
       aria-label="3D city street. Walk up to a storefront to manage that racket."
     >
-      <color attach="background" args={['#a7cce5']} />
-      <fog attach="fog" args={['#b8d0dd', 65, 220]} />
-      <ambientLight intensity={1.3} color="#fff4df" />
-      <hemisphereLight args={['#d5ecff', '#a2947a', 1.65]} />
-      <directionalLight position={[40, 60, -70]} intensity={2.6} color="#fff1d0" />
-      <directionalLight position={[-35, 25, 40]} intensity={0.65} color="#c4e1ff" />
-
-      <mesh position={[90,80,-170]}><sphereGeometry args={[5,16,12]}/><meshBasicMaterial color="#fff1b6" fog={false}/></mesh>
+      <CityAtmosphere hour={time.hour} />
+      <mesh position={[90, time.night ? 65 : 80, -170]}>
+        <sphereGeometry args={[5, 16, 12]} />
+        <meshBasicMaterial color={time.night ? '#dae3f0' : '#fff1b6'} fog={false} />
+      </mesh>
+      {state.play.territories.map((t, i) => (
+        <group key={t.district} position={[i < 3 ? -32 : i === 3 ? 76 : 112, 0, i < 3 ? 22 - i * 36 : 22]}>
+          <mesh position={[0, 2.3, 0]}>
+            <cylinderGeometry args={[0.06, 0.06, 4.6, 6]} />
+            <meshStandardMaterial color="#6d736e" />
+          </mesh>
+          <mesh position={[1, 3.6, 0]}>
+            <boxGeometry args={[2, 0.9, 0.06]} />
+            <meshStandardMaterial
+              color={t.control >= 75 ? '#bb9a4b' : t.control > 0 ? '#846847' : '#713e43'}
+            />
+          </mesh>
+          <WorldText position={[1, 3.6, 0.05]} fontSize={0.2} color="#f0dfb0">
+            {t.control >= 75 ? 'BELLINI' : t.control > 0 ? 'CONTESTED' : 'RIVAL TURF'}
+          </WorldText>
+        </group>
+      ))}
       <CityStreets />
       <StreetLifeDetails />
-      <LivingCity active={movementEnabled} dynasty={state.dynasty} onMeet={onNpcEncounter} />
+      <LivingCity
+        contacts={state.play.contacts}
+        night={time.night}
+        low={low}
+        active={movementEnabled}
+        dynasty={state.dynasty}
+        onMeet={onNpcEncounter}
+      />
       <RivalCrews active={movementEnabled} onEncounter={onFamilyEncounter} />
       <GoodLifeLandmarks city assets={state.assets} endZ={STREET_NAVIGATION.bounds.minZ} />
 
@@ -128,7 +154,7 @@ export function CityScene({
                     : building.name
               }
               status={business ? statusFor(state, building.id) : 'ready'}
-              litLevel={business ? litLevelFor(business.owned) : 0.6}
+              litLevel={time.night ? 0.9 : business ? litLevelFor(business.owned) : 0.6}
               focused={focusedId === building.id}
               seed={i + 1}
             />

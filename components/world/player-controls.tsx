@@ -27,11 +27,11 @@ export function PlayerControls({
   enabled: boolean
   navigation: Navigation
   character: CharacterConfig
-  vehicle?: typeof VEHICLES[number] | null
+  vehicle?: (typeof VEHICLES)[number] | null
   assets?: string[]
   driving?: boolean
   onVehicleUpdate?: (pose: CarPose) => void
-  onPositionChange?: (position: { x: number; z: number }) => void
+  onPositionChange?: (position: { x: number; z: number; yaw?: number }) => void
   onFocusChange: (id: string | null) => void
 }) {
   const hasVehicle = vehicle !== undefined ? !!vehicle : assets.includes('sedan')
@@ -100,14 +100,9 @@ export function PlayerControls({
       dragging = true
       lastX = e.clientX
       lastY = e.clientY
-      if (e.pointerType === 'mouse' && !document.pointerLockElement) {
-        try {
-          const result = el.requestPointerLock() as unknown as Promise<void> | undefined
-          result?.catch?.(() => {})
-        } catch {
-          // Pointer lock can be blocked inside iframes; drag-to-look still works.
-        }
-      }
+      // Ordinary clicks also select NPCs. Do not acquire pointer lock on pointerdown:
+      // it can recenter the subsequent click before R3F raycasts the intended person.
+      // Drag-to-look works for mouse and touch without capturing the cursor.
     }
     const onPointerMove = (e: PointerEvent) => {
       if (!input.enabled) return
@@ -177,7 +172,16 @@ export function PlayerControls({
     const len = Math.hypot(mx, mz)
     const moving = len > 0
     if (driving) {
-      car.current = driveCar(car.current, forward, strafe, k.has('Space'), dt, navigation.bounds, navigation.obstacles, vehicle ?? undefined)
+      car.current = driveCar(
+        car.current,
+        forward,
+        strafe,
+        k.has('Space'),
+        dt,
+        navigation.bounds,
+        navigation.obstacles,
+        vehicle ?? undefined,
+      )
       position.current = { x: car.current.x, z: car.current.z }
       look.current.yaw = car.current.yaw - Math.PI
       if (carModel.current) {
@@ -205,7 +209,7 @@ export function PlayerControls({
     if (reportElapsed.current >= 0.25) {
       reportElapsed.current = 0
       onVehicleUpdate?.({ ...car.current })
-      onPositionChange?.({ ...position.current })
+      onPositionChange?.({ ...position.current, yaw: driving ? car.current.yaw - Math.PI : yaw })
     }
     if (player.current) player.current.position.set(position.current.x, 0, position.current.z)
     const orbit = followCamera(
@@ -218,12 +222,11 @@ export function PlayerControls({
     if (player.current)
       player.current.visible =
         !driving && Math.hypot(orbit.x - position.current.x, orbit.z - position.current.z) >= 0.65
-    camera.position.set(orbit.x, orbit.y, orbit.z)
+    camera.position.lerp(view.current.set(orbit.x, orbit.y, orbit.z), 1 - Math.exp(-dt * 12))
     camera.lookAt(view.current.set(position.current.x, 1.25 * character.height, position.current.z))
 
     const nearCar =
-      hasVehicle &&
-      Math.hypot(position.current.x - car.current.x, position.current.z - car.current.z) < 3.2
+      hasVehicle && Math.hypot(position.current.x - car.current.x, position.current.z - car.current.z) < 3.2
     const best = driving ? null : nearCar ? 'sedan' : focusedTarget(position.current, yaw, navigation)
     if (best !== focusedRef.current) {
       focusedRef.current = best

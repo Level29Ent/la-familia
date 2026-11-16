@@ -1,3 +1,4 @@
+import { contactFor } from './city-play'
 import type { GameState } from './engine'
 import { FAMILIES } from './city'
 
@@ -211,12 +212,16 @@ export function defense(state: GameState) {
         (m) =>
           m.duty === 'guard' && !m.recoveryMs && !state.dynasty.missions.some((o) => o.memberId === m.id),
       )
-      .reduce((s, m) => s + RECRUITS.find((r) => r.id === m.id)!.power, 0)
+      .reduce((s, m) => s + RECRUITS.find((r) => r.id === m.id)!.power + contactFor(state, m.id).grade * 4, 0)
   )
 }
 export function missionPower(state: GameState, id: string) {
   return (
-    (RECRUITS.find((r) => r.id === id)?.power ?? 0) + rankIndex(state) * 5 + Math.floor(state.city.crew / 2)
+    (RECRUITS.find((r) => r.id === id)?.power ?? 0) +
+    contactFor(state, id).grade * 5 +
+    Math.floor(Math.max(0, contactFor(state, id).loyalty - 50) / 10) +
+    rankIndex(state) * 5 +
+    Math.floor(state.city.crew / 2)
   )
 }
 export function missionEnemy(state: GameState, family: string) {

@@ -16,6 +16,10 @@ import { SceneBoundary } from './scene-boundary'
 import { CITY_BUILDINGS, CITY_NAVIGATION, outsideBuilding, type CityBuilding } from '@/lib/game/city'
 import { CityMap } from './city-map'
 import { activeVehicle } from '@/lib/game/vehicles'
+import type { MapPosition } from '@/lib/game/map'
+import { GuidePanel } from './city-play-panel'
+import { CityFeedback } from './city-feedback'
+import { MiniMap } from './street-map'
 import { CustodyNotice } from './dynasty-panel'
 import { InteriorHud } from './interior-hud'
 
@@ -52,6 +56,7 @@ const BUY_KEYS: Record<string, BuyAmount> = { Digit1: 1, Digit2: 10, Digit3: 100
 
 function World() {
   const { state, dispatch, offlineReport } = useGame()
+  const [transitioning, setTransitioning] = useState(false)
   const [driving, setDriving] = useState(false)
   const [focusedId, setFocusedId] = useState<string | null>(null)
   const [started, setStarted] = useState(false)
@@ -61,12 +66,19 @@ function World() {
   const [vaultOpen, setVaultOpen] = useState(false)
   const [vaultVisited, setVaultVisited] = useState(false)
   const [interior, setInterior] = useState<CityBuilding | null>(null)
+  const [menuSection, setMenuSection] = useState('map')
+  const [destination, setDestination] = useState<string | null>(null)
   const [selectedNpc, setSelectedNpc] = useState<string | null>(null)
   const [mapOpen, setMapOpen] = useState(false)
   const [cityNavigation, setCityNavigation] = useState(CITY_NAVIGATION)
   const [visit, setVisit] = useState(0)
-  const streetPosition = useRef({ x: CITY_NAVIGATION.start[0], z: CITY_NAVIGATION.start[2] })
+  const streetPosition = useRef<MapPosition>({
+    x: CITY_NAVIGATION.start[0],
+    z: CITY_NAVIGATION.start[2],
+    yaw: 0,
+  })
   const meetFamily = useCallback(() => {
+    setMenuSection('map')
     setSelectedNpc(null)
     setDriving(false)
     setMapOpen(true)
@@ -76,12 +88,25 @@ function World() {
     setDriving(false)
     setMapOpen(true)
   }, [])
-  const reportPosition = useCallback((p: { x: number; z: number }) => {
+  const drivingNow = useRef(false)
+  drivingNow.current = driving
+  const lastDrive = useRef<{ x: number; z: number } | null>(null)
+  const reportPosition = useCallback((p: MapPosition) => {
+    if (drivingNow.current && lastDrive.current) {
+      const meters = Math.hypot(p.x - lastDrive.current.x, p.z - lastDrive.current.z)
+      if (meters > 0 && meters <= 8) dispatch({ type: 'driveMeters', meters })
+    }
+    lastDrive.current = drivingNow.current ? { x: p.x, z: p.z } : null
     streetPosition.current = p
   }, [])
   const [ledgerOpen, setLedgerOpen] = useState(false)
   const [buyAmount, setBuyAmount] = useState<BuyAmount>(1)
 
+  useEffect(() => {
+    setTransitioning(true)
+    const id = setTimeout(() => setTransitioning(false), 300)
+    return () => clearTimeout(id)
+  }, [driving])
   const vehicle = activeVehicle(state)
   const badges = ledgerBadges(state)
   const alerts = badges.capos + badges.upgrades + badges.family + badges.empire
@@ -95,6 +120,8 @@ function World() {
     !creatorOpen &&
     !offlineReport
   const enterHouse = () => {
+    const nav = outsideBuilding('safehouse')
+    streetPosition.current = { x: nav.start[0], z: nav.start[2], yaw: nav.yaw }
     setDriving(false)
     setFocusedId(null)
     setLedgerOpen(false)
@@ -106,7 +133,9 @@ function World() {
     setVaultOpen(false)
     setShopOpen(false)
     setSafeHouseOpen(false)
-    setCityNavigation(outsideBuilding('safehouse'))
+    const nav = outsideBuilding('safehouse')
+    streetPosition.current = { x: nav.start[0], z: nav.start[2], yaw: nav.yaw }
+    setCityNavigation(nav)
     setVisit((n) => n + 1)
   }
   const openVault = () => {
@@ -124,18 +153,27 @@ function World() {
     }
     setDriving(false)
     setFocusedId(null)
+    streetPosition.current = { x: building.door[0], z: building.door[1], yaw: building.rotationY }
     setInterior(building)
   }
   const leaveBuilding = () => {
-    if (interior) setCityNavigation(outsideBuilding(interior.id))
+    if (interior) {
+      const nav = outsideBuilding(interior.id)
+      streetPosition.current = { x: nav.start[0], z: nav.start[2], yaw: nav.yaw }
+      setCityNavigation(nav)
+    }
     setFocusedId(null)
     setInterior(null)
     setVisit((n) => n + 1)
   }
   const travel = (id: string) => {
+    setSafeHouseOpen(false)
+    setInterior(null)
+    setVaultOpen(false)
+    setShopOpen(false)
     const navigation = outsideBuilding(id)
     setCityNavigation(navigation)
-    streetPosition.current = { x: navigation.start[0], z: navigation.start[2] }
+    streetPosition.current = { x: navigation.start[0], z: navigation.start[2], yaw: navigation.yaw }
     setFocusedId(null)
     setDriving(false)
     setMapOpen(false)
@@ -152,7 +190,10 @@ function World() {
       return
     if (creatorOpen) return
     if (mapOpen) {
-      if (e.code === 'Escape' || e.code === 'KeyG') setMapOpen(false)
+      if (e.code === 'Escape' || e.code === 'KeyG') {
+        e.preventDefault()
+        setMapOpen(false)
+      }
       return
     }
     if (shopOpen) {
@@ -161,6 +202,14 @@ function World() {
     }
     if (vaultOpen) {
       if (e.code === 'Escape') setVaultOpen(false)
+      return
+    }
+    if ((e.code === 'KeyG' || e.code === 'Tab') && !ledgerOpen) {
+      e.preventDefault()
+      setMenuSection('map')
+      setSelectedNpc(null)
+      setDriving(false)
+      setMapOpen(true)
       return
     }
     if (e.code === 'KeyC') {
@@ -185,12 +234,6 @@ function World() {
           })
         if (e.code === 'KeyQ') dispatch({ type: 'hire', id: interior.id })
       }
-      return
-    }
-    if (e.code === 'KeyG' && !ledgerOpen) {
-      setSelectedNpc(null)
-      setDriving(false)
-      setMapOpen(true)
       return
     }
     if (e.code === 'KeyH') {
@@ -305,6 +348,7 @@ function World() {
           focusedId={focusedId}
           onEnterBuilding={enterBuilding}
           onOpenMap={() => {
+            setMenuSection('map')
             setSelectedNpc(null)
             setDriving(false)
             setMapOpen(true)
@@ -318,18 +362,63 @@ function World() {
           }}
           buyAmount={buyAmount}
           onBuyAmountChange={setBuyAmount}
+          onOpenGoals={() => {
+            setMenuSection('guide')
+            setSelectedNpc(null)
+            setDriving(false)
+            setMapOpen(true)
+          }}
           onOpenLedger={() => setLedgerOpen(true)}
           onOpenSafeHouse={enterHouse}
           onCharacter={() => setCreatorOpen(true)}
           alerts={alerts}
         />
       )}
+      {started && !safeHouseOpen && !interior && (
+        <MiniMap
+          position={streetPosition.current}
+          destination={destination}
+          onOpen={() => {
+            setMenuSection('map')
+            setSelectedNpc(null)
+            setDriving(false)
+            setMapOpen(true)
+          }}
+        />
+      )}
+      {started && !safeHouseOpen && !interior && (
+        <div className="pointer-events-auto absolute bottom-4 left-4 z-10 hidden max-w-[250px] lg:block">
+          <GuidePanel onTravel={travel} compact />
+        </div>
+      )}
+      {started && <CityFeedback />}
+      {started && transitioning && (
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 z-30 animate-pulse bg-black/20"
+        />
+      )}
       {!started && <StartOverlay onStart={() => setStarted(true)} onCharacter={() => setCreatorOpen(true)} />}
       {interior && (
-        <InteriorHud building={interior} focusedId={focusedId} buyAmount={buyAmount} onExit={leaveBuilding} />
+        <InteriorHud
+          building={interior}
+          focusedId={focusedId}
+          buyAmount={buyAmount}
+          onTravel={travel}
+          onMap={() => {
+            setMenuSection('map')
+            setSelectedNpc(null)
+            setMapOpen(true)
+          }}
+          onExit={leaveBuilding}
+        />
       )}
       {mapOpen && (
         <CityMap
+          initialSection={menuSection}
+          currentInterior={safeHouseOpen ? 'Family Safe House' : interior?.name}
+          destination={destination}
+          onDestination={setDestination}
           selectedNpc={selectedNpc}
           position={streetPosition.current}
           onTravel={travel}
@@ -343,6 +432,11 @@ function World() {
           onCharacter={() => setCreatorOpen(true)}
           onVault={openVault}
           onShop={() => setShopOpen(true)}
+          onMap={() => {
+            setMenuSection('map')
+            setSelectedNpc(null)
+            setMapOpen(true)
+          }}
           onExit={exitHouse}
         />
       )}
