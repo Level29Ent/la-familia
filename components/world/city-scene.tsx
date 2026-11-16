@@ -6,6 +6,7 @@ import type { CarPose } from '@/lib/game/good-life'
 import type { Navigation } from '@/lib/game/navigation'
 import { GoodLifeLandmarks } from './good-life-displays'
 import { Canvas } from '@react-three/fiber'
+import { SceneUnavailable } from '@/components/game/scene-boundary'
 import { BUSINESSES } from '@/lib/game/config'
 import type { GameState } from '@/lib/game/engine'
 import { Building, type BuildingStatus } from './building'
@@ -55,6 +56,7 @@ export function CityScene({
 }) {
   return (
     <Canvas
+      fallback={<SceneUnavailable />}
       className="absolute inset-0 touch-none"
       dpr={[1, 1.5]}
       camera={{ fov: 70, near: 0.1, far: 260 }}

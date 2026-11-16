@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { Canvas } from '@react-three/fiber'
+import { SceneUnavailable } from '@/components/game/scene-boundary'
 import { OrbitControls } from '@react-three/drei'
 import { X, UserRound } from 'lucide-react'
 import { CharacterModel } from '@/components/world/character-model'
@@ -76,6 +77,7 @@ export function CharacterCreator({ onClose }: { onClose: () => void }) {
         <section aria-label="Character preview" className="bg-[#1c2631] md:sticky md:top-20 md:h-[560px]">
           <div className="h-72 md:h-[480px]">
             <Canvas
+              fallback={<SceneUnavailable />}
               camera={{ position: [0, 1.3, 4.1], fov: 37 }}
               dpr={[1, 1.5]}
               aria-label="Rotatable 3D character preview"

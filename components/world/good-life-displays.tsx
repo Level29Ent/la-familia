@@ -1,6 +1,6 @@
 'use client'
 
-import { Text } from '@react-three/drei'
+import { WorldText } from './world-text'
 
 type Point = [number, number, number]
 function Box({ at, size, color, metal = false }: { at: Point; size: Point; color: string; metal?: boolean }) {
@@ -13,9 +13,9 @@ function Box({ at, size, color, metal = false }: { at: Point; size: Point; color
 }
 function Label({ at, children, size = 0.18 }: { at: Point; children: string; size?: number }) {
   return (
-    <Text font="/fonts/Geist-Regular.ttf" position={at} fontSize={size} color="#f4d99c" anchorX="center">
+    <WorldText position={at} fontSize={size} color="#f4d99c" anchorX="center">
       {children}
-    </Text>
+    </WorldText>
   )
 }
 function Painting({ at, variant = 0 }: { at: Point; variant?: number }) {

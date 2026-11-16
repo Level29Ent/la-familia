@@ -4,13 +4,11 @@ import { CharacterModel } from './character-model'
 import { DEFAULT_CHARACTER } from '@/lib/game/character'
 import { memo, useMemo, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
-import { Text } from '@react-three/drei'
+import { WorldText } from './world-text'
 import * as THREE from 'three'
 import type { BuildingStyle, Placement } from './layout'
 
 export type BuildingStatus = 'locked' | 'ready' | 'running' | 'managed'
-
-const FONT = '/fonts/Geist-Regular.ttf'
 
 const litWindow = new THREE.MeshStandardMaterial({
   color: '#2a2016',
@@ -160,8 +158,7 @@ function BuildingImpl({ placement, style, name, status, litLevel, focused, seed 
         <boxGeometry args={[Math.min(width - 1, name.length * 0.42 + 1.2), 1.1, 0.15]} />
         <meshStandardMaterial color="#0c0a09" roughness={0.6} />
       </mesh>
-      <Text
-        font={FONT}
+      <WorldText
         position={[0, 5.6, front + 0.34]}
         fontSize={0.62}
         maxWidth={width - 1.4}
@@ -171,7 +168,7 @@ function BuildingImpl({ placement, style, name, status, litLevel, focused, seed 
         letterSpacing={0.04}
       >
         {name.toUpperCase()}
-      </Text>
+      </WorldText>
 
       {locked && (
         <group position={[0, 3.3, front + 0.12]}>
@@ -179,8 +176,7 @@ function BuildingImpl({ placement, style, name, status, litLevel, focused, seed 
             <boxGeometry args={[2.6, 0.8, 0.08]} />
             <meshStandardMaterial color="#d9c9a3" roughness={0.9} />
           </mesh>
-          <Text
-            font={FONT}
+          <WorldText
             position={[0, 0, 0.06]}
             fontSize={0.36}
             color="#7a1f1a"
@@ -188,7 +184,7 @@ function BuildingImpl({ placement, style, name, status, litLevel, focused, seed 
             anchorY="middle"
           >
             FOR SALE
-          </Text>
+          </WorldText>
         </group>
       )}
 

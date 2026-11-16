@@ -1,6 +1,7 @@
 'use client'
 
 import Image from 'next/image'
+import { assetPath } from '@/lib/asset-path'
 
 const CONTROLS = [
   ['W A S D', 'Walk the street'],
@@ -19,7 +20,7 @@ export function StartOverlay({ onStart, onCharacter }: { onStart: () => void; on
   return (
     <div className="absolute inset-0 z-20 flex items-center justify-center overflow-y-auto p-4">
       <Image
-        src="/images/city-skyline.png"
+        src={assetPath('/images/city-skyline.png')}
         alt=""
         fill
         priority
@@ -33,7 +34,7 @@ export function StartOverlay({ onStart, onCharacter }: { onStart: () => void; on
       >
         <div className="flex flex-col gap-2 text-center">
           <Image
-            src="/icon.svg"
+            src={assetPath('/icon.svg')}
             alt="La Familia family crest"
             width={76}
             height={76}

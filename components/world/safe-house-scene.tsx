@@ -6,7 +6,8 @@ import { useMemo } from 'react'
 import { goodLifeRoomNavigation } from '@/lib/game/good-life'
 import { GoodLifeRoom } from './good-life-displays'
 import { Canvas } from '@react-three/fiber'
-import { Text } from '@react-three/drei'
+import { SceneUnavailable } from '@/components/game/scene-boundary'
+import { WorldText } from './world-text'
 import { cashBundleCount, VAULT_TIERS, type SafeHouseState } from '@/lib/game/safe-house'
 import type { CharacterConfig } from '@/lib/game/character'
 import { decorItem, type DecorState } from '@/lib/game/decor'
@@ -24,9 +25,9 @@ function Box({ at, size, color, metal = false }: { at: Point; size: Point; color
 }
 function Label({ at, children, size = 0.22 }: { at: Point; children: string; size?: number }) {
   return (
-    <Text font="/fonts/Geist-Regular.ttf" position={at} fontSize={size} color="#e8cf98" anchorX="center">
+    <WorldText position={at} fontSize={size} color="#e8cf98" anchorX="center">
       {children}
-    </Text>
+    </WorldText>
   )
 }
 
@@ -64,6 +65,7 @@ export function SafeHouseScene({
   const accent = decor.equipped.decoration
   return (
     <Canvas
+      fallback={<SceneUnavailable />}
       className="absolute inset-0 touch-none"
       dpr={[1, 1.5]}
       camera={{ fov: 70, near: 0.1, far: 50 }}
