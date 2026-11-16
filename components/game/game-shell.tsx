@@ -22,7 +22,6 @@ import { CityFeedback } from './city-feedback'
 import { MiniMap } from './street-map'
 import { CustodyNotice } from './dynasty-panel'
 import { SUITES } from '@/lib/game/apartments'
-import { HARBOR_MISSIONS } from '@/lib/game/harbor'
 import { InteriorHud } from './interior-hud'
 
 const CityScene = dynamic(() => import('@/components/world/city-scene').then((m) => m.CityScene), {
@@ -378,6 +377,7 @@ function World() {
         <Hud
           focusedId={focusedId}
           onEnterBuilding={enterBuilding}
+          onOpenHarbor={() => { setMenuSection('harbor'); setSelectedNpc(null); setDriving(false); setMapOpen(true) }}
           onOpenMap={() => {
             setMenuSection('map')
             setSelectedNpc(null)
@@ -422,13 +422,6 @@ function World() {
           <GuidePanel onTravel={travel} compact />
         </div>
       )}
-      {started && !mapOpen && !ledgerOpen && !vaultOpen && !shopOpen && !creatorOpen && !state.dynasty.jailMs && (
-        <button className="absolute right-3 top-28 z-20 max-w-[min(250px,60vw)] rounded-xl border border-primary/40 bg-background/95 p-3 text-left shadow-xl" onClick={() => { setMenuSection('harbor'); setDriving(false); setMapOpen(true) }}>
-          <span className="block text-[10px] uppercase tracking-[0.2em] text-primary">Harbor story · {Math.min(5, state.harbor.chapter + 1)}/5</span>
-          <span className="mt-1 block text-sm">{HARBOR_MISSIONS[state.harbor.chapter]?.steps[state.harbor.step] ?? 'Story complete · Family council'}</span>
-          <span className="mt-1 block text-xs text-muted-foreground">Open objectives & council →</span>
-        </button>
-      )}
       {started && <CityFeedback />}
       {started && transitioning && (
         <div
@@ -439,8 +432,9 @@ function World() {
       {!started && <StartOverlay onStart={() => setStarted(true)} onCharacter={() => setCreatorOpen(true)} />}
       {interior && (
         <InteriorHud
+          onOpenHarbor={() => { setMenuSection('harbor'); setSelectedNpc(null); setMapOpen(true) }}
           currentSuiteId={activeSuite}
-          onApartments={() => { setMenuSection('apartments'); setMapOpen(true) }}
+          onApartments={() => { setMenuSection('apartments'); setSelectedNpc(null); setMapOpen(true) }}
           building={interior}
           focusedId={focusedId}
           buyAmount={buyAmount}
