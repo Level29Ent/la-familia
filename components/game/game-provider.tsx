@@ -1,6 +1,7 @@
 'use client'
 
 import { createContext, useContext, useEffect, useReducer, useRef, useState, type ReactNode } from 'react'
+import { harborAction, type HarborAction } from '@/lib/game/harbor'
 import { playAction, type PlayAction } from '@/lib/game/city-play'
 import { dynastyAction, type DynastyAction } from '@/lib/game/dynasty'
 import { fleetAction, type FleetAction } from '@/lib/game/vehicles'
@@ -24,6 +25,7 @@ import {
 } from '@/lib/game/engine'
 
 type Action =
+  | HarborAction
   | PlayAction
   | DynastyAction
   | FleetAction
@@ -44,6 +46,11 @@ type Action =
 function reducer(state: GameState, action: Action): GameState {
   if (state.dynasty.jailMs && !['tick', 'load', 'hardReset', 'bail', 'shelter'].includes(action.type)) return state
   switch (action.type) {
+    case 'harborSupport':
+    case 'harborMove':
+    case 'harborStep':
+    case 'harborInvest':
+      return harborAction(state, action)
     case 'driveMeters':
     case 'waitTime':
     case 'guideClaim':

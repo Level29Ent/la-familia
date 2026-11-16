@@ -24,7 +24,8 @@ export function RivalPanel({ familyId }: { familyId?: string }) {
       </button>
       {FAMILIES.filter((f) => !familyId || f.id === familyId).map((family) => {
         const rival = state.city.families[family.id],
-          enemy = opposition(state, family.id)
+          enemy = opposition(state, family.id),
+          allied = family.id === 'doyle' && state.harbor.chapter === 5 && state.harbor.ending === 'alliance'
         return (
           <article key={family.id} className="rounded-xl border border-border bg-background/90 p-3">
             <h3 className="font-serif text-lg" style={{ color: family.color }}>
@@ -40,7 +41,7 @@ export function RivalPanel({ familyId }: { familyId?: string }) {
               />
             </div>
             <p className="mb-2 text-xs text-muted-foreground">
-              {rival.influence === 0
+              {allied ? 'Permanent Harbor alliance: your families are at peace.' : rival.influence === 0
                 ? 'Your family controls this territory until they recover.'
                 : power >= enemy
                   ? 'Your crew can win this confrontation.'
@@ -51,7 +52,7 @@ export function RivalPanel({ familyId }: { familyId?: string }) {
               <button
                 type="button"
                 disabled={
-                  rival.cooldownMs > 0 ||
+                  allied || rival.cooldownMs > 0 ||
                   rival.truceMs > 0 ||
                   state.city.stamina < 25 ||
                   rival.influence === 0
@@ -59,17 +60,17 @@ export function RivalPanel({ familyId }: { familyId?: string }) {
                 onClick={() => dispatch({ type: 'rival', id: family.id, move: 'challenge' })}
                 className="rounded border border-primary/50 px-3 py-2 text-xs text-primary disabled:opacity-40"
               >
-                {rival.cooldownMs > 0
+                {allied ? 'Harbor alliance active' : rival.cooldownMs > 0
                   ? `Regroup ${Math.ceil(rival.cooldownMs / 1000)}s`
                   : `Challenge · 25 stamina · ${formatMoney(family.reward)} if won`}
               </button>
               <button
                 type="button"
-                disabled={rival.truceMs > 0 || state.cash < family.reward / 2}
+                disabled={allied || rival.truceMs > 0 || state.cash < family.reward / 2}
                 onClick={() => dispatch({ type: 'rival', id: family.id, move: 'truce' })}
                 className="rounded border border-border px-3 py-2 text-xs disabled:opacity-40"
               >
-                {rival.truceMs > 0
+                {allied ? 'Permanent peace' : rival.truceMs > 0
                   ? `Truce ${Math.ceil(rival.truceMs / 1000)}s`
                   : `Negotiate truce · ${formatMoney(family.reward / 2)}`}
               </button>

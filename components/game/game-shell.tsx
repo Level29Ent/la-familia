@@ -21,6 +21,7 @@ import { GuidePanel } from './city-play-panel'
 import { CityFeedback } from './city-feedback'
 import { MiniMap } from './street-map'
 import { CustodyNotice } from './dynasty-panel'
+import { HARBOR_MISSIONS } from '@/lib/game/harbor'
 import { InteriorHud } from './interior-hud'
 
 const CityScene = dynamic(() => import('@/components/world/city-scene').then((m) => m.CityScene), {
@@ -91,18 +92,26 @@ function World() {
   const drivingNow = useRef(false)
   drivingNow.current = driving
   const lastDrive = useRef<{ x: number; z: number } | null>(null)
+  const lastHarborPosition = useRef<MapPosition | null>(null)
   const reportPosition = useCallback((p: MapPosition) => {
     if (drivingNow.current && lastDrive.current) {
       const meters = Math.hypot(p.x - lastDrive.current.x, p.z - lastDrive.current.z)
       if (meters > 0 && meters <= 8) dispatch({ type: 'driveMeters', meters })
     }
     lastDrive.current = drivingNow.current ? { x: p.x, z: p.z } : null
+    if (lastHarborPosition.current) {
+      const meters = Math.hypot(p.x - lastHarborPosition.current.x, p.z - lastHarborPosition.current.z)
+      if (meters > 0 && meters <= 8) dispatch({ type: 'harborMove', meters, driving: drivingNow.current })
+    }
+    lastHarborPosition.current = p
     streetPosition.current = p
   }, [])
   const [ledgerOpen, setLedgerOpen] = useState(false)
   const [buyAmount, setBuyAmount] = useState<BuyAmount>(1)
 
   useEffect(() => {
+    lastHarborPosition.current = null
+    lastDrive.current = null
     setTransitioning(true)
     const id = setTimeout(() => setTransitioning(false), 300)
     return () => clearTimeout(id)
@@ -120,6 +129,7 @@ function World() {
     !creatorOpen &&
     !offlineReport
   const enterHouse = () => {
+    lastHarborPosition.current = null
     const nav = outsideBuilding('safehouse')
     streetPosition.current = { x: nav.start[0], z: nav.start[2], yaw: nav.yaw }
     setDriving(false)
@@ -129,6 +139,7 @@ function World() {
     setSafeHouseOpen(true)
   }
   const exitHouse = () => {
+    lastHarborPosition.current = null
     setFocusedId(null)
     setVaultOpen(false)
     setShopOpen(false)
@@ -145,6 +156,7 @@ function World() {
   }
 
   const enterBuilding = (id: string) => {
+    lastHarborPosition.current = null
     const building = CITY_BUILDINGS.find((b) => b.id === id)
     if (!building) return
     if (id === 'safehouse') {
@@ -157,6 +169,7 @@ function World() {
     setInterior(building)
   }
   const leaveBuilding = () => {
+    lastHarborPosition.current = null
     if (interior) {
       const nav = outsideBuilding(interior.id)
       streetPosition.current = { x: nav.start[0], z: nav.start[2], yaw: nav.yaw }
@@ -167,6 +180,8 @@ function World() {
     setVisit((n) => n + 1)
   }
   const travel = (id: string) => {
+    lastHarborPosition.current = null
+    lastDrive.current = null
     setSafeHouseOpen(false)
     setInterior(null)
     setVaultOpen(false)
@@ -391,6 +406,13 @@ function World() {
           <GuidePanel onTravel={travel} compact />
         </div>
       )}
+      {started && !mapOpen && !ledgerOpen && !vaultOpen && !shopOpen && !creatorOpen && !state.dynasty.jailMs && (
+        <button className="absolute right-3 top-28 z-20 max-w-[min(250px,60vw)] rounded-xl border border-primary/40 bg-background/95 p-3 text-left shadow-xl" onClick={() => { setMenuSection('harbor'); setDriving(false); setMapOpen(true) }}>
+          <span className="block text-[10px] uppercase tracking-[0.2em] text-primary">Harbor story · {Math.min(5, state.harbor.chapter + 1)}/5</span>
+          <span className="mt-1 block text-sm">{HARBOR_MISSIONS[state.harbor.chapter]?.steps[state.harbor.step] ?? 'Story complete · Family council'}</span>
+          <span className="mt-1 block text-xs text-muted-foreground">Open objectives & council →</span>
+        </button>
+      )}
       {started && <CityFeedback />}
       {started && transitioning && (
         <div
@@ -415,6 +437,7 @@ function World() {
       )}
       {mapOpen && (
         <CityMap
+          currentBuildingId={safeHouseOpen ? 'safehouse' : interior?.id}
           initialSection={menuSection}
           currentInterior={safeHouseOpen ? 'Family Safe House' : interior?.name}
           destination={destination}

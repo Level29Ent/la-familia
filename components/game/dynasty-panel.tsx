@@ -195,7 +195,7 @@ export function DynastyPanel({ selectedNpc }: { selectedNpc?: string | null }) {
                   type="button"
                   className={button}
                   disabled={
-                    busy ||
+                    (family === 'doyle' && state.harbor.chapter === 5 && state.harbor.ending === 'alliance') || busy ||
                     rank < 1 ||
                     state.cash < 40 ||
                     d.heat >= 80 ||

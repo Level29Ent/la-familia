@@ -231,6 +231,7 @@ export function missionEnemy(state: GameState, family: string) {
   )
 }
 export function dynastyAction(state: GameState, action: DynastyAction): GameState {
+  if (action.type === 'sendHit' && action.family === 'doyle' && state.harbor?.chapter === 5 && state.harbor.ending === 'alliance') return state
   let d = state.dynasty
   if (action.type === 'shelter')
     return d.shelter === action.inside ? state : { ...state, dynasty: { ...d, shelter: action.inside } }
@@ -390,7 +391,7 @@ export function tickDynasty(state: GameState, raw: number): GameState {
   if (d.raidMs <= 0) {
     const enemies = FAMILIES.filter(
       (f) =>
-        d.hostility.includes(f.id) && city.families[f.id].truceMs === 0 && city.families[f.id].influence > 0,
+        !(f.id === 'doyle' && state.harbor?.chapter === 5 && state.harbor.ending === 'alliance') && d.hostility.includes(f.id) && city.families[f.id].truceMs === 0 && city.families[f.id].influence > 0,
     )
     const threat = enemies[d.raids % Math.max(1, enemies.length)]
     if (threat) {

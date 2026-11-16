@@ -2,7 +2,8 @@
 
 import { memo, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
-import type { Group } from 'three'
+import type { Group, MeshBasicMaterial } from 'three'
+import { trafficPosition, trafficSignal } from '@/lib/game/city-life'
 import { RECRUITS, type DynastyState } from '@/lib/game/dynasty'
 import { AVENUES } from '@/lib/game/city'
 import { VintageCar } from './vintage-car'
@@ -17,19 +18,23 @@ const RECRUIT_LOOKS = RECRUITS.map((r, i) => ({
   gender: ['lucia', 'maria', 'ada', 'rosa'].includes(r.id) ? 1 : 0,
 }))
 
-const Citizen = memo(function Citizen({ index, active }: { index: number; active: boolean }) {
+const Citizen = memo(function Citizen({ index, active, heat }: { index: number; active: boolean; heat: number }) {
   const motion = useRef({ moving: active, sprint: false })
   motion.current.moving = active
   const ref = useRef<Group>(null),
     row = Math.floor(index / 8),
     x = -32 + (index % 8) * 24,
     z = 23 - row * 36
-  useFrame(({ clock }) => {
-    if (ref.current && active) {
-      const t = (clock.elapsedTime * 0.65 + index * 3) % 12
-      ref.current.position.x = x + (t < 6 ? t : 12 - t)
-      ref.current.rotation.y = t < 6 ? Math.PI / 2 : -Math.PI / 2
-    }
+  const elapsed = useRef(index * 3)
+  useFrame((_, dt) => {
+    if (!ref.current || !active) return
+    elapsed.current += Math.min(dt, 0.1) * (heat >= 60 ? 1.6 : 0.65)
+    const t = elapsed.current % 16
+    const walking = t < 6 || (t >= 8 && t < 14)
+    motion.current.moving = walking
+    motion.current.sprint = heat >= 60
+    ref.current.position.x = x + (t < 6 ? t : t < 8 ? 6 : t < 14 ? 14 - t : 0)
+    ref.current.rotation.y = t < 8 ? Math.PI / 2 : -Math.PI / 2
   })
   return (
     <group ref={ref} position={[x, 0, z]}>
@@ -49,11 +54,8 @@ const Traffic = memo(function Traffic({
   const ref = useRef<Group>(null),
     x = AVENUES[index] + (index % 2 ? 2 : -2),
     reverse = index % 2 === 1
-  useFrame(({ clock }) => {
-    if (ref.current && active) {
-      const t = (clock.elapsedTime * (heat >= 60 ? 6 : 3) + index * 19) % 112
-      ref.current.position.z = reverse ? -91 + t : 21 - t
-    }
+  useFrame(({ clock }, dt) => {
+    if (ref.current && active) ref.current.position.z = trafficPosition(ref.current.position.z, reverse, dt, clock.elapsedTime, heat >= 60 && index === 0 ? 6 : 3)
   })
   return (
     <group ref={ref} position={[x, 0.15, 21 - index * 15]} rotation={[0, reverse ? 0 : Math.PI, 0]}>
@@ -94,10 +96,10 @@ export const LivingCity = memo(function LivingCity({
   return (
     <group>
       {Array.from({ length: low ? 8 : night ? 12 : 24 }, (_, index) => (
-        <Citizen key={index} index={index} active={active} />
+        <Citizen key={index} index={index} active={active} heat={dynasty.heat} />
       ))}
       {Array.from({ length: night ? 6 : low ? 3 : 5 }, (_, index) => (
-        <Traffic key={index} index={index} active={active} heat={Math.max(dynasty.heat, night ? 60 : 0)} />
+        <Traffic key={index} index={index} active={active} heat={dynasty.heat} />
       ))}
       {RECRUITS.map((r, index) => {
         const hired = dynasty.members.some((m) => m.id === r.id),
@@ -136,6 +138,12 @@ export const LivingCity = memo(function LivingCity({
   )
 })
 
+function SignalLamp({ color, phase, y }: { color: string; phase: 'green' | 'amber' | 'red'; y: number }) {
+  const material = useRef<MeshBasicMaterial>(null)
+  useFrame(({ clock }) => { if (material.current) material.current.opacity = trafficSignal(clock.elapsedTime) === phase ? 1 : 0.15 })
+  return <mesh position={[0, y, 0.25]}><circleGeometry args={[0.14, 10]} /><meshBasicMaterial ref={material} color={color} transparent /></mesh>
+}
+
 export const StreetLifeDetails = memo(function StreetLifeDetails() {
   return (
     <group>
@@ -150,16 +158,9 @@ export const StreetLifeDetails = memo(function StreetLifeDetails() {
               <boxGeometry args={[0.5, 1.4, 0.45]} />
               <meshStandardMaterial color="#292d31" />
             </mesh>
-            {[
-              ['#b94b43', 4.9],
-              ['#d2b54c', 4.5],
-              ['#7cbd8e', 4.1],
-            ].map(([color, y]) => (
-              <mesh key={color} position={[0, Number(y), 0.25]}>
-                <circleGeometry args={[0.14, 10]} />
-                <meshBasicMaterial color={String(color)} />
-              </mesh>
-            ))}
+            <SignalLamp color="#f15d50" phase="red" y={4.9} />
+            <SignalLamp color="#f2cc57" phase="amber" y={4.5} />
+            <SignalLamp color="#87e8a1" phase="green" y={4.1} />
             <mesh position={[1, 0.4, 0]}>
               <boxGeometry args={[0.6, 0.8, 0.6]} />
               <meshStandardMaterial color="#53736b" />

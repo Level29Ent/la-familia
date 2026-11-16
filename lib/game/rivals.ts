@@ -81,7 +81,7 @@ export function cityAction(state: GameState, action: CityAction): GameState {
     return { ...state, city: { ...city, stamina: 100, message: 'You rested at home. Your crew is ready.' } }
   }
   const family = FAMILIES.find((f) => f.id === action.id)
-  if (!family) return state
+  if (!family || (family.id === 'doyle' && state.harbor?.chapter === 5 && state.harbor.ending === 'alliance')) return state
   const rival = city.families[family.id]
   if (action.move === 'truce') {
     const cost = family.reward / 2
