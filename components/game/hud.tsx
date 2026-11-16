@@ -12,6 +12,7 @@ import { GUIDE } from '@/lib/game/city-play'
 import { ClockBadge } from './city-feedback'
 import { RANKS, rankIndex } from '@/lib/game/dynasty'
 import { activeVehicle } from '@/lib/game/vehicles'
+import { HARBOR_MISSIONS } from '@/lib/game/harbor'
 import { CITY_BUILDINGS } from '@/lib/game/city'
 
 const AMOUNTS: BuyAmount[] = [1, 10, 100, 'max']
@@ -20,6 +21,7 @@ export function Hud({
   focusedId,
   onEnterBuilding,
   onOpenMap,
+  onOpenHarbor,
   onOpenGoals,
   driving,
   onDrive,
@@ -32,6 +34,7 @@ export function Hud({
 }: {
   onEnterBuilding: (id: string) => void
   onOpenGoals: () => void
+  onOpenHarbor: () => void
   onOpenMap: () => void
   focusedId: string | null
   driving: boolean
@@ -129,6 +132,10 @@ export function Hud({
             className="rounded-full border border-primary/40 bg-background/90 px-4 py-2 text-sm text-primary"
           >
             City map & families · G
+          </button>
+          <button type="button" onClick={onOpenHarbor} className="max-w-48 rounded-xl border border-primary/40 bg-background/95 p-2 text-left text-xs text-primary">
+            <span className="block uppercase tracking-wider">Harbor story · {Math.min(5, state.harbor.chapter + 1)}/5</span>
+            <span className="mt-1 block text-foreground">{HARBOR_MISSIONS[state.harbor.chapter]?.steps[state.harbor.step] ?? 'Family council'}</span>
           </button>
           <MusicPlayer />
           <div

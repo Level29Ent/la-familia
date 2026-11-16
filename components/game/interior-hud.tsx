@@ -15,6 +15,7 @@ export function InteriorHud({
   building,
   currentSuiteId,
   onApartments,
+  onOpenHarbor,
   focusedId,
   buyAmount,
   onExit,
@@ -23,6 +24,7 @@ export function InteriorHud({
 }: {
   currentSuiteId?: string | null
   onApartments: () => void
+  onOpenHarbor: () => void
   building: CityBuilding
   focusedId: string | null
   buyAmount: BuyAmount
@@ -66,6 +68,7 @@ export function InteriorHud({
           className="pointer-events-auto max-h-[42dvh] w-full max-w-lg self-end overflow-y-auto rounded-xl border border-border bg-background/95 p-3"
           aria-label="Interior activities"
         >
+          <button type="button" onClick={onOpenHarbor} className="mb-3 rounded-lg border border-primary/40 px-3 py-2 text-sm text-primary">Harbor story & family council</button>
           {APARTMENT_BUILDINGS.some((b) => b.id === building.id) && (
             <div className="mb-3 rounded-lg border border-primary/30 p-3">
               <h2 className="font-serif text-lg text-primary">Apartment suites</h2>
