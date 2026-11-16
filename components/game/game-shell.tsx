@@ -12,6 +12,7 @@ import { DecorShop } from './decor-shop'
 import { SafeHouseHud } from './safe-house-hud'
 import { SafeHouse } from './safe-house'
 import { StartOverlay } from './start-overlay'
+import { SceneBoundary } from './scene-boundary'
 
 const CityScene = dynamic(() => import('@/components/world/city-scene').then((m) => m.CityScene), {
   ssr: false,
@@ -143,26 +144,28 @@ function World() {
 
   return (
     <main className="relative h-dvh w-full overflow-hidden bg-background select-none">
-      {safeHouseOpen ? (
-        <SafeHouseScene
-          assets={state.assets}
-          safeHouse={state.safeHouse}
-          character={state.character}
-          decor={state.safeHouse.decor}
-          enabled={playing}
-          vaultOpen={vaultVisited}
-          onFocusChange={setFocusedId}
-        />
-      ) : (
-        <CityScene
-          state={state}
-          driving={driving && state.assets.includes('sedan')}
-          returning={returning}
-          focusedId={focusedId}
-          movementEnabled={playing}
-          onFocusChange={setFocusedId}
-        />
-      )}
+      <SceneBoundary key={safeHouseOpen ? 'house' : 'city'}>
+        {safeHouseOpen ? (
+          <SafeHouseScene
+            assets={state.assets}
+            safeHouse={state.safeHouse}
+            character={state.character}
+            decor={state.safeHouse.decor}
+            enabled={playing}
+            vaultOpen={vaultVisited}
+            onFocusChange={setFocusedId}
+          />
+        ) : (
+          <CityScene
+            state={state}
+            driving={driving && state.assets.includes('sedan')}
+            returning={returning}
+            focusedId={focusedId}
+            movementEnabled={playing}
+            onFocusChange={setFocusedId}
+          />
+        )}
+      </SceneBoundary>
       {started && !safeHouseOpen && (
         <Hud
           focusedId={focusedId}

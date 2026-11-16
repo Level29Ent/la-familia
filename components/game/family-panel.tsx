@@ -1,6 +1,7 @@
 'use client'
 
 import Image from 'next/image'
+import { assetPath } from '@/lib/asset-path'
 import { useState } from 'react'
 import { RESPECT_BONUS_PER_POINT } from '@/lib/game/config'
 import { claimableRespect, totalIncomePerSecond } from '@/lib/game/engine'
@@ -34,7 +35,7 @@ export function FamilyPanel() {
       <div className="flex flex-col overflow-hidden rounded-xl border border-border bg-card md:flex-row">
         <div className="relative aspect-square w-full md:w-72 md:shrink-0">
           <Image
-            src="/images/the-don.png"
+            src={assetPath('/images/the-don.png')}
             alt="Portrait of the Don in shadow"
             fill
             sizes="(min-width: 768px) 18rem, 100vw"
