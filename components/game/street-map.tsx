@@ -5,11 +5,13 @@ import { mapPoint, nearestAddress, type MapPosition } from '@/lib/game/map'
 
 export function StreetMap({
   position,
+  territories,
   destination,
   onSelect,
   visibleIds,
   compact = false,
 }: {
+  territories?: { district: string; control: number }[]
   position: MapPosition
   destination?: string | null
   onSelect?: (id: string) => void
@@ -29,6 +31,21 @@ export function StreetMap({
       }
       className="h-full w-full rounded-xl bg-[#182b30]"
     >
+      {territories?.map((t, i) => (
+        <rect
+          key={t.district}
+          x={i < 3 ? -35 : i === 3 ? 73 : 109}
+          y={i < 3 ? -17 + i * 36 : -17}
+          width={i < 3 ? 106 : 34}
+          height={i < 3 ? 34 : 106}
+          fill={t.control >= 75 ? '#bfa14e' : t.control > 0 ? '#8c6d40' : '#693d42'}
+          opacity={0.3}
+        >
+          <title>
+            {t.district}: {t.control}% Bellini influence
+          </title>
+        </rect>
+      ))}
       <path d="M -44 104 H 154" stroke="#3b7180" strokeWidth="8" />
       {AVENUES.map((x) => (
         <path key={x} d={`M ${x} -26 V 98`} stroke="#43555b" strokeWidth="8" />

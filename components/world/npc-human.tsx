@@ -72,7 +72,7 @@ export const NpcHuman = memo(function NpcHuman({
       [leftArm, -swing * 0.7],
       [rightArm, swing * 0.7],
     ] as const)
-      if (ref.current) ref.current.rotation.x = amount
+      if (ref.current) ref.current.rotation.x += (amount - ref.current.rotation.x) * (1 - Math.exp(-dt * 12))
   })
   return (
     <group ref={root} scale={[config.build, config.height, 1]} userData={{ human: true, skin: config.skin }}>

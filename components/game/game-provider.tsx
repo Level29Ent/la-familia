@@ -1,6 +1,7 @@
 'use client'
 
 import { createContext, useContext, useEffect, useReducer, useRef, useState, type ReactNode } from 'react'
+import { playAction, type PlayAction } from '@/lib/game/city-play'
 import { dynastyAction, type DynastyAction } from '@/lib/game/dynasty'
 import { fleetAction, type FleetAction } from '@/lib/game/vehicles'
 import { cityAction, type CityAction } from '@/lib/game/rivals'
@@ -23,6 +24,7 @@ import {
 } from '@/lib/game/engine'
 
 type Action =
+  | PlayAction
   | DynastyAction
   | FleetAction
   | CityAction
@@ -42,6 +44,20 @@ type Action =
 function reducer(state: GameState, action: Action): GameState {
   if (state.dynasty.jailMs && !['tick', 'load', 'hardReset', 'bail', 'shelter'].includes(action.type)) return state
   switch (action.type) {
+    case 'driveMeters':
+    case 'waitTime':
+    case 'guideClaim':
+    case 'guideToggle':
+    case 'startJob':
+    case 'jobStep':
+    case 'cancelJob':
+    case 'territory':
+    case 'talk':
+    case 'promoteMember':
+    case 'contactQuest':
+    case 'buyRental':
+    case 'quality':
+      return playAction(state, action)
     case 'estateUpgrade':
     case 'payLawyer':
     case 'bail':

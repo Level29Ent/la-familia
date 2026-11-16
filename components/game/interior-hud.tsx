@@ -7,6 +7,7 @@ import { FocusCard } from './focus-card'
 import { FleetPanel } from './fleet-panel'
 import { RivalPanel } from './rival-panel'
 import { TouchControls } from './touch-controls'
+import { ActivityPanel, RentalPanel, ScheduleRest } from './city-play-panel'
 import { useGame } from './game-provider'
 
 export function InteriorHud({
@@ -15,10 +16,12 @@ export function InteriorHud({
   buyAmount,
   onExit,
   onMap,
+  onTravel,
 }: {
   building: CityBuilding
   focusedId: string | null
   buyAmount: BuyAmount
+  onTravel: (id: string) => void
   onMap: () => void
   onExit: () => void
 }) {
@@ -53,6 +56,13 @@ export function InteriorHud({
           className="pointer-events-auto max-h-[42dvh] w-full max-w-lg self-end overflow-y-auto rounded-xl border border-border bg-background/95 p-3"
           aria-label="Interior activities"
         >
+          <ActivityPanel location={building.id} onTravel={onTravel} />
+          {building.kind === 'home' && (
+            <>
+              <RentalPanel id={building.id} />
+              <ScheduleRest />
+            </>
+          )}
           {building.kind === 'business' ? (
             <>
               <FocusCard focusedId={building.id} buyAmount={buyAmount} onOpenSafeHouse={() => {}} />

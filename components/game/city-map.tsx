@@ -6,9 +6,12 @@ import { StreetMap } from './street-map'
 import { mapBuildings, nearestAddress, type MapPosition, type MapFilter } from '@/lib/game/map'
 import { DynastyPanel } from './dynasty-panel'
 import { FleetPanel } from './fleet-panel'
+import { GuidePanel, TerritoryPanel, ActivityDirectory } from './city-play-panel'
+import { useGame } from './game-provider'
 import { RivalPanel } from './rival-panel'
 
 export function CityMap({
+  initialSection,
   currentInterior,
   destination,
   onDestination,
@@ -17,6 +20,7 @@ export function CityMap({
   onTravel,
   onClose,
 }: {
+  initialSection?: string
   currentInterior?: string
   destination?: string | null
   onDestination: (id: string | null) => void
@@ -25,7 +29,8 @@ export function CityMap({
   onTravel: (id: string) => void
   onClose: () => void
 }) {
-  const [tab, setTab] = useState(selectedNpc ? 'family' : 'map')
+  const { state, dispatch } = useGame()
+  const [tab, setTab] = useState(selectedNpc ? 'family' : (initialSection ?? 'map'))
   const [filter, setFilter] = useState<MapFilter>('all')
   const [search, setSearch] = useState('')
   const matches = mapBuildings(filter, search)
@@ -63,11 +68,16 @@ export function CityMap({
           Close city map
         </button>
       </header>
-      <nav aria-label="City menu sections" className="sticky top-20 z-10 flex gap-2 bg-background py-2">
+      <nav
+        aria-label="City menu sections"
+        className="sticky top-20 z-10 flex gap-2 overflow-x-auto bg-background py-2"
+      >
         {[
           ['map', 'Map'],
           ['family', 'Family & law'],
           ['garage', 'Garage'],
+          ['territory', 'Territory'],
+          ['guide', 'Goals & settings'],
         ].map(([id, label]) => (
           <button
             key={id}
@@ -84,14 +94,15 @@ export function CityMap({
         {tab === 'map' && (
           <section className="md:col-span-2">
             <p role="status" className="mb-3 text-sm text-primary">
-              You are here: {currentInterior ? `Inside ${currentInterior} · ` : ''}{nearest.district} · near {nearest.name} · X {position.x.toFixed(1)}, Z{' '}
-              {position.z.toFixed(1)}
+              You are here: {currentInterior ? `Inside ${currentInterior} · ` : ''}
+              {nearest.district} · near {nearest.name} · X {position.x.toFixed(1)}, Z {position.z.toFixed(1)}
             </p>
             <div className="h-[40dvh] min-h-48">
               <StreetMap
                 position={position}
                 destination={destination}
                 onSelect={onDestination}
+                territories={state.play.territories}
                 visibleIds={matches.map((b) => b.id)}
               />
             </div>
@@ -184,6 +195,37 @@ export function CityMap({
           <div className="md:col-span-2">
             <DynastyPanel selectedNpc={selectedNpc} />
             <RivalPanel />
+          </div>
+        )}
+        {tab === 'territory' && (
+          <div className="md:col-span-2">
+            <TerritoryPanel />
+          </div>
+        )}
+        {tab === 'guide' && (
+          <div className="md:col-span-2">
+            <GuidePanel onTravel={onTravel} />
+            <ActivityDirectory onTravel={onTravel} />
+            <label className="mt-4 block text-sm">
+              Graphics quality
+              <select
+                aria-label="Graphics quality"
+                value={state.play.quality}
+                onChange={(e) => dispatch({ type: 'quality', value: e.target.value as 'balanced' | 'low' })}
+                className="ml-2 rounded border border-border bg-card p-2"
+              >
+                <option value="balanced">Balanced</option>
+                <option value="low">Low · reduced crowd detail and resolution</option>
+              </select>
+            </label>
+            <section aria-label="Activity journal" className="mt-4 text-sm">
+              <h2 className="text-primary">City activity journal</h2>
+              {state.play.events.map((e, i) => (
+                <p key={i} className="my-2 text-xs text-muted-foreground">
+                  {e}
+                </p>
+              ))}
+            </section>
           </div>
         )}
         {tab === 'garage' && (

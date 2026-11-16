@@ -222,7 +222,7 @@ export function PlayerControls({
     if (player.current)
       player.current.visible =
         !driving && Math.hypot(orbit.x - position.current.x, orbit.z - position.current.z) >= 0.65
-    camera.position.set(orbit.x, orbit.y, orbit.z)
+    camera.position.lerp(view.current.set(orbit.x, orbit.y, orbit.z), 1 - Math.exp(-dt * 12))
     camera.lookAt(view.current.set(position.current.x, 1.25 * character.height, position.current.z))
 
     const nearCar =

@@ -5,6 +5,7 @@ import { formatMoney } from '@/lib/game/format'
 import { VAULT_TIERS } from '@/lib/game/safe-house'
 import { useGame } from './game-provider'
 import { ESTATES } from '@/lib/game/dynasty'
+import { ScheduleRest } from './city-play-panel'
 import { EstatePanel } from './dynasty-panel'
 import { TouchControls } from './touch-controls'
 
@@ -85,6 +86,7 @@ export function SafeHouseHud({
       <div className="flex flex-col items-center gap-3">
         <div className="pointer-events-auto max-h-[28dvh] w-full max-w-xl self-end overflow-y-auto">
           <EstatePanel />
+          <ScheduleRest />
         </div>
         {focusedId === 'vault' && state.dynasty.estate >= 0 ? (
           <button

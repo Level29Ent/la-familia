@@ -68,7 +68,7 @@ export function StartOverlay({ onStart, onCharacter }: { onStart: () => void; on
         </dl>
 
         <p className="text-center text-xs text-primary">
-          New: Made Men to Godfather · Hire NPCs · Upgrade your estate · Police heat
+          New: Guided opening · City activities · Territory · Day & night · Loyalty
         </p>
         <button
           type="button"

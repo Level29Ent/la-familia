@@ -13,6 +13,7 @@ import {
 } from '@/lib/game/dynasty'
 import { FAMILIES } from '@/lib/game/city'
 import { formatMoney } from '@/lib/game/format'
+import { ContactPanel } from './city-play-panel'
 import { useGame } from './game-provider'
 const button = 'rounded-lg border border-primary/40 px-3 py-2 text-xs text-primary disabled:opacity-40'
 
@@ -151,6 +152,7 @@ export function DynastyPanel({ selectedNpc }: { selectedNpc?: string | null }) {
               {r.role} · power {r.power} · collector payout ${r.wage || 5}/30s · sidewalk ({r.position[0]},{' '}
               {r.position[2]})
             </p>
+            <ContactPanel id={r.id}/>
             {!m ? (
               <button
                 type="button"

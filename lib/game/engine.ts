@@ -1,3 +1,4 @@
+import { initialPlay, restorePlay, tickPlay, type PlayState } from './city-play'
 import { initialDynasty, restoreDynasty, tickDynasty, type DynastyState } from './dynasty'
 import { initialFleet, restoreFleet, type FleetState } from './vehicles'
 import { initialCity, restoreCity, tickCity, type CityState } from './rivals'
@@ -24,6 +25,7 @@ export type BusinessState = {
 }
 
 export type GameState = {
+  play: PlayState
   dynasty: DynastyState
   fleet: FleetState
   city: CityState
@@ -58,6 +60,7 @@ export function createInitialState(respect = 0, lifetimeEarnings = 0, heists = 0
   }
   const now = Date.now()
   return {
+    play: initialPlay(),
     dynasty: initialDynasty(),
     fleet: initialFleet(),
     city: initialCity(),
@@ -198,16 +201,22 @@ export function tick(state: GameState, dtMs: number): GameState {
       operation = null
     }
   }
-  return tickDynasty({
-    ...state,
-    city,
-    businesses,
-    operation,
-    operationsCompleted,
-    cash: state.cash + earned,
-    runEarnings: state.runEarnings + earned,
-    lifetimeEarnings: state.lifetimeEarnings + earned,
-  }, dtMs)
+  return tickPlay(
+    tickDynasty(
+      {
+        ...state,
+        city,
+        businesses,
+        operation,
+        operationsCompleted,
+        cash: state.cash + earned,
+        runEarnings: state.runEarnings + earned,
+        lifetimeEarnings: state.lifetimeEarnings + earned,
+      },
+      dtMs,
+    ),
+    dtMs,
+  )
 }
 
 export function computeOfflineEarnings(state: GameState, now: number) {
@@ -276,6 +285,7 @@ export function restoreState(saved: Partial<GameState>): GameState {
   return {
     ...fresh,
     ...saved,
+    play: restorePlay(saved.play),
     dynasty: restoreDynasty(saved.dynasty, !saved.dynasty && !!saved.safeHouse),
     fleet: restoreFleet(saved.fleet, Array.isArray(saved.assets) ? saved.assets : []),
     city: restoreCity(saved.city),

@@ -7,6 +7,7 @@ import { RECRUITS, type DynastyState } from '@/lib/game/dynasty'
 import { AVENUES } from '@/lib/game/city'
 import { VintageCar } from './vintage-car'
 import { NpcHuman } from './npc-human'
+import type { Contact } from '@/lib/game/city-play'
 import { npcAppearance } from '@/lib/game/npc-appearance'
 import { WorldText } from './world-text'
 
@@ -77,20 +78,26 @@ const Traffic = memo(function Traffic({
 })
 export const LivingCity = memo(function LivingCity({
   active,
+  night = false,
+  low = false,
   dynasty,
+  contacts = [],
   onMeet,
 }: {
   active: boolean
+  night?: boolean
+  low?: boolean
+  contacts?: Contact[]
   dynasty: DynastyState
   onMeet?: (id: string) => void
 }) {
   return (
     <group>
-      {Array.from({ length: 24 }, (_, index) => (
+      {Array.from({ length: low ? 8 : night ? 12 : 24 }, (_, index) => (
         <Citizen key={index} index={index} active={active} />
       ))}
-      {Array.from({ length: 6 }, (_, index) => (
-        <Traffic key={index} index={index} active={active} heat={dynasty.heat} />
+      {Array.from({ length: night ? 6 : low ? 3 : 5 }, (_, index) => (
+        <Traffic key={index} index={index} active={active} heat={Math.max(dynasty.heat, night ? 60 : 0)} />
       ))}
       {RECRUITS.map((r, index) => {
         const hired = dynasty.members.some((m) => m.id === r.id),
@@ -115,7 +122,7 @@ export const LivingCity = memo(function LivingCity({
             </WorldText>
             <WorldText position={[0, 2.5, 0]} fontSize={0.18} color="#f0dfb7">
               {hired
-                ? `FAMILY · ${dynasty.members.find((m) => m.id === r.id)?.duty.toUpperCase()}`
+                ? `${['ASSOCIATE', 'MADE MAN', 'CAPO'][contacts.find((c) => c.id === r.id)?.grade ?? 0]} · ${dynasty.members.find((m) => m.id === r.id)?.duty.toUpperCase()}`
                 : `HIRE ${r.role.toUpperCase()} · $${r.cost}`}
             </WorldText>
             <mesh position={[0, 0.03, 0]} rotation={[-Math.PI / 2, 0, 0]}>

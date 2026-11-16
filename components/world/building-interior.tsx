@@ -9,6 +9,7 @@ import { npcAppearance, appearanceSeed } from '@/lib/game/npc-appearance'
 import { PlayerControls } from './player-controls'
 import { CharacterModel } from './character-model'
 import { useSurfaceTexture } from './surface-texture'
+import { InteriorIdentity } from './interior-identities'
 import { InteriorFinishes } from './architectural-details'
 import { EastsideFittings } from './eastside-fittings'
 import { WorldText } from './world-text'
@@ -71,6 +72,7 @@ export const BuildingInterior = memo(function BuildingInterior({
       aria-label={`Walkable interior of ${building.name}`}
     >
       <InteriorFinishes theme={building.theme} />
+      <InteriorIdentity building={building} />
       <color attach="background" args={['#4c5756']} />
       <ambientLight intensity={1.8} />
       <hemisphereLight args={['#fff1cf', '#766657', 1.8]} />
@@ -124,12 +126,12 @@ export const BuildingInterior = memo(function BuildingInterior({
         </group>
       ) : (
         <group>
-          <Shelf x={-4.8} />
+          {!/bakery|diner|tailor/.test(building.id)&&building.theme!=='office'&&<Shelf x={-4.8} />}
           {['garage', 'taxidepot', 'florist', 'fishmarket', 'grocer', 'warehouse', 'jazz', 'radio'].includes(
             building.id,
           ) ? (
             <EastsideFittings id={building.id} />
-          ) : bar ? (
+          ) : /casino|numbers|cinema/.test(building.id) ? null : bar ? (
             <group>
               {[-2, 0, 2].map((z) => (
                 <mesh key={z} position={[4.7, 0.6, z]}>
