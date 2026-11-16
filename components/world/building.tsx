@@ -110,6 +110,37 @@ function BuildingImpl({ placement, style, name, status, litLevel, focused, seed 
         <cylinderGeometry args={[0.07, 0.07, height, 6]} />
         <meshStandardMaterial color="#655d52" metalness={0.7} roughness={0.6} />
       </mesh>
+      {Array.from({ length: Math.floor(height / 2) }, (_, i) => (
+        <mesh key={`course-${i}`} position={[0, 1 + i * 2, front + 0.015]}>
+          <boxGeometry args={[width, 0.025, 0.025]} />
+          <meshStandardMaterial color={trim} />
+        </mesh>
+      ))}
+      {height >= 25 && (
+        <group position={[width / 4, height + 1.5, -1]}>
+          <mesh>
+            <cylinderGeometry args={[0.9, 0.9, 2.3, 10]} />
+            <meshStandardMaterial color="#705741" />
+          </mesh>
+          <mesh position={[0, 1.4, 0]}>
+            <coneGeometry args={[1.15, 0.6, 10]} />
+            <meshStandardMaterial color="#3f4748" />
+          </mesh>
+        </group>
+      )}
+      {height >= 25 &&
+        [8, 13, 18].map((y) => (
+          <group key={y} position={[0, y, front + 0.5]}>
+            <mesh>
+              <boxGeometry args={[width - 1, 0.15, 0.7]} />
+              <meshStandardMaterial color={trim} />
+            </mesh>
+            <mesh position={[0, 0.5, 0.3]}>
+              <boxGeometry args={[width - 1, 0.08, 0.08]} />
+              <meshStandardMaterial color="#8b9590" />
+            </mesh>
+          </group>
+        ))}
       {windows.map((w) => (
         <mesh key={`sill-${w.i}`} position={[w.x, w.y - 0.8, front + 0.14]}>
           <boxGeometry args={[1.4, 0.12, 0.3]} />

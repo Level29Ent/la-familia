@@ -2,14 +2,17 @@
 
 import { useEffect, useRef } from 'react'
 import { AVENUES, CITY_BUILDINGS, CROSS_STREETS, FAMILIES } from '@/lib/game/city'
+import { DynastyPanel } from './dynasty-panel'
 import { FleetPanel } from './fleet-panel'
 import { RivalPanel } from './rival-panel'
 
 export function CityMap({
+  selectedNpc,
   position,
   onTravel,
   onClose,
 }: {
+  selectedNpc?: string | null
   position: { x: number; z: number }
   onTravel: (id: string) => void
   onClose: () => void
@@ -20,6 +23,9 @@ export function CityMap({
     el.showModal()
     return () => el.close()
   }, [])
+  useEffect(() => {
+    if (selectedNpc) document.getElementById(`recruit-${selectedNpc}`)?.scrollIntoView({ block: 'center' })
+  }, [selectedNpc])
   return (
     <dialog
       ref={ref}
@@ -36,7 +42,7 @@ export function CityMap({
             City atlas & rival families
           </h2>
           <p className="text-xs text-muted-foreground">
-            12 blocks · 48 enterable buildings · 26 businesses · 18 homes · 3 rival clubs
+            15 blocks · 60 enterable buildings · 26 businesses · 30 homes · 3 rival clubs
           </p>
         </div>
         <button type="button" onClick={onClose} className="rounded border border-border px-3 py-2">
@@ -46,7 +52,7 @@ export function CityMap({
       <div className="mt-4 grid gap-6 md:grid-cols-[1fr_0.8fr]">
         <section>
           <svg
-            viewBox="-48 -30 172 136"
+            viewBox="-48 -30 208 136"
             role="img"
             aria-label="City street grid with buildings; gold dot marks your position"
             className="w-full rounded-xl bg-[#192d31]"
@@ -55,7 +61,7 @@ export function CityMap({
               <path key={x} d={`M ${x} -26 V 98`} stroke="#52636a" strokeWidth="9" />
             ))}
             {CROSS_STREETS.map((z) => (
-              <path key={z} d={`M -44 ${-z} H 116`} stroke="#52636a" strokeWidth="9" />
+              <path key={z} d={`M -44 ${-z} H 152`} stroke="#52636a" strokeWidth="9" />
             ))}
             {CITY_BUILDINGS.map((b) => (
               <rect
@@ -100,7 +106,7 @@ export function CityMap({
             ))}
           </div>
         </section>
-        <div><FleetPanel /><RivalPanel /></div>
+        <div><DynastyPanel selectedNpc={selectedNpc} /><FleetPanel /><RivalPanel /></div>
       </div>
     </dialog>
   )

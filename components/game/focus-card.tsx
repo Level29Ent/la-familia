@@ -78,7 +78,7 @@ export function FocusCard({
         <ActionButton
           hotkey="E"
           label="Enter safe house"
-          detail="Visit your vault"
+          detail="View residence / vault"
           onClick={onOpenSafeHouse}
         />
       </section>

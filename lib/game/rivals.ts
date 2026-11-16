@@ -66,6 +66,7 @@ export function opposition(state: GameState, id: string) {
 }
 export function cityAction(state: GameState, action: CityAction): GameState {
   const city = state.city
+  if (state.dynasty.jailMs) return state
   if (action.type === 'recruit') {
     const cost = recruitCost(state)
     if (city.crew >= 50 || state.cash < cost) return state
@@ -101,6 +102,7 @@ export function cityAction(state: GameState, action: CityAction): GameState {
   const reward = won ? family.reward : 0
   return {
     ...state,
+    dynasty: { ...state.dynasty, heat: Math.min(100,state.dynasty.heat+20), hostility: [...new Set([...state.dynasty.hostility,family.id])], xp: state.dynasty.xp+(won ? 20 : 0) },
     cash: state.cash + reward,
     runEarnings: state.runEarnings + reward,
     lifetimeEarnings: state.lifetimeEarnings + reward,

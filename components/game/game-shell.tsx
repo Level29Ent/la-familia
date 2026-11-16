@@ -16,6 +16,7 @@ import { SceneBoundary } from './scene-boundary'
 import { CITY_BUILDINGS, CITY_NAVIGATION, outsideBuilding, type CityBuilding } from '@/lib/game/city'
 import { CityMap } from './city-map'
 import { activeVehicle } from '@/lib/game/vehicles'
+import { CustodyNotice } from './dynasty-panel'
 import { InteriorHud } from './interior-hud'
 
 const CityScene = dynamic(() => import('@/components/world/city-scene').then((m) => m.CityScene), {
@@ -60,11 +61,21 @@ function World() {
   const [vaultOpen, setVaultOpen] = useState(false)
   const [vaultVisited, setVaultVisited] = useState(false)
   const [interior, setInterior] = useState<CityBuilding | null>(null)
+  const [selectedNpc, setSelectedNpc] = useState<string | null>(null)
   const [mapOpen, setMapOpen] = useState(false)
   const [cityNavigation, setCityNavigation] = useState(CITY_NAVIGATION)
   const [visit, setVisit] = useState(0)
   const streetPosition = useRef({ x: CITY_NAVIGATION.start[0], z: CITY_NAVIGATION.start[2] })
-  const meetFamily = useCallback(() => { setDriving(false); setMapOpen(true) }, [])
+  const meetFamily = useCallback(() => {
+    setSelectedNpc(null)
+    setDriving(false)
+    setMapOpen(true)
+  }, [])
+  const meetNpc = useCallback((id: string) => {
+    setSelectedNpc(id)
+    setDriving(false)
+    setMapOpen(true)
+  }, [])
   const reportPosition = useCallback((p: { x: number; z: number }) => {
     streetPosition.current = p
   }, [])
@@ -75,7 +86,14 @@ function World() {
   const badges = ledgerBadges(state)
   const alerts = badges.capos + badges.upgrades + badges.family + badges.empire
   const playing =
-    started && !mapOpen && !ledgerOpen && !vaultOpen && !shopOpen && !creatorOpen && !offlineReport
+    started &&
+    !state.dynasty.jailMs &&
+    !mapOpen &&
+    !ledgerOpen &&
+    !vaultOpen &&
+    !shopOpen &&
+    !creatorOpen &&
+    !offlineReport
   const enterHouse = () => {
     setDriving(false)
     setFocusedId(null)
@@ -92,6 +110,7 @@ function World() {
     setVisit((n) => n + 1)
   }
   const openVault = () => {
+    if (state.dynasty.estate < 0) return
     setVaultVisited(true)
     setVaultOpen(true)
   }
@@ -124,7 +143,8 @@ function World() {
   }
 
   const onKey = useEffectEvent((e: KeyboardEvent) => {
-    if (!started || offlineReport || e.repeat || e.metaKey || e.ctrlKey || e.altKey) return
+    if (!started || state.dynasty.jailMs || offlineReport || e.repeat || e.metaKey || e.ctrlKey || e.altKey)
+      return
     if (
       e.target instanceof HTMLElement &&
       e.target.closest('input, textarea, select, [contenteditable=true]')
@@ -168,6 +188,7 @@ function World() {
       return
     }
     if (e.code === 'KeyG' && !ledgerOpen) {
+      setSelectedNpc(null)
       setDriving(false)
       setMapOpen(true)
       return
@@ -220,15 +241,37 @@ function World() {
   }, [])
 
   useEffect(() => {
+    if (!state.dynasty.jailMs) return
+    setMapOpen(false)
+    setVaultOpen(false)
+    setShopOpen(false)
+    setCreatorOpen(false)
+    setLedgerOpen(false)
+    setDriving(false)
+  }, [!!state.dynasty.jailMs])
+
+  useEffect(() => {
+    dispatch({ type: 'shelter', inside: safeHouseOpen || !!interior })
+  }, [safeHouseOpen, interior?.id])
+
+  useEffect(() => {
     if (!vehicle) setDriving(false)
   }, [vehicle?.id])
 
   return (
     <main className="relative h-dvh w-full overflow-hidden bg-background select-none">
       <SceneBoundary key={safeHouseOpen ? 'house' : (interior?.id ?? `city-${visit}`)}>
-        {safeHouseOpen ? (
+        {safeHouseOpen && state.dynasty.estate < 0 ? (
+          <BuildingInterior
+            building={CITY_BUILDINGS.find((b) => b.id === 'safehouse')!}
+            character={state.character}
+            enabled={playing}
+            onFocusChange={setFocusedId}
+          />
+        ) : safeHouseOpen ? (
           <SafeHouseScene
             assets={state.assets}
+            estateTier={state.dynasty.estate}
             safeHouse={state.safeHouse}
             character={state.character}
             decor={state.safeHouse.decor}
@@ -249,6 +292,7 @@ function World() {
             driving={driving && !!vehicle}
             navigationOverride={cityNavigation}
             onPositionChange={reportPosition}
+            onNpcEncounter={meetNpc}
             onFamilyEncounter={meetFamily}
             focusedId={focusedId}
             movementEnabled={playing}
@@ -260,7 +304,11 @@ function World() {
         <Hud
           focusedId={focusedId}
           onEnterBuilding={enterBuilding}
-          onOpenMap={() => { setDriving(false); setMapOpen(true) }}
+          onOpenMap={() => {
+            setSelectedNpc(null)
+            setDriving(false)
+            setMapOpen(true)
+          }}
           driving={driving}
           onDrive={() => {
             if (!!vehicle) {
@@ -281,7 +329,12 @@ function World() {
         <InteriorHud building={interior} focusedId={focusedId} buyAmount={buyAmount} onExit={leaveBuilding} />
       )}
       {mapOpen && (
-        <CityMap position={streetPosition.current} onTravel={travel} onClose={() => setMapOpen(false)} />
+        <CityMap
+          selectedNpc={selectedNpc}
+          position={streetPosition.current}
+          onTravel={travel}
+          onClose={() => setMapOpen(false)}
+        />
       )}
       {ledgerOpen && <LedgerOverlay onClose={() => setLedgerOpen(false)} />}
       {safeHouseOpen && (
@@ -297,6 +350,7 @@ function World() {
       {shopOpen && <DecorShop onClose={() => setShopOpen(false)} />}
       {creatorOpen && <CharacterCreator onClose={() => setCreatorOpen(false)} />}
       <OfflineDialog />
+      <CustodyNotice />
     </main>
   )
 }

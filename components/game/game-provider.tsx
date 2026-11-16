@@ -1,6 +1,7 @@
 'use client'
 
 import { createContext, useContext, useEffect, useReducer, useRef, useState, type ReactNode } from 'react'
+import { dynastyAction, type DynastyAction } from '@/lib/game/dynasty'
 import { fleetAction, type FleetAction } from '@/lib/game/vehicles'
 import { cityAction, type CityAction } from '@/lib/game/rivals'
 import { restoreCharacter, type CharacterConfig } from '@/lib/game/character'
@@ -22,6 +23,7 @@ import {
 } from '@/lib/game/engine'
 
 type Action =
+  | DynastyAction
   | FleetAction
   | CityAction
   | EmpireAction
@@ -38,7 +40,16 @@ type Action =
   | { type: 'hardReset' }
 
 function reducer(state: GameState, action: Action): GameState {
+  if (state.dynasty.jailMs && !['tick', 'load', 'hardReset', 'bail', 'shelter'].includes(action.type)) return state
   switch (action.type) {
+    case 'estateUpgrade':
+    case 'payLawyer':
+    case 'bail':
+    case 'meetHire':
+    case 'duty':
+    case 'sendHit':
+    case 'shelter':
+      return dynastyAction(state, action)
     case 'vehicleBuy':
     case 'vehicleSelect':
       return fleetAction(state, action)
@@ -56,14 +67,16 @@ function reducer(state: GameState, action: Action): GameState {
       return decorAction(state, action)
     case 'vault':
     case 'vaultUpgrade':
-      return vaultAction(state, action)
+      return state.dynasty.estate < 0 ? state : vaultAction(state, action)
     case 'tick':
       return tick(state, action.dt)
     case 'run': {
+      if (state.dynasty.jailMs) return state
       const b = state.businesses[action.id]
       if (!b || b.owned === 0 || b.running || b.managed) return state
       return {
         ...state,
+        dynasty: { ...state.dynasty, heat: Math.min(100,state.dynasty.heat+2) },
         businesses: { ...state.businesses, [action.id]: { ...b, running: true, progress: 0 } },
       }
     }

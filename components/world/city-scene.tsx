@@ -14,6 +14,9 @@ import { PlayerControls } from './player-controls'
 import { CityStreets } from './city-streets'
 import { RivalCrews } from './rival-crews'
 import { activeVehicle } from '@/lib/game/vehicles'
+import { ESTATES } from '@/lib/game/dynasty'
+import { EstateDetails } from './estate-details'
+import { LivingCity, StreetLifeDetails } from './living-city'
 import { CITY_BUILDINGS, FAMILIES } from '@/lib/game/city'
 
 const CITY_STYLES = Object.fromEntries(
@@ -29,6 +32,18 @@ const CITY_STYLES = Object.fromEntries(
     },
   ]),
 )
+
+const ESTATE_STYLES = [
+  { wall: '#646257', trim: '#3e3f38', neon: '#cbb385', height: 7, width: 10, depth: 9 },
+  ...ESTATES.map((e, i) => ({
+    wall: e.wall,
+    trim: e.trim,
+    neon: e.trim,
+    height: 8 + i * 3,
+    width: 10,
+    depth: 9,
+  })),
+]
 
 function statusFor(state: GameState, id: string): BuildingStatus {
   const b = state.businesses[id]
@@ -51,6 +66,7 @@ export function CityScene({
   returning = false,
   onPositionChange,
   onFamilyEncounter,
+  onNpcEncounter,
   focusedId,
   movementEnabled,
   onFocusChange,
@@ -63,6 +79,7 @@ export function CityScene({
   returning?: boolean
   onPositionChange?: (position: { x: number; z: number }) => void
   onFamilyEncounter?: () => void
+  onNpcEncounter?: (id: string) => void
   focusedId: string | null
   movementEnabled: boolean
   onFocusChange: (id: string | null) => void
@@ -84,27 +101,43 @@ export function CityScene({
       <directionalLight position={[40, 60, -70]} intensity={2.6} color="#fff1d0" />
       <directionalLight position={[-35, 25, 40]} intensity={0.65} color="#c4e1ff" />
 
+      <mesh position={[90,80,-170]}><sphereGeometry args={[5,16,12]}/><meshBasicMaterial color="#fff1b6" fog={false}/></mesh>
       <CityStreets />
+      <StreetLifeDetails />
+      <LivingCity active={movementEnabled} dynasty={state.dynasty} onMeet={onNpcEncounter} />
       <RivalCrews active={movementEnabled} onEncounter={onFamilyEncounter} />
       <GoodLifeLandmarks city assets={state.assets} endZ={STREET_NAVIGATION.bounds.minZ} />
 
       {CITY_BUILDINGS.map((building, i) => {
         const business = state.businesses[building.id]
         return (
-          <Building
-            key={building.id}
-            placement={building}
-            style={CITY_STYLES[building.id]}
-            name={
-              building.id === 'home-14' && state.assets.includes('penthouse')
-                ? 'Bellini Penthouse'
-                : building.name
-            }
-            status={business ? statusFor(state, building.id) : 'ready'}
-            litLevel={business ? litLevelFor(business.owned) : 0.6}
-            focused={focusedId === building.id}
-            seed={i + 1}
-          />
+          <group key={building.id}>
+            <Building
+              key={building.id}
+              placement={building}
+              style={
+                building.id === 'safehouse'
+                  ? ESTATE_STYLES[state.dynasty.estate + 1]
+                  : CITY_STYLES[building.id]
+              }
+              name={
+                building.id === 'safehouse'
+                  ? (ESTATES[state.dynasty.estate]?.name ?? 'Abandoned Property')
+                  : building.id === 'home-14' && state.assets.includes('penthouse')
+                    ? 'Bellini Penthouse'
+                    : building.name
+              }
+              status={business ? statusFor(state, building.id) : 'ready'}
+              litLevel={business ? litLevelFor(business.owned) : 0.6}
+              focused={focusedId === building.id}
+              seed={i + 1}
+            />
+            {building.id === 'safehouse' && (
+              <group position={building.position} rotation={[0, building.rotationY, 0]}>
+                <EstateDetails tier={state.dynasty.estate} exterior />
+              </group>
+            )}
+          </group>
         )
       })}
 

@@ -95,7 +95,9 @@ export const BuildingInterior = memo(function BuildingInterior({
             ? 'WELCOME HOME · REST AND RECOVER'
             : 'OPEN FOR BUSINESS · SPEAK TO THE PROPRIETOR'}
       </WorldText>
-      {home ? (
+      {building.kind === 'safehouse' ? (
+        <group><Box at={[-4.7,0.15,0]} size={[2,0.3,3]} color="#7e7461" /><Box at={[4.7,0.5,-1]} size={[1.5,1,1.5]} color="#88775c" /><WorldText position={[0,2.8,-6.7]} fontSize={0.32} color="#efd49e">ABANDONED · FOR SALE · $250</WorldText></group>
+      ) : home ? (
         <group>
           <Box at={[-4.7, 0.6, -0.8]} size={[2.4, 1.2, 3.4]} color="#657a6f" />
           <Box at={[-5.8, 1.2, -0.8]} size={[0.3, 1.4, 3.5]} color="#44554c" />
@@ -134,6 +136,7 @@ export const BuildingInterior = memo(function BuildingInterior({
       )}
       <Box at={[0, 0.7, -4]} size={[4.7, 1.4, 1.2]} color={bar ? '#6b4432' : '#5f5040'} />
       <Box at={[0, 1.45, -4]} size={[4.9, 0.12, 1.4]} color="#c3a776" />
+      {building.kind === 'headquarters' && <WorldText position={[0,2.5,-5.5]} fontSize={0.28} color="#e1bc76">{`Don ${building.family === 'moretti' ? 'Moretti' : building.family === 'volkov' ? 'Volkov' : 'Doyle'}`}</WorldText>}
       <group position={[0, 0, -5.5]}>
         <CharacterModel
           config={{ ...DEFAULT_CHARACTER, jacket: home ? 2 : building.kind === 'headquarters' ? 1 : 3 }}

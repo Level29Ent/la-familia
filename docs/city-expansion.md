@@ -2,7 +2,7 @@
 
 ## Explore
 
-The old single street is now a connected four-by-three block city. There are 48 enterable buildings: 26 businesses, 18 residences, three rival social clubs and the existing safe house. Exterior footprints block the player and sedan. Every entrance has a clear return point connected to the street grid.
+The old single street is now a connected five-by-three block city. There are 60 enterable buildings: 26 businesses, 30 residences, three rival social clubs and the existing safe house. Exterior footprints block the player and sedan. Every entrance has a clear return point connected to the street grid.
 
 - WASD/arrows: walk; Shift: sprint; drag to turn; scroll to zoom.
 - **G / City map & families** opens the atlas, directory and rivalry board. Travel takes you to the selected entrance (not inside); walking between neighborhoods is unrestricted.
@@ -26,7 +26,7 @@ Moretti, Volkov and Doyle have colored patrol crews and social clubs in Little I
 
 ## Verification
 
-`pnpm check` covers all 48 connected entrances, non-overlapping footprints, doorway focus after travel/exit, furniture/vehicle collision, patrol positions, old-save migration, recruiting costs, deterministic wins/losses, cooldown/double-reward guards, truces, AI influence recovery, stamina, and save round trips, in addition to the existing economy/vault/vehicle/avatar checks.
+`pnpm check` covers all 60 connected entrances, non-overlapping footprints, doorway focus after travel/exit, furniture/vehicle collision, patrol positions, old-save migration, recruiting costs, deterministic wins/losses, cooldown/double-reward guards, truces, AI influence recovery, stamina, and save round trips, in addition to the existing economy/vault/vehicle/avatar checks.
 
 `pnpm build` runs those checks, builds the static site, and checks exported asset URLs. Also test the literal base-path rewriting performed by configure-pages before building; do not test only an environment variable.
 
@@ -40,3 +40,6 @@ Eastside adds a column of three blocks without moving any original address: Rose
 The City atlas and Eastside Motor Works have a **Family motor pool**. Buy/select a Yellow Cab ($600), Delivery Pickup ($1,400), Panel Delivery Van ($2,800), Crimson Roadster ($4,500), or the original Armored Sedan ($25,000). Each has a distinct model and speed/acceleration/steering profile. Close the atlas and use the HUD's Drive button; W/S accelerate/reverse, A/D steer, Space brakes, E parks/exits. Opening the atlas parks first. Switching vehicles returns the motor pool model to its central parking space and resets motion. Six parked vehicle displays use the same collision centers as their rendered models; these are scenery, not stealable traffic.
 
 The sedan's existing income perk and purchase path remain compatible. Other vehicles do not multiply income. Ownership and selection save, reload, and reset on retirement. Old saves without a fleet recover their existing sedan from the original asset flag; invalid or unowned selections are dropped.
+
+
+See [Dynasty and law](dynasty-and-law.md) for family ranks, named hires, missions/retaliation, home ownership and visible estate upgrades, police heat and Garden Heights apartments.

@@ -1,3 +1,4 @@
+import { initialDynasty, restoreDynasty, tickDynasty, type DynastyState } from './dynasty'
 import { initialFleet, restoreFleet, type FleetState } from './vehicles'
 import { initialCity, restoreCity, tickCity, type CityState } from './rivals'
 import { DEFAULT_CHARACTER, restoreCharacter, type CharacterConfig } from './character'
@@ -23,6 +24,7 @@ export type BusinessState = {
 }
 
 export type GameState = {
+  dynasty: DynastyState
   fleet: FleetState
   city: CityState
   cash: number
@@ -56,6 +58,7 @@ export function createInitialState(respect = 0, lifetimeEarnings = 0, heists = 0
   }
   const now = Date.now()
   return {
+    dynasty: initialDynasty(),
     fleet: initialFleet(),
     city: initialCity(),
     cash: 0,
@@ -107,7 +110,7 @@ export function profitMultiplier(state: GameState, businessId: string) {
     if (up && (up.target === 'all' || up.target === businessId)) mult *= up.multiplier
   }
   for (const asset of ASSETS) if (state.assets.includes(asset.id)) mult *= asset.multiplier
-  return mult
+  return state.dynasty.disruptionMs > 0 ? mult * 0.8 : mult
 }
 
 export function revenuePerCycle(state: GameState, config: BusinessConfig) {
@@ -154,6 +157,7 @@ export function claimableRespect(state: GameState) {
 }
 
 export function tick(state: GameState, dtMs: number): GameState {
+  if (state.dynasty.jailMs) return tickDynasty(state, dtMs)
   let earned = 0
   const city = tickCity(state.city, dtMs)
   const businesses = { ...state.businesses }
@@ -194,7 +198,7 @@ export function tick(state: GameState, dtMs: number): GameState {
       operation = null
     }
   }
-  return {
+  return tickDynasty({
     ...state,
     city,
     businesses,
@@ -203,7 +207,7 @@ export function tick(state: GameState, dtMs: number): GameState {
     cash: state.cash + earned,
     runEarnings: state.runEarnings + earned,
     lifetimeEarnings: state.lifetimeEarnings + earned,
-  }
+  }, dtMs)
 }
 
 export function computeOfflineEarnings(state: GameState, now: number) {
@@ -272,6 +276,7 @@ export function restoreState(saved: Partial<GameState>): GameState {
   return {
     ...fresh,
     ...saved,
+    dynasty: restoreDynasty(saved.dynasty, !saved.dynasty && !!saved.safeHouse),
     fleet: restoreFleet(saved.fleet, Array.isArray(saved.assets) ? saved.assets : []),
     city: restoreCity(saved.city),
     businesses: { ...fresh.businesses, ...saved.businesses },
@@ -285,6 +290,7 @@ export function retireEmpire(state: GameState): GameState {
   if (gained <= 0) return state
   return {
     ...createInitialState(state.respect + gained, state.lifetimeEarnings, state.heists + 1),
+    dynasty: { ...initialDynasty(), estate: state.dynasty.estate },
     safeHouse: { ...state.safeHouse },
     character: { ...state.character },
   }
