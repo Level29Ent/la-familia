@@ -21,6 +21,7 @@ import { GuidePanel } from './city-play-panel'
 import { CityFeedback } from './city-feedback'
 import { MiniMap } from './street-map'
 import { CustodyNotice } from './dynasty-panel'
+import { SUITES } from '@/lib/game/apartments'
 import { HARBOR_MISSIONS } from '@/lib/game/harbor'
 import { InteriorHud } from './interior-hud'
 
@@ -66,6 +67,7 @@ function World() {
   const [shopOpen, setShopOpen] = useState(false)
   const [vaultOpen, setVaultOpen] = useState(false)
   const [vaultVisited, setVaultVisited] = useState(false)
+  const [activeSuite, setActiveSuite] = useState<string | null>(null)
   const [interior, setInterior] = useState<CityBuilding | null>(null)
   const [menuSection, setMenuSection] = useState('map')
   const [destination, setDestination] = useState<string | null>(null)
@@ -129,6 +131,7 @@ function World() {
     !creatorOpen &&
     !offlineReport
   const enterHouse = () => {
+    setActiveSuite(null)
     lastHarborPosition.current = null
     const nav = outsideBuilding('safehouse')
     streetPosition.current = { x: nav.start[0], z: nav.start[2], yaw: nav.yaw }
@@ -157,6 +160,7 @@ function World() {
 
   const enterBuilding = (id: string) => {
     lastHarborPosition.current = null
+    setActiveSuite(null)
     const building = CITY_BUILDINGS.find((b) => b.id === id)
     if (!building) return
     if (id === 'safehouse') {
@@ -169,6 +173,7 @@ function World() {
     setInterior(building)
   }
   const leaveBuilding = () => {
+    setActiveSuite(null)
     lastHarborPosition.current = null
     if (interior) {
       const nav = outsideBuilding(interior.id)
@@ -179,7 +184,16 @@ function World() {
     setInterior(null)
     setVisit((n) => n + 1)
   }
+  const tourSuite = (id: string) => {
+    const suite = SUITES.find(s => s.id === id)
+    if (!suite) return
+    setSafeHouseOpen(false)
+    setMapOpen(false)
+    enterBuilding(suite.buildingId)
+    setActiveSuite(id)
+  }
   const travel = (id: string) => {
+    setActiveSuite(null)
     lastHarborPosition.current = null
     lastDrive.current = null
     setSafeHouseOpen(false)
@@ -339,6 +353,8 @@ function World() {
           />
         ) : interior ? (
           <BuildingInterior
+            suiteId={activeSuite ?? undefined}
+            suite={state.apartments.suites.find(s => s.id === activeSuite)}
             building={interior}
             character={state.character}
             enabled={playing}
@@ -423,6 +439,8 @@ function World() {
       {!started && <StartOverlay onStart={() => setStarted(true)} onCharacter={() => setCreatorOpen(true)} />}
       {interior && (
         <InteriorHud
+          currentSuiteId={activeSuite}
+          onApartments={() => { setMenuSection('apartments'); setMapOpen(true) }}
           building={interior}
           focusedId={focusedId}
           buyAmount={buyAmount}
@@ -437,6 +455,8 @@ function World() {
       )}
       {mapOpen && (
         <CityMap
+          currentSuiteId={activeSuite}
+          onSuiteTour={tourSuite}
           currentBuildingId={safeHouseOpen ? 'safehouse' : interior?.id}
           initialSection={menuSection}
           currentInterior={safeHouseOpen ? 'Family Safe House' : interior?.name}

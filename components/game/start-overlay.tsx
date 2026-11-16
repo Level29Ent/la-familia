@@ -68,7 +68,7 @@ export function StartOverlay({ onStart, onCharacter }: { onStart: () => void; on
         </dl>
 
         <p className="text-center text-xs text-primary">
-          New: Trouble at the Harbor · Five story missions · Family council · Living neighborhoods
+          New: Own & lease apartment suites · Tenant requests · Furnished tours · Harbor story
         </p>
         <button
           type="button"

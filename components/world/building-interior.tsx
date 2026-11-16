@@ -12,6 +12,8 @@ import { useSurfaceTexture } from './surface-texture'
 import { InteriorIdentity } from './interior-identities'
 import { InteriorFinishes } from './architectural-details'
 import { EastsideFittings } from './eastside-fittings'
+import { SuiteFittings } from './apartment-details'
+import { SUITES, type SuiteState } from '@/lib/game/apartments'
 import { WorldText } from './world-text'
 
 type Point = [number, number, number]
@@ -45,15 +47,22 @@ function Shelf({ x }: { x: number }) {
 }
 export const BuildingInterior = memo(function BuildingInterior({
   building,
+  suiteId,
+  suite,
   character,
   enabled,
   onFocusChange,
 }: {
+  suiteId?: string
+  suite?: SuiteState
   building: CityBuilding
   character: CharacterConfig
   enabled: boolean
   onFocusChange: (id: string | null) => void
 }) {
+  const suiteConfig = suiteId
+    ? SUITES.find((s) => s.id === suiteId && s.buildingId === building.id)
+    : undefined
   const floorTexture = useSurfaceTexture(
     building.theme === 'home' || building.theme === 'bar' ? 'wood' : 'tile',
     3,
@@ -69,10 +78,10 @@ export const BuildingInterior = memo(function BuildingInterior({
       fallback={<SceneUnavailable />}
       dpr={[1, 1.5]}
       camera={{ fov: 70, near: 0.1, far: 60 }}
-      aria-label={`Walkable interior of ${building.name}`}
+      aria-label={`Walkable interior of ${building.name}${suiteConfig ? ` suite ${suiteConfig.number}` : ''}`}
     >
       <InteriorFinishes theme={building.theme} />
-      <InteriorIdentity building={building} />
+      {!suiteConfig && <InteriorIdentity building={building} />}
       <color attach="background" args={['#4c5756']} />
       <ambientLight intensity={1.8} />
       <hemisphereLight args={['#fff1cf', '#766657', 1.8]} />
@@ -98,17 +107,30 @@ export const BuildingInterior = memo(function BuildingInterior({
         EXIT · E
       </WorldText>
       <Box at={[0, 0.015, 2.4]} size={[2.8, 0.03, 6]} color={home ? '#8b4042' : '#4e625b'} />
-      <WorldText position={[0, 3.8, -6.8]} fontSize={0.44} maxWidth={11} color="#fff0c0">
-        {building.name}
+      <WorldText
+        position={[0, suiteConfig ? 4.55 : 3.8, -6.8]}
+        fontSize={0.44}
+        maxWidth={11}
+        color="#fff0c0"
+      >
+        {suiteConfig ? `${suiteConfig.name} · ${suiteConfig.number}` : building.name}
       </WorldText>
-      <WorldText position={[0, 3.05, -6.8]} fontSize={0.24} color="#eedfc8">
-        {building.kind === 'headquarters'
-          ? 'FAMILY COUNCIL · NEGOTIATE OR CHALLENGE'
-          : home
-            ? 'WELCOME HOME · REST AND RECOVER'
-            : 'OPEN FOR BUSINESS · SPEAK TO THE PROPRIETOR'}
+      <WorldText
+        position={[0, suiteConfig ? 2 : 3.05, suiteConfig ? -3.8 : -6.8]}
+        fontSize={0.24}
+        color="#eedfc8"
+      >
+        {suiteConfig
+          ? `${['ORIGINAL', 'RENOVATED', 'LUXURY'][suite?.level ?? 0]} · ${suite?.tenant ? 'TENANT IN RESIDENCE' : 'VACANT SUITE'}`
+          : building.kind === 'headquarters'
+            ? 'FAMILY COUNCIL · NEGOTIATE OR CHALLENGE'
+            : home
+              ? 'WELCOME HOME · REST AND RECOVER'
+              : 'OPEN FOR BUSINESS · SPEAK TO THE PROPRIETOR'}
       </WorldText>
-      {building.kind === 'safehouse' ? (
+      {suiteConfig ? (
+        <SuiteFittings id={suiteConfig.id} suite={suite} />
+      ) : building.kind === 'safehouse' ? (
         <group>
           <Box at={[-4.7, 0.15, 0]} size={[2, 0.3, 3]} color="#7e7461" />
           <Box at={[4.7, 0.5, -1]} size={[1.5, 1, 1.5]} color="#88775c" />
@@ -166,9 +188,15 @@ export const BuildingInterior = memo(function BuildingInterior({
           color="#e1bc76"
         >{`Don ${building.family === 'moretti' ? 'Moretti' : building.family === 'volkov' ? 'Volkov' : 'Doyle'}`}</WorldText>
       )}
-      <group position={[0, 0, -5.5]}>
-        <CharacterModel config={npcAppearance(appearanceSeed(building.id))} />
-      </group>
+      {(!suiteConfig || suite?.tenant) && (
+        <group position={[0, 0, -5.5]}>
+          <CharacterModel
+            config={npcAppearance(
+              appearanceSeed(suiteConfig ? `${suiteConfig.id}-${suite?.tenant}` : building.id),
+            )}
+          />
+        </group>
+      )}
       <PlayerControls
         enabled={enabled}
         navigation={INTERIOR_NAVIGATION}
