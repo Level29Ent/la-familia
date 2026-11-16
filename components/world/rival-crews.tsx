@@ -4,6 +4,8 @@ import { memo, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import type { Group } from 'three'
 import { FAMILIES, patrolPosition } from '@/lib/game/city'
+import { NpcHuman } from './npc-human'
+import { npcAppearance } from '@/lib/game/npc-appearance'
 import { WorldText } from './world-text'
 
 function Patrol({
@@ -15,6 +17,8 @@ function Patrol({
   active: boolean
   onEncounter?: () => void
 }) {
+  const motion = useRef({ moving: active, sprint: false })
+  motion.current.moving = active
   const ref = useRef<Group>(null)
   const family = FAMILIES[Math.floor(index / 4)]
   const start = patrolPosition(index, 0)
@@ -34,30 +38,7 @@ function Patrol({
       ref={ref}
       position={[start[0], 0, start[1]]}
     >
-      <mesh position={[0, 1.1, 0]}>
-        <boxGeometry args={[0.52, 0.8, 0.32]} />
-        <meshStandardMaterial color={family.color} />
-      </mesh>
-      <mesh position={[0, 1.72, 0]}>
-        <sphereGeometry args={[0.22, 10, 8]} />
-        <meshStandardMaterial color="#c49a77" />
-      </mesh>
-      <mesh position={[0, 1.95, 0]}>
-        <cylinderGeometry args={[0.32, 0.32, 0.1, 10]} />
-        <meshStandardMaterial color="#25282e" />
-      </mesh>
-      {[-1, 1].map((side) => (
-        <group key={side}>
-          <mesh position={[side * 0.16, 0.38, 0]}>
-            <boxGeometry args={[0.18, 0.76, 0.22]} />
-            <meshStandardMaterial color="#30333b" />
-          </mesh>
-          <mesh position={[side * 0.37, 1.06, 0]}>
-            <boxGeometry args={[0.16, 0.65, 0.22]} />
-            <meshStandardMaterial color={family.color} />
-          </mesh>
-        </group>
-      ))}
+      <NpcHuman config={npcAppearance(index + 50)} motion={motion} accent={family.color} />
       <WorldText position={[0, 2.35, 0]} fontSize={0.2} color={family.color}>
         {family.name}
       </WorldText>

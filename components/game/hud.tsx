@@ -151,7 +151,7 @@ export function Hud({
       <button
         type="button"
         onClick={onOpenLedger}
-        className="pointer-events-auto absolute top-80 left-4 max-w-[55%] rounded-xl border border-primary/20 bg-background/80 p-2 text-left backdrop-blur-md md:top-56 md:p-3 md:left-6"
+        className="pointer-events-auto absolute top-80 left-4 max-w-[55%] rounded-xl border border-primary/20 bg-background/80 p-2 text-left backdrop-blur-md md:top-80 md:p-3 md:left-6"
       >
         <p className="hidden text-[10px] tracking-[0.18em] text-primary uppercase md:block">
           City empire · {properties}/{BUSINESSES.length} properties

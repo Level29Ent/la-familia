@@ -5,9 +5,11 @@ import { Canvas } from '@react-three/fiber'
 import { SceneUnavailable } from '@/components/game/scene-boundary'
 import { INTERIOR_NAVIGATION, type CityBuilding } from '@/lib/game/city'
 import type { CharacterConfig } from '@/lib/game/character'
-import { DEFAULT_CHARACTER } from '@/lib/game/character'
+import { npcAppearance, appearanceSeed } from '@/lib/game/npc-appearance'
 import { PlayerControls } from './player-controls'
 import { CharacterModel } from './character-model'
+import { useSurfaceTexture } from './surface-texture'
+import { InteriorFinishes } from './architectural-details'
 import { EastsideFittings } from './eastside-fittings'
 import { WorldText } from './world-text'
 
@@ -51,6 +53,11 @@ export const BuildingInterior = memo(function BuildingInterior({
   enabled: boolean
   onFocusChange: (id: string | null) => void
 }) {
+  const floorTexture = useSurfaceTexture(
+    building.theme === 'home' || building.theme === 'bar' ? 'wood' : 'tile',
+    3,
+    3,
+  )
   const home = building.theme === 'home',
     bar = building.theme === 'bar',
     workshop = building.theme === 'workshop'
@@ -63,11 +70,15 @@ export const BuildingInterior = memo(function BuildingInterior({
       camera={{ fov: 70, near: 0.1, far: 60 }}
       aria-label={`Walkable interior of ${building.name}`}
     >
+      <InteriorFinishes theme={building.theme} />
       <color attach="background" args={['#4c5756']} />
       <ambientLight intensity={1.8} />
       <hemisphereLight args={['#fff1cf', '#766657', 1.8]} />
       <pointLight position={[0, 4.5, 0]} intensity={35} distance={20} color="#ffdfb0" />
-      <Box at={[0, -0.1, 0]} size={[14, 0.2, 14]} color={workshop ? '#77796f' : '#866a50'} />
+      <mesh position={[0, -0.1, 0]}>
+        <boxGeometry args={[14, 0.2, 14]} />
+        <meshStandardMaterial map={floorTexture} color={workshop ? '#77796f' : '#866a50'} roughness={0.7} />
+      </mesh>
       <Box at={[0, 4.9, 0]} size={[14, 0.2, 14]} color="#e0d0b0" />
       <Box at={[0, 2.4, -7]} size={[14, 4.8, 0.2]} color={building.color} />
       {[-7, 7].map((x) => (
@@ -96,7 +107,13 @@ export const BuildingInterior = memo(function BuildingInterior({
             : 'OPEN FOR BUSINESS · SPEAK TO THE PROPRIETOR'}
       </WorldText>
       {building.kind === 'safehouse' ? (
-        <group><Box at={[-4.7,0.15,0]} size={[2,0.3,3]} color="#7e7461" /><Box at={[4.7,0.5,-1]} size={[1.5,1,1.5]} color="#88775c" /><WorldText position={[0,2.8,-6.7]} fontSize={0.32} color="#efd49e">ABANDONED · FOR SALE · $250</WorldText></group>
+        <group>
+          <Box at={[-4.7, 0.15, 0]} size={[2, 0.3, 3]} color="#7e7461" />
+          <Box at={[4.7, 0.5, -1]} size={[1.5, 1, 1.5]} color="#88775c" />
+          <WorldText position={[0, 2.8, -6.7]} fontSize={0.32} color="#efd49e">
+            ABANDONED · FOR SALE · $250
+          </WorldText>
+        </group>
       ) : home ? (
         <group>
           <Box at={[-4.7, 0.6, -0.8]} size={[2.4, 1.2, 3.4]} color="#657a6f" />
@@ -108,7 +125,11 @@ export const BuildingInterior = memo(function BuildingInterior({
       ) : (
         <group>
           <Shelf x={-4.8} />
-          {['garage', 'taxidepot', 'florist', 'fishmarket', 'grocer', 'warehouse', 'jazz', 'radio'].includes(building.id) ? <EastsideFittings id={building.id} /> : bar ? (
+          {['garage', 'taxidepot', 'florist', 'fishmarket', 'grocer', 'warehouse', 'jazz', 'radio'].includes(
+            building.id,
+          ) ? (
+            <EastsideFittings id={building.id} />
+          ) : bar ? (
             <group>
               {[-2, 0, 2].map((z) => (
                 <mesh key={z} position={[4.7, 0.6, z]}>
@@ -136,11 +157,15 @@ export const BuildingInterior = memo(function BuildingInterior({
       )}
       <Box at={[0, 0.7, -4]} size={[4.7, 1.4, 1.2]} color={bar ? '#6b4432' : '#5f5040'} />
       <Box at={[0, 1.45, -4]} size={[4.9, 0.12, 1.4]} color="#c3a776" />
-      {building.kind === 'headquarters' && <WorldText position={[0,2.5,-5.5]} fontSize={0.28} color="#e1bc76">{`Don ${building.family === 'moretti' ? 'Moretti' : building.family === 'volkov' ? 'Volkov' : 'Doyle'}`}</WorldText>}
+      {building.kind === 'headquarters' && (
+        <WorldText
+          position={[0, 2.5, -5.5]}
+          fontSize={0.28}
+          color="#e1bc76"
+        >{`Don ${building.family === 'moretti' ? 'Moretti' : building.family === 'volkov' ? 'Volkov' : 'Doyle'}`}</WorldText>
+      )}
       <group position={[0, 0, -5.5]}>
-        <CharacterModel
-          config={{ ...DEFAULT_CHARACTER, jacket: home ? 2 : building.kind === 'headquarters' ? 1 : 3 }}
-        />
+        <CharacterModel config={npcAppearance(appearanceSeed(building.id))} />
       </group>
       <PlayerControls
         enabled={enabled}

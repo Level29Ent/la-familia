@@ -1,7 +1,9 @@
 'use client'
 
+import { useSurfaceTexture } from './surface-texture'
+import { ArchitecturalDetails } from './architectural-details'
 import { CharacterModel } from './character-model'
-import { DEFAULT_CHARACTER } from '@/lib/game/character'
+import { npcAppearance } from '@/lib/game/npc-appearance'
 import { memo, useMemo, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { WorldText } from './world-text'
@@ -42,6 +44,7 @@ type Props = {
 
 function BuildingImpl({ placement, style, name, status, litLevel, focused, seed }: Props) {
   const { width, height, depth, wall, trim, neon } = style
+  const surface=useSurfaceTexture('brick',width/3,height/3)
   const front = depth / 2
   const locked = status === 'locked'
   const isCityHall = placement.id === 'cityhall'
@@ -73,9 +76,10 @@ function BuildingImpl({ placement, style, name, status, litLevel, focused, seed 
 
   return (
     <group position={placement.position} rotation={[0, placement.rotationY, 0]}>
+      <ArchitecturalDetails width={width} height={height} depth={depth} trim={trim} seed={seed}/>
       <mesh position={[0, height / 2, 0]}>
         <boxGeometry args={[width, height, depth]} />
-        <meshStandardMaterial color={wall} roughness={0.95} />
+        <meshStandardMaterial map={surface} color={wall} roughness={0.95} />
       </mesh>
       <mesh position={[0, height + 0.25, 0]}>
         <boxGeometry args={[width + 0.4, 0.5, depth + 0.4]} />
@@ -235,14 +239,7 @@ function Capo({ position, seed }: { position: [number, number, number]; seed: nu
   return (
     <group position={position}>
       <CharacterModel
-        config={{
-          ...DEFAULT_CHARACTER,
-          skin: seed % 6,
-          jacket: seed % 6,
-          hair: seed % 4,
-          facialHair: seed % 3,
-          hat: seed % 3,
-        }}
+        config={npcAppearance(seed+70)}
       />
     </group>
   )

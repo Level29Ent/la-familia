@@ -14,10 +14,12 @@ export function InteriorHud({
   focusedId,
   buyAmount,
   onExit,
+  onMap,
 }: {
   building: CityBuilding
   focusedId: string | null
   buyAmount: BuyAmount
+  onMap: () => void
   onExit: () => void
 }) {
   const { state, dispatch } = useGame()
@@ -40,12 +42,22 @@ export function InteriorHud({
         </button>
       </header>
       <div className="flex flex-col gap-3">
+        <button
+          type="button"
+          onClick={onMap}
+          className="pointer-events-auto self-start rounded-lg border border-border bg-background/90 p-2 text-xs text-primary"
+        >
+          Map menu · Tab / G
+        </button>
         <section
           className="pointer-events-auto max-h-[42dvh] w-full max-w-lg self-end overflow-y-auto rounded-xl border border-border bg-background/95 p-3"
           aria-label="Interior activities"
         >
           {building.kind === 'business' ? (
-            <><FocusCard focusedId={building.id} buyAmount={buyAmount} onOpenSafeHouse={() => {}} />{building.id === 'garage' && <FleetPanel />}</>
+            <>
+              <FocusCard focusedId={building.id} buyAmount={buyAmount} onOpenSafeHouse={() => {}} />
+              {building.id === 'garage' && <FleetPanel />}
+            </>
           ) : building.kind === 'headquarters' ? (
             <RivalPanel familyId={building.family} />
           ) : (

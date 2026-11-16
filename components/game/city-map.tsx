@@ -1,22 +1,36 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
-import { AVENUES, CITY_BUILDINGS, CROSS_STREETS, FAMILIES } from '@/lib/game/city'
+import { useEffect, useRef, useState } from 'react'
+import { CITY_BUILDINGS } from '@/lib/game/city'
+import { StreetMap } from './street-map'
+import { mapBuildings, nearestAddress, type MapPosition, type MapFilter } from '@/lib/game/map'
 import { DynastyPanel } from './dynasty-panel'
 import { FleetPanel } from './fleet-panel'
 import { RivalPanel } from './rival-panel'
 
 export function CityMap({
+  currentInterior,
+  destination,
+  onDestination,
   selectedNpc,
   position,
   onTravel,
   onClose,
 }: {
+  currentInterior?: string
+  destination?: string | null
+  onDestination: (id: string | null) => void
   selectedNpc?: string | null
-  position: { x: number; z: number }
+  position: MapPosition
   onTravel: (id: string) => void
   onClose: () => void
 }) {
+  const [tab, setTab] = useState(selectedNpc ? 'family' : 'map')
+  const [filter, setFilter] = useState<MapFilter>('all')
+  const [search, setSearch] = useState('')
+  const matches = mapBuildings(filter, search)
+  const nearest = nearestAddress(position)
+  const target = CITY_BUILDINGS.find((b) => b.id === destination)
   const ref = useRef<HTMLDialogElement>(null)
   useEffect(() => {
     const el = ref.current!
@@ -49,64 +63,134 @@ export function CityMap({
           Close city map
         </button>
       </header>
-      <div className="mt-4 grid gap-6 md:grid-cols-[1fr_0.8fr]">
-        <section>
-          <svg
-            viewBox="-48 -30 208 136"
-            role="img"
-            aria-label="City street grid with buildings; gold dot marks your position"
-            className="w-full rounded-xl bg-[#192d31]"
+      <nav aria-label="City menu sections" className="sticky top-20 z-10 flex gap-2 bg-background py-2">
+        {[
+          ['map', 'Map'],
+          ['family', 'Family & law'],
+          ['garage', 'Garage'],
+        ].map(([id, label]) => (
+          <button
+            key={id}
+            type="button"
+            aria-pressed={tab === id}
+            onClick={() => setTab(id)}
+            className={`rounded-lg border px-4 py-2 text-sm ${tab === id ? 'border-primary text-primary' : 'border-border'}`}
           >
-            {AVENUES.map((x) => (
-              <path key={x} d={`M ${x} -26 V 98`} stroke="#52636a" strokeWidth="9" />
-            ))}
-            {CROSS_STREETS.map((z) => (
-              <path key={z} d={`M -44 ${-z} H 152`} stroke="#52636a" strokeWidth="9" />
-            ))}
-            {CITY_BUILDINGS.map((b) => (
-              <rect
-                key={b.id}
-                x={b.position[0] - 5}
-                y={-b.position[2] - 4.5}
-                width="10"
-                height="9"
-                rx="1"
-                fill={
-                  b.kind === 'headquarters'
-                    ? FAMILIES.find((f) => f.id === b.family)?.color
-                    : b.kind === 'home'
-                      ? '#a58c6d'
-                      : b.kind === 'safehouse'
-                        ? '#cfa952'
-                        : '#759e8d'
-                }
+            {label}
+          </button>
+        ))}
+      </nav>
+      <div className="mt-4 grid gap-6 md:grid-cols-[1fr_0.8fr]">
+        {tab === 'map' && (
+          <section className="md:col-span-2">
+            <p role="status" className="mb-3 text-sm text-primary">
+              You are here: {currentInterior ? `Inside ${currentInterior} · ` : ''}{nearest.district} · near {nearest.name} · X {position.x.toFixed(1)}, Z{' '}
+              {position.z.toFixed(1)}
+            </p>
+            <div className="h-[40dvh] min-h-48">
+              <StreetMap
+                position={position}
+                destination={destination}
+                onSelect={onDestination}
+                visibleIds={matches.map((b) => b.id)}
+              />
+            </div>
+            <p className="my-2 text-xs text-muted-foreground">
+              Gold arrow: you · Green: businesses · Tan: homes · Gold building: safe house · Family colors:
+              rival clubs. North is up. Dashed line is a bearing, not a collision-free route.
+            </p>
+            {target && (
+              <section
+                aria-label="Tracked destination"
+                className="my-3 rounded border border-primary/40 p-3 text-sm"
               >
-                <title>{b.name}</title>
-              </rect>
-            ))}
-            <circle cx={position.x} cy={-position.z} r="2" fill="#ffda65" stroke="white" strokeWidth="0.5" />
-          </svg>
-          <p className="mt-2 text-xs text-muted-foreground">
-            Green: businesses · Tan: homes · Gold: safe house · Family colors: rival clubs. Travel brings you
-            to the door, not inside. Walk anywhere with WASD; E enters a nearby building.
-          </p>
-          <div className="mt-4 grid grid-cols-2 gap-2">
-            {CITY_BUILDINGS.map((b) => (
-              <button
-                key={b.id}
-                type="button"
-                onClick={() => onTravel(b.id)}
-                className="rounded-lg border border-border bg-card px-3 py-2 text-left hover:border-primary"
+                <strong>{target.name}</strong> ·{' '}
+                {Math.round(Math.hypot(position.x - target.door[0], position.z - target.door[1]))}m away ·{' '}
+                {target.district}
+                <button type="button" className="ml-3 underline" onClick={() => onDestination(null)}>
+                  Clear destination
+                </button>
+              </section>
+            )}
+            <div className="my-3 flex flex-wrap gap-2">
+              <input
+                aria-label="Search city destinations"
+                placeholder="Search name or district"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="min-w-0 flex-1 rounded border border-border bg-card p-2"
+              />
+              <select
+                aria-label="Map building filter"
+                value={filter}
+                onChange={(e) => setFilter(e.target.value as MapFilter)}
+                className="rounded border border-border bg-card p-2"
               >
-                <span className="block text-sm text-primary">Travel to {b.name}</span>
-                <span className="text-[11px] text-muted-foreground">
-                  {b.district} · {b.kind}
-                </span>
-              </button>
-            ))}
+                {[
+                  ['all', 'All places'],
+                  ['business', 'Businesses'],
+                  ['home', 'Homes'],
+                  ['headquarters', 'Rival clubs'],
+                  ['safehouse', 'Safe house'],
+                ].map(([id, label]) => (
+                  <option key={id} value={id}>
+                    {label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {matches.length} destinations · Walk anywhere along the streets, track a bearing, or travel to
+              an entrance.
+            </p>
+            {!matches.length && (
+              <p className="my-3 text-sm text-muted-foreground">
+                No matching destinations. Try another name or district.
+              </p>
+            )}
+            <div className="mt-4 grid grid-cols-2 gap-2">
+              {matches.map((b) => (
+                <article
+                  key={b.id}
+                  id={`destination-${b.id}`}
+                  className="rounded-lg border border-border bg-card p-3"
+                >
+                  <h3 className="text-sm text-primary">{b.name}</h3>
+                  <p className="text-[11px] text-muted-foreground">
+                    {b.district} · {b.kind}
+                  </p>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      onClick={() => onDestination(b.id)}
+                      className="rounded border border-primary/30 px-2 py-1 text-xs"
+                    >
+                      Track {b.name}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => onTravel(b.id)}
+                      className="rounded border border-border px-2 py-1 text-xs"
+                    >
+                      Travel to {b.name}
+                    </button>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </section>
+        )}
+        {tab === 'family' && (
+          <div className="md:col-span-2">
+            <DynastyPanel selectedNpc={selectedNpc} />
+            <RivalPanel />
           </div>
-        </section>
-        <div><DynastyPanel selectedNpc={selectedNpc} /><FleetPanel /><RivalPanel /></div>
+        )}
+        {tab === 'garage' && (
+          <div className="md:col-span-2">
+            <FleetPanel />
+          </div>
+        )}
       </div>
     </dialog>
   )

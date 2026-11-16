@@ -14,11 +14,13 @@ export function SafeHouseHud({
   onShop,
   onCharacter,
   onExit,
+  onMap,
 }: {
   focusedId: string | null
   onVault: () => void
   onShop: () => void
   onCharacter: () => void
+  onMap: () => void
   onExit: () => void
 }) {
   const { state } = useGame()
@@ -29,12 +31,21 @@ export function SafeHouseHud({
           <p className="flex items-center gap-2 text-xs tracking-widest text-primary uppercase">
             <House className="size-4" /> Inside your safe house
           </p>
-          <h1 className="mt-1 font-serif text-2xl">{ESTATES[state.dynasty.estate]?.name ?? 'Abandoned property · For sale'}</h1>
+          <h1 className="mt-1 font-serif text-2xl">
+            {ESTATES[state.dynasty.estate]?.name ?? 'Abandoned property · For sale'}
+          </h1>
           <p className="text-xs text-muted-foreground">
             Wallet {formatMoney(state.cash)} · Vault {formatMoney(state.safeHouse.balance)}
           </p>
         </div>
         <div className="pointer-events-auto flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={onMap}
+            className="rounded-full border border-border bg-background/85 px-3 py-2 text-sm"
+          >
+            Map menu · Tab / G
+          </button>
           <button
             type="button"
             onClick={onCharacter}
@@ -72,7 +83,9 @@ export function SafeHouseHud({
         className="absolute top-1/2 left-1/2 size-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/80 ring-2 ring-black/40"
       />
       <div className="flex flex-col items-center gap-3">
-        <div className="pointer-events-auto max-h-[28dvh] w-full max-w-xl self-end overflow-y-auto"><EstatePanel /></div>
+        <div className="pointer-events-auto max-h-[28dvh] w-full max-w-xl self-end overflow-y-auto">
+          <EstatePanel />
+        </div>
         {focusedId === 'vault' && state.dynasty.estate >= 0 ? (
           <button
             type="button"

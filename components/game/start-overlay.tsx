@@ -10,7 +10,7 @@ const CONTROLS = [
   ['F', 'Buy more / acquire'],
   ['Q', 'Hire a capo'],
   ['1 - 4', 'Buy x1, x10, x100, Max'],
-  ['G / M', 'City map & rivals / ledger'],
+  ['Tab / G', 'Map, family orders & garage'],
   ['H', 'Visit your safe house & vault'],
   ['C', 'Customize your character'],
   ['E / Space', 'Enter or exit owned sedan / brake'],

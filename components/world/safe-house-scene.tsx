@@ -1,6 +1,8 @@
 'use client'
 
 import { ESTATES } from '@/lib/game/dynasty'
+import { useSurfaceTexture } from './surface-texture'
+import { InteriorFinishes } from './architectural-details'
 import { EstateDetails } from './estate-details'
 import { InspectionCamera, type InspectionView } from './inspection-camera'
 
@@ -56,6 +58,7 @@ export function SafeHouseScene({
   vaultOpen: boolean
   onFocusChange: (id: string | null) => void
 }) {
+  const floorTexture=useSurfaceTexture(estateTier>=3?'tile':'wood',3,3)
   const wardrobeOwned = assets.includes('wardrobe')
   const navigation = useMemo(
     () => goodLifeRoomNavigation(wardrobeOwned ? ['wardrobe'] : [], navigationOverride ?? ROOM_NAVIGATION),
@@ -76,13 +79,14 @@ export function SafeHouseScene({
       camera={{ fov: 70, near: 0.1, far: 50 }}
       aria-label="Walkable 3D safe house lounge with a vault and street exit"
     >
+      <InteriorFinishes theme="home"/>
       <EstateDetails tier={estateTier} />
       <color attach="background" args={['#19252b']} />
       <ambientLight intensity={1.8} color="#e8e7df" />
       <hemisphereLight args={['#fff0d4', '#79634b', 1.5]} />
       <pointLight position={[0, 4.2, 0]} color={light} intensity={estateTier === 0 ? 25 : 48} distance={18} />
       <pointLight position={[-5, 2.4, -3]} color={light} intensity={15} distance={9} />
-      <Box at={[0, -0.12, 0]} size={[14, 0.2, 14]} color={estate.floor} />
+      <mesh position={[0,-.12,0]}><boxGeometry args={[14,.2,14]}/><meshStandardMaterial map={floorTexture} color={estate.floor} roughness={estateTier>=3?.4:.8}/></mesh>
       {Array.from({ length: 15 }, (_, i) => (
         <Box key={i} at={[-7 + i, 0, 0]} size={[0.025, 0.015, 14]} color="#302b27" />
       ))}

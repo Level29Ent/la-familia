@@ -1,5 +1,6 @@
 'use client'
 
+import { VehicleDetails } from './vehicle-details'
 import type { VehicleKind } from '@/lib/game/vehicles'
 
 export function VintageCar({
@@ -17,6 +18,7 @@ export function VintageCar({
   const height = roadster ? 0.48 : 0.7
   return (
     <group position={position}>
+      <VehicleDetails kind={kind} color={color}/>
       <mesh position={[0, 0.6, 0]}>
         <boxGeometry args={[1.65, height, 3.7]} />
         <meshStandardMaterial color={color} metalness={0.6} roughness={0.35} />
