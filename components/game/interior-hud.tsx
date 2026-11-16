@@ -8,16 +8,21 @@ import { FleetPanel } from './fleet-panel'
 import { RivalPanel } from './rival-panel'
 import { TouchControls } from './touch-controls'
 import { ActivityPanel, RentalPanel, ScheduleRest } from './city-play-panel'
+import { SUITES, APARTMENT_BUILDINGS } from '@/lib/game/apartments'
 import { useGame } from './game-provider'
 
 export function InteriorHud({
   building,
+  currentSuiteId,
+  onApartments,
   focusedId,
   buyAmount,
   onExit,
   onMap,
   onTravel,
 }: {
+  currentSuiteId?: string | null
+  onApartments: () => void
   building: CityBuilding
   focusedId: string | null
   buyAmount: BuyAmount
@@ -33,7 +38,12 @@ export function InteriorHud({
           <p className="text-[10px] uppercase tracking-widest text-muted-foreground">
             {building.district} · {building.kind}
           </p>
-          <h1 className="font-serif text-xl text-primary">{building.name}</h1>
+          <h1 className="font-serif text-xl text-primary">
+            {building.name}
+            {currentSuiteId
+              ? ` · Suite ${SUITES.find((s) => s.id === currentSuiteId)?.number}`
+              : ''}
+          </h1>
           <p className="text-xs text-muted-foreground">Wallet {formatMoney(state.cash)}</p>
         </div>
         <button
@@ -56,6 +66,21 @@ export function InteriorHud({
           className="pointer-events-auto max-h-[42dvh] w-full max-w-lg self-end overflow-y-auto rounded-xl border border-border bg-background/95 p-3"
           aria-label="Interior activities"
         >
+          {APARTMENT_BUILDINGS.some((b) => b.id === building.id) && (
+            <div className="mb-3 rounded-lg border border-primary/30 p-3">
+              <h2 className="font-serif text-lg text-primary">Apartment suites</h2>
+              <p className="my-2 text-xs text-muted-foreground">
+                Own individual suites, choose tenants and renovate. Visit a leased suite to handle
+                tenant requests.
+              </p>
+              <button
+                className="rounded border border-primary/40 px-3 py-2 text-sm text-primary"
+                onClick={onApartments}
+              >
+                Manage suites & tenants
+              </button>
+            </div>
+          )}
           <ActivityPanel location={building.id} onTravel={onTravel} />
           {building.kind === 'home' && (
             <>

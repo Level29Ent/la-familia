@@ -1,3 +1,9 @@
+import {
+  initialApartments,
+  restoreApartments,
+  tickApartments,
+  type ApartmentState,
+} from './apartments'
 import { initialHarbor, restoreHarbor, type HarborState } from './harbor'
 import { initialPlay, restorePlay, tickPlay, type PlayState } from './city-play'
 import { initialDynasty, restoreDynasty, tickDynasty, type DynastyState } from './dynasty'
@@ -26,6 +32,7 @@ export type BusinessState = {
 }
 
 export type GameState = {
+  apartments: ApartmentState
   harbor: HarborState
   play: PlayState
   dynasty: DynastyState
@@ -62,6 +69,7 @@ export function createInitialState(respect = 0, lifetimeEarnings = 0, heists = 0
   }
   const now = Date.now()
   return {
+    apartments: initialApartments(),
     harbor: initialHarbor(),
     play: initialPlay(),
     dynasty: initialDynasty(),
@@ -204,18 +212,21 @@ export function tick(state: GameState, dtMs: number): GameState {
       operation = null
     }
   }
-  return tickPlay(
-    tickDynasty(
-      {
-        ...state,
-        city,
-        businesses,
-        operation,
-        operationsCompleted,
-        cash: state.cash + earned,
-        runEarnings: state.runEarnings + earned,
-        lifetimeEarnings: state.lifetimeEarnings + earned,
-      },
+  return tickApartments(
+    tickPlay(
+      tickDynasty(
+        {
+          ...state,
+          city,
+          businesses,
+          operation,
+          operationsCompleted,
+          cash: state.cash + earned,
+          runEarnings: state.runEarnings + earned,
+          lifetimeEarnings: state.lifetimeEarnings + earned,
+        },
+        dtMs,
+      ),
       dtMs,
     ),
     dtMs,
@@ -288,6 +299,7 @@ export function restoreState(saved: Partial<GameState>): GameState {
   return {
     ...fresh,
     ...saved,
+    apartments: restoreApartments(saved.apartments),
     harbor: restoreHarbor(saved.harbor),
     play: restorePlay(saved.play),
     dynasty: restoreDynasty(saved.dynasty, !saved.dynasty && !!saved.safeHouse),

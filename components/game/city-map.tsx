@@ -8,6 +8,7 @@ import { DynastyPanel } from './dynasty-panel'
 import { FleetPanel } from './fleet-panel'
 import { GuidePanel, TerritoryPanel, ActivityDirectory } from './city-play-panel'
 import { useGame } from './game-provider'
+import { ApartmentsPanel } from './apartments-panel'
 import { HarborPanel } from './harbor-panel'
 import { RivalPanel } from './rival-panel'
 
@@ -15,6 +16,8 @@ export function CityMap({
   initialSection,
   currentInterior,
   currentBuildingId,
+  currentSuiteId,
+  onSuiteTour,
   destination,
   onDestination,
   selectedNpc,
@@ -23,6 +26,8 @@ export function CityMap({
   onClose,
 }: {
   initialSection?: string
+  currentSuiteId?: string | null
+  onSuiteTour: (id: string) => void
   currentBuildingId?: string
   currentInterior?: string
   destination?: string | null
@@ -78,6 +83,7 @@ export function CityMap({
         {[
           ['map', 'Map'],
           ['harbor', 'Harbor story'],
+          ['apartments', 'Apartments'],
           ['family', 'Family & law'],
           ['garage', 'Garage'],
           ['territory', 'Territory'],
@@ -95,6 +101,7 @@ export function CityMap({
         ))}
       </nav>
       <div className="mt-4 grid gap-6 md:grid-cols-[1fr_0.8fr]">
+        {tab === 'apartments' && <ApartmentsPanel buildingId={currentBuildingId} currentSuiteId={currentSuiteId} onTour={onSuiteTour} />}
         {tab === 'harbor' && <HarborPanel location={currentBuildingId} onTravel={onTravel} />}
         {tab === 'map' && (
           <section className="md:col-span-2">
