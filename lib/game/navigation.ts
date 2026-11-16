@@ -86,3 +86,10 @@ export function followCamera(
     y: Math.min(3.9, 1.65 + Math.tan(pitch) * allowed),
   }
 }
+
+// Integrate slow frames with collision-safe slices, without a large jump after tab resume.
+export function simulationSteps(rawSeconds: number): number[] {
+  const elapsed = Number.isFinite(rawSeconds) ? Math.max(0, Math.min(rawSeconds, 0.25)) : 0
+  const count = Math.ceil(elapsed / 0.05)
+  return count ? Array.from({ length: count }, () => elapsed / count) : []
+}

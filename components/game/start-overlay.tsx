@@ -50,7 +50,7 @@ export function StartOverlay({ onStart, onCharacter }: { onStart: () => void; on
             La Familia
           </h1>
           <p className="text-pretty text-sm text-muted-foreground">
-            Fifteen city blocks. Sixty enterable buildings. Twenty-six businesses, thirty homes, and three rival families. Build your crew and claim the city.
+            Sixteen city blocks. Sixty-four enterable buildings. Thirty businesses, thirty homes, and three rival families. Build your crew and claim the city.
           </p>
         </div>
 
@@ -68,7 +68,7 @@ export function StartOverlay({ onStart, onCharacter }: { onStart: () => void; on
         </dl>
 
         <p className="text-center text-xs text-primary">
-          New: Own & lease apartment suites · Tenant requests · Furnished tours · Harbor story
+          New: Garden Market businesses · Hands-on shifts · Timed route challenges · Apartment empire
         </p>
         <button
           type="button"

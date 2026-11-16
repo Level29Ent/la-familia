@@ -1,6 +1,7 @@
 'use client'
 
 import { createContext, useContext, useEffect, useReducer, useRef, useState, type ReactNode } from 'react'
+import { challengeAction, type ChallengeAction } from '@/lib/game/challenges'
 import { apartmentAction, type ApartmentAction } from '@/lib/game/apartments'
 import { harborAction, type HarborAction } from '@/lib/game/harbor'
 import { playAction, type PlayAction } from '@/lib/game/city-play'
@@ -26,6 +27,7 @@ import {
 } from '@/lib/game/engine'
 
 type Action =
+  | ChallengeAction
   | ApartmentAction
   | HarborAction
   | PlayAction
@@ -48,6 +50,11 @@ type Action =
 function reducer(state: GameState, action: Action): GameState {
   if (state.dynasty.jailMs && !['tick', 'load', 'hardReset', 'bail', 'shelter'].includes(action.type)) return state
   switch (action.type) {
+    case 'challengeStart':
+    case 'challengeCancel':
+    case 'challengeMove':
+    case 'challengeCheck':
+      return challengeAction(state, action)
     case 'suiteVisit':
     case 'suiteBuy':
     case 'suiteLease':

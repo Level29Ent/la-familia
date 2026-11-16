@@ -173,7 +173,7 @@ test('heat leads to visible timed custody, finite fines, bail or free release; s
   assert.equal(tickDynasty(broke, 1000).cash, 0)
 })
 test('Garden Heights adds twelve accessible homes including apartment towers; recruit positions are outside buildings', () => {
-  const homes = CITY_BUILDINGS.filter((b) => b.district === 'Garden Heights')
+  const homes = CITY_BUILDINGS.filter((b) => b.district === 'Garden Heights' && b.kind === 'home')
   assert.equal(homes.length, 12)
   assert.ok(homes.filter((b) => b.name.includes('Apartments')).length >= 5)
   assert.ok(homes.some((b) => b.height >= 25))

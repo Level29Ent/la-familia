@@ -1,3 +1,4 @@
+import { initialChallenges, restoreChallenges, tickChallenges, type ChallengeState } from './challenges'
 import {
   initialApartments,
   restoreApartments,
@@ -32,6 +33,7 @@ export type BusinessState = {
 }
 
 export type GameState = {
+  challenges: ChallengeState
   apartments: ApartmentState
   harbor: HarborState
   play: PlayState
@@ -69,6 +71,7 @@ export function createInitialState(respect = 0, lifetimeEarnings = 0, heists = 0
   }
   const now = Date.now()
   return {
+    challenges: initialChallenges(),
     apartments: initialApartments(),
     harbor: initialHarbor(),
     play: initialPlay(),
@@ -212,7 +215,7 @@ export function tick(state: GameState, dtMs: number): GameState {
       operation = null
     }
   }
-  return tickApartments(
+  return tickChallenges(tickApartments(
     tickPlay(
       tickDynasty(
         {
@@ -230,7 +233,7 @@ export function tick(state: GameState, dtMs: number): GameState {
       dtMs,
     ),
     dtMs,
-  )
+  ), dtMs)
 }
 
 export function computeOfflineEarnings(state: GameState, now: number) {
@@ -299,6 +302,7 @@ export function restoreState(saved: Partial<GameState>): GameState {
   return {
     ...fresh,
     ...saved,
+    challenges: restoreChallenges(saved.challenges),
     apartments: restoreApartments(saved.apartments),
     harbor: restoreHarbor(saved.harbor),
     play: restorePlay(saved.play),

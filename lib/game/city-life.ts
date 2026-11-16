@@ -19,3 +19,7 @@ export function trafficPosition(
   const next = z + distance * direction
   return next > 25 ? -97 : next < -97 ? 25 : next
 }
+
+export function ambientPopulation(low: boolean, night: boolean) {
+  return { citizens: low ? 8 : night ? 12 : 24, traffic: low ? 3 : night ? 6 : 5 }
+}

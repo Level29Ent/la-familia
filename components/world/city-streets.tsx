@@ -9,8 +9,8 @@ import { WorldText } from './world-text'
 export const CityStreets = memo(function CityStreets() {
   return (
     <group>
-      <mesh position={[54, -0.2, -36]} rotation={[-Math.PI / 2, 0, 0]}>
-        <planeGeometry args={[210, 138]} />
+      <mesh position={[72, -0.2, -36]} rotation={[-Math.PI / 2, 0, 0]}>
+        <planeGeometry args={[246, 138]} />
         <meshStandardMaterial color="#89877b" />
       </mesh>
       {AVENUES.map((x) => (
@@ -29,8 +29,8 @@ export const CityStreets = memo(function CityStreets() {
       ))}
       {CROSS_STREETS.map((z, row) => (
         <group key={z}>
-          <mesh position={[54, 0, z]}>
-            <boxGeometry args={[210, 0.12, 10]} />
+          <mesh position={[72, 0, z]}>
+            <boxGeometry args={[246, 0.12, 10]} />
             <meshStandardMaterial color="#41474b" />
           </mesh>
           {AVENUES.map((x) => (
@@ -82,8 +82,8 @@ export const CityStreets = memo(function CityStreets() {
           </mesh>
         </group>
       ))}
-      <mesh position={[54, -0.12, -106]} rotation={[-Math.PI / 2, 0, 0]}>
-        <planeGeometry args={[210, 12]} />
+      <mesh position={[72, -0.12, -106]} rotation={[-Math.PI / 2, 0, 0]}>
+        <planeGeometry args={[246, 12]} />
         <meshStandardMaterial color="#468095" metalness={0.3} roughness={0.3} />
       </mesh>
     </group>

@@ -216,6 +216,13 @@ export const EASTSIDE_BUSINESSES: BusinessConfig[] = [
   { id: 'warehouse', name: 'Riverside Warehouse', description: 'Crates, freight contracts and guarded storage.', icon: 'warehouse', baseCost: 140000, costGrowth: 1.13, baseRevenue: 25000, cycleSeconds: 40, managerCost: 850000, managerName: 'Vera Dock', managerTitle: 'Moves the cargo' },
   { id: 'radio', name: 'WBLN Radio Studio', description: 'News, music and sponsored evening broadcasts.', icon: 'radio', baseCost: 750000, costGrowth: 1.13, baseRevenue: 130000, cycleSeconds: 65, managerCost: 4200000, managerName: 'June Waves', managerTitle: 'The voice of the city' },
 ]
+export const MARKET_BUSINESSES: BusinessConfig[] = [
+  { id: 'coffeehouse', name: 'Juniper Coffee House', description: 'Morning espresso, fresh pastries and familiar faces.', icon: 'bread', baseCost: 65, costGrowth: 1.1, baseRevenue: 12, cycleSeconds: 5, managerCost: 400, managerName: 'Cora Bean', managerTitle: 'Remembers every order' },
+  { id: 'barbershop', name: 'Crown & Comb', description: 'Sharp cuts, warm towels and neighborhood conversation.', icon: 'scissors', baseCost: 420, costGrowth: 1.11, baseRevenue: 65, cycleSeconds: 8, managerCost: 2500, managerName: 'Leon Crown', managerTitle: 'A steady hand' },
+  { id: 'furniture', name: 'Oak & Brass Furnishings', description: 'Restore vintage pieces for the growing apartment district.', icon: 'store', baseCost: 2200, costGrowth: 1.12, baseRevenue: 330, cycleSeconds: 15, managerCost: 14000, managerName: 'Mabel Oak', managerTitle: 'Makes old things new' },
+  { id: 'courieroffice', name: 'City Express Couriers', description: 'Dispatch parcels across every district.', icon: 'warehouse', baseCost: 8500, costGrowth: 1.12, baseRevenue: 1300, cycleSeconds: 20, managerCost: 52000, managerName: 'Felix Post', managerTitle: 'Never misses a stop' },
+]
+BUSINESSES.push(...MARKET_BUSINESSES)
 BUSINESSES.push(...EASTSIDE_BUSINESSES)
 BUSINESSES.sort((a, b) => a.baseCost - b.baseCost)
 

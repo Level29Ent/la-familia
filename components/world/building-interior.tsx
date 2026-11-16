@@ -12,6 +12,8 @@ import { useSurfaceTexture } from './surface-texture'
 import { InteriorIdentity } from './interior-identities'
 import { InteriorFinishes } from './architectural-details'
 import { EastsideFittings } from './eastside-fittings'
+import { MarketFittings } from './market-fittings'
+import { MARKET_BUSINESSES } from '@/lib/game/config'
 import { SuiteFittings } from './apartment-details'
 import { SUITES, type SuiteState } from '@/lib/game/apartments'
 import { WorldText } from './world-text'
@@ -48,11 +50,13 @@ function Shelf({ x }: { x: number }) {
 export const BuildingInterior = memo(function BuildingInterior({
   building,
   suiteId,
+  low = false,
   suite,
   character,
   enabled,
   onFocusChange,
 }: {
+  low?: boolean
   suiteId?: string
   suite?: SuiteState
   building: CityBuilding
@@ -76,7 +80,7 @@ export const BuildingInterior = memo(function BuildingInterior({
       frameloop={enabled ? 'always' : 'demand'}
       className="absolute inset-0 touch-none"
       fallback={<SceneUnavailable />}
-      dpr={[1, 1.5]}
+      dpr={low ? 1 : [1, 1.5]}
       camera={{ fov: 70, near: 0.1, far: 60 }}
       aria-label={`Walkable interior of ${building.name}${suiteConfig ? ` suite ${suiteConfig.number}` : ''}`}
     >
@@ -148,8 +152,9 @@ export const BuildingInterior = memo(function BuildingInterior({
         </group>
       ) : (
         <group>
-          {!/bakery|diner|tailor/.test(building.id)&&building.theme!=='office'&&<Shelf x={-4.8} />}
-          {['garage', 'taxidepot', 'florist', 'fishmarket', 'grocer', 'warehouse', 'jazz', 'radio'].includes(
+          {MARKET_BUSINESSES.some(b => b.id === building.id) && <MarketFittings id={building.id} />}
+          {!MARKET_BUSINESSES.some(b => b.id === building.id) && !/bakery|diner|tailor/.test(building.id)&&building.theme!=='office'&&<Shelf x={-4.8} />}
+          {MARKET_BUSINESSES.some(b => b.id === building.id) ? null : ['garage', 'taxidepot', 'florist', 'fishmarket', 'grocer', 'warehouse', 'jazz', 'radio'].includes(
             building.id,
           ) ? (
             <EastsideFittings id={building.id} />

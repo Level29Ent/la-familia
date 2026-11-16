@@ -5,6 +5,7 @@ import { useFrame } from '@react-three/fiber'
 import type { Group } from 'three'
 import type { GameState } from '@/lib/game/engine'
 import { CITY_BUILDINGS } from '@/lib/game/city'
+import { CHALLENGES } from '@/lib/game/challenges'
 import { HARBOR_MISSIONS } from '@/lib/game/harbor'
 import { npcAppearance } from '@/lib/game/npc-appearance'
 import { NpcHuman } from './npc-human'
@@ -15,6 +16,9 @@ export function NeighborhoodLife({ state, active }: { state: GameState; active: 
   const objective = HARBOR_MISSIONS[state.harbor.chapter]
   const target =
     objective && CITY_BUILDINGS.find((b) => b.id === objective.locations[state.harbor.step])
+  const run = state.challenges.run
+  const route = CHALLENGES.find(c => c.id === run?.id)
+  const routeTarget = run && route ? CITY_BUILDINGS.find(b => b.id === route.stops[run.checkpoint]) : undefined
   const marker = useRef<Group>(null)
   useFrame(({ clock }) => {
     if (marker.current && active)
@@ -22,6 +26,10 @@ export function NeighborhoodLife({ state, active }: { state: GameState; active: 
   })
   return (
     <group>
+      {routeTarget && <group position={[routeTarget.door[0], 0, routeTarget.door[1]]}>
+        <mesh position={[0,0.07,0]} rotation={[-Math.PI/2,0,0]}><ringGeometry args={[1.1,1.25,24]} /><meshBasicMaterial color="#89d9e3" /></mesh>
+        <WorldText position={[0,4.1,0]} fontSize={0.24} color="#b9f4ff">CITY EXPRESS CHECKPOINT</WorldText>
+      </group>}
       {target && (
         <group position={[target.door[0], 0, target.door[1]]}>
           <group ref={marker}>

@@ -32,11 +32,11 @@ const {
 const { driveCar, carExit } = require('../lib/game/good-life.ts')
 const inside = (p, o) => p.x > o.minX && p.x < o.maxX && p.z > o.minZ && p.z < o.maxZ
 
-test('fifteen blocks contain 60 non-overlapping, enterable buildings including homes, businesses and family clubs', () => {
-  assert.equal(CITY_BUILDINGS.length, 60)
-  assert.equal(new Set(CITY_BUILDINGS.map((b) => b.id)).size, 60)
+test('sixteen blocks contain 64 non-overlapping, enterable buildings including homes, businesses and family clubs', () => {
+  assert.equal(CITY_BUILDINGS.length, 64)
+  assert.equal(new Set(CITY_BUILDINGS.map((b) => b.id)).size, 64)
   assert.equal(CITY_BUILDINGS.filter((b) => b.kind === 'home').length, 30)
-  assert.equal(CITY_BUILDINGS.filter((b) => b.kind === 'business').length, 26)
+  assert.equal(CITY_BUILDINGS.filter((b) => b.kind === 'business').length, 30)
   assert.equal(CITY_BUILDINGS.filter((b) => b.kind === 'headquarters').length, 3)
   for (const b of CITY_BUILDINGS) {
     const nav = outsideBuilding(b.id),

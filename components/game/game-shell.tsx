@@ -21,6 +21,7 @@ import { GuidePanel } from './city-play-panel'
 import { CityFeedback } from './city-feedback'
 import { MiniMap } from './street-map'
 import { CustodyNotice } from './dynasty-panel'
+import { CitySoundProvider } from './city-sound'
 import { SUITES } from '@/lib/game/apartments'
 import { InteriorHud } from './interior-hud'
 
@@ -102,7 +103,10 @@ function World() {
     lastDrive.current = drivingNow.current ? { x: p.x, z: p.z } : null
     if (lastHarborPosition.current) {
       const meters = Math.hypot(p.x - lastHarborPosition.current.x, p.z - lastHarborPosition.current.z)
-      if (meters > 0 && meters <= 8) dispatch({ type: 'harborMove', meters, driving: drivingNow.current })
+      if (meters > 0 && meters <= 8) {
+        dispatch({ type: 'harborMove', meters, driving: drivingNow.current })
+        dispatch({ type: 'challengeMove', meters })
+      }
     }
     lastHarborPosition.current = p
     streetPosition.current = p
@@ -334,6 +338,7 @@ function World() {
       <SceneBoundary key={safeHouseOpen ? 'house' : (interior?.id ?? `city-${visit}`)}>
         {safeHouseOpen && state.dynasty.estate < 0 ? (
           <BuildingInterior
+            low={state.play.quality === 'low'}
             building={CITY_BUILDINGS.find((b) => b.id === 'safehouse')!}
             character={state.character}
             enabled={playing}
@@ -341,6 +346,7 @@ function World() {
           />
         ) : safeHouseOpen ? (
           <SafeHouseScene
+            low={state.play.quality === 'low'}
             assets={state.assets}
             estateTier={state.dynasty.estate}
             safeHouse={state.safeHouse}
@@ -352,6 +358,7 @@ function World() {
           />
         ) : interior ? (
           <BuildingInterior
+            low={state.play.quality === 'low'}
             suiteId={activeSuite ?? undefined}
             suite={state.apartments.suites.find(s => s.id === activeSuite)}
             building={interior}
@@ -432,6 +439,7 @@ function World() {
       {!started && <StartOverlay onStart={() => setStarted(true)} onCharacter={() => setCreatorOpen(true)} />}
       {interior && (
         <InteriorHud
+          onChallenges={() => { setMenuSection('challenges'); setSelectedNpc(null); setMapOpen(true) }}
           onOpenHarbor={() => { setMenuSection('harbor'); setSelectedNpc(null); setMapOpen(true) }}
           currentSuiteId={activeSuite}
           onApartments={() => { setMenuSection('apartments'); setSelectedNpc(null); setMapOpen(true) }}
@@ -489,7 +497,7 @@ function World() {
 export function GameShell() {
   return (
     <GameProvider>
-      <World />
+      <CitySoundProvider><World /></CitySoundProvider>
     </GameProvider>
   )
 }

@@ -1,4 +1,4 @@
-import { BUSINESSES, EASTSIDE_BUSINESSES } from './config'
+import { BUSINESSES, EASTSIDE_BUSINESSES, MARKET_BUSINESSES } from './config'
 import type { Navigation, Obstacle } from './navigation'
 
 export const FAMILIES = [
@@ -43,7 +43,7 @@ export type CityBuilding = {
   width: number
   depth: number
 }
-export const AVENUES = [-36, 0, 36, 72, 108, 144]
+export const AVENUES = [-36, 0, 36, 72, 108, 144, 180]
 export const CROSS_STREETS = [18, -18, -54, -90]
 const homes = [
   'Rosa Apartments',
@@ -63,7 +63,7 @@ const homes = [
 ]
 const district = ['Little Italy', 'Market Ward', 'Harbor Quarter']
 const inventory = [
-  ...BUSINESSES.filter((b) => !EASTSIDE_BUSINESSES.some((e) => e.id === b.id)).map((b) => ({ id: b.id, name: b.name, kind: 'business' as const })),
+  ...BUSINESSES.filter((b) => !EASTSIDE_BUSINESSES.some((e) => e.id === b.id) && !MARKET_BUSINESSES.some(e => e.id === b.id)).map((b) => ({ id: b.id, name: b.name, kind: 'business' as const })),
   { id: 'safehouse', name: 'Family Safe House', kind: 'safehouse' as const },
   ...FAMILIES.map((f) => ({
     id: `hq-${f.id}`,
@@ -95,12 +95,13 @@ catalog.push(
   ...['Riverside Terrace', 'Eastgate Apartments', 'Foundry House', 'Station Row'].map((name, i) => ({ id: `home-${15 + i}`, name, kind: 'home' as const })),
 )
 catalog.push(...['Olive Terrace', 'Grand Central Apartments', 'Saint James Court', 'Prospect Towers', 'Maple Cottage', 'Riverton Apartments', 'Crown Heights', 'Parkside Apartments', 'Birch Row', 'Regent Apartments', 'Westbrook House', 'Sky Garden Apartments'].map((name, i) => ({ id: `home-${19+i}`, name, kind: 'home' as const })))
+catalog.push(...MARKET_BUSINESSES.map(b => ({ id: b.id, name: b.name, kind: 'business' as const })))
 // Four buildings per block; Eastside extends the original grid one column east.
 export const CITY_BUILDINGS: CityBuilding[] = catalog.map((item, i) => {
   const block = Math.floor(i / 4),
     slot = i % 4
   const row = i < 36 ? Math.floor(block / 3) : Math.floor(((i - 36) % 12) / 4),
-    column = i < 36 ? block % 3 : i < 48 ? 3 : 4
+    column = i < 36 ? block % 3 : i < 48 ? 3 : i < 60 ? 4 : 5
   const x = -18 + column * 36 + (slot % 2 ? 8 : -8)
   const z = -row * 36 + (slot < 2 ? 8 : -8)
   const south = slot < 2
@@ -129,7 +130,7 @@ export const CITY_BUILDINGS: CityBuilding[] = catalog.map((item, i) => {
     depth: 9,
   }
 })
-export const CITY_BOUNDS = { minX: -43, maxX: 151, minZ: -97, maxZ: 25 }
+export const CITY_BOUNDS = { minX: -43, maxX: 187, minZ: -97, maxZ: 25 }
 export const CITY_OBSTACLES: Obstacle[] = CITY_BUILDINGS.map((b) => ({
   minX: b.position[0] - b.width / 2 - 0.45,
   maxX: b.position[0] + b.width / 2 + 0.45,

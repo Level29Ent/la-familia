@@ -8,6 +8,7 @@ import { FleetPanel } from './fleet-panel'
 import { RivalPanel } from './rival-panel'
 import { TouchControls } from './touch-controls'
 import { ActivityPanel, RentalPanel, ScheduleRest } from './city-play-panel'
+import { CitySound } from './city-sound'
 import { SUITES, APARTMENT_BUILDINGS } from '@/lib/game/apartments'
 import { useGame } from './game-provider'
 
@@ -16,6 +17,7 @@ export function InteriorHud({
   currentSuiteId,
   onApartments,
   onOpenHarbor,
+  onChallenges,
   focusedId,
   buyAmount,
   onExit,
@@ -25,6 +27,7 @@ export function InteriorHud({
   currentSuiteId?: string | null
   onApartments: () => void
   onOpenHarbor: () => void
+  onChallenges: () => void
   building: CityBuilding
   focusedId: string | null
   buyAmount: BuyAmount
@@ -84,6 +87,8 @@ export function InteriorHud({
               </button>
             </div>
           )}
+          <button type="button" onClick={onChallenges} className="mb-3 rounded-lg border border-primary/40 px-3 py-2 text-sm text-primary">Challenges & dispatch</button>
+          <CitySound />
           <ActivityPanel location={building.id} onTravel={onTravel} />
           {building.kind === 'home' && (
             <>

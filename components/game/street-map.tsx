@@ -22,7 +22,7 @@ export function StreetMap({
     target = CITY_BUILDINGS.find((b) => b.id === destination)
   return (
     <svg
-      viewBox="-48 -30 208 136"
+      viewBox="-48 -30 244 136"
       role="img"
       aria-label={
         compact
@@ -36,7 +36,7 @@ export function StreetMap({
           key={t.district}
           x={i < 3 ? -35 : i === 3 ? 73 : 109}
           y={i < 3 ? -17 + i * 36 : -17}
-          width={i < 3 ? 106 : 34}
+          width={i < 3 ? 106 : i === 4 ? 70 : 34}
           height={i < 3 ? 34 : 106}
           fill={t.control >= 75 ? '#bfa14e' : t.control > 0 ? '#8c6d40' : '#693d42'}
           opacity={0.3}
@@ -46,12 +46,12 @@ export function StreetMap({
           </title>
         </rect>
       ))}
-      <path d="M -44 104 H 154" stroke="#3b7180" strokeWidth="8" />
+      <path d="M -44 104 H 190" stroke="#3b7180" strokeWidth="8" />
       {AVENUES.map((x) => (
         <path key={x} d={`M ${x} -26 V 98`} stroke="#43555b" strokeWidth="8" />
       ))}
       {CROSS_STREETS.map((z) => (
-        <path key={z} d={`M -44 ${-z} H 152`} stroke="#43555b" strokeWidth="8" />
+        <path key={z} d={`M -44 ${-z} H 188`} stroke="#43555b" strokeWidth="8" />
       ))}
       {!compact &&
         ['LITTLE ITALY', 'MARKET WARD', 'HARBOR QUARTER', 'EASTSIDE', 'GARDEN HEIGHTS'].map((s, i) => (
@@ -130,7 +130,7 @@ export function StreetMap({
         stroke="white"
         strokeWidth="0.45"
       />
-      <text x="147" y="-22" fill="#f2e4bc" fontSize="4">
+      <text x="183" y="-22" fill="#f2e4bc" fontSize="4">
         N ↑
       </text>
     </svg>
