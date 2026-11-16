@@ -15,6 +15,7 @@ import { StartOverlay } from './start-overlay'
 import { SceneBoundary } from './scene-boundary'
 import { CITY_BUILDINGS, CITY_NAVIGATION, outsideBuilding, type CityBuilding } from '@/lib/game/city'
 import { CityMap } from './city-map'
+import { activeVehicle } from '@/lib/game/vehicles'
 import { InteriorHud } from './interior-hud'
 
 const CityScene = dynamic(() => import('@/components/world/city-scene').then((m) => m.CityScene), {
@@ -63,13 +64,14 @@ function World() {
   const [cityNavigation, setCityNavigation] = useState(CITY_NAVIGATION)
   const [visit, setVisit] = useState(0)
   const streetPosition = useRef({ x: CITY_NAVIGATION.start[0], z: CITY_NAVIGATION.start[2] })
-  const meetFamily = useCallback(() => setMapOpen(true), [])
+  const meetFamily = useCallback(() => { setDriving(false); setMapOpen(true) }, [])
   const reportPosition = useCallback((p: { x: number; z: number }) => {
     streetPosition.current = p
   }, [])
   const [ledgerOpen, setLedgerOpen] = useState(false)
   const [buyAmount, setBuyAmount] = useState<BuyAmount>(1)
 
+  const vehicle = activeVehicle(state)
   const badges = ledgerBadges(state)
   const alerts = badges.capos + badges.upgrades + badges.family + badges.empire
   const playing =
@@ -166,6 +168,7 @@ function World() {
       return
     }
     if (e.code === 'KeyG' && !ledgerOpen) {
+      setDriving(false)
       setMapOpen(true)
       return
     }
@@ -186,7 +189,7 @@ function World() {
       return
     }
     if (focusedId === 'sedan') {
-      if (e.code === 'KeyE' && state.assets.includes('sedan')) setDriving(true)
+      if (e.code === 'KeyE' && !!vehicle) setDriving(true)
       return
     }
     if (e.code in BUY_KEYS) {
@@ -217,8 +220,8 @@ function World() {
   }, [])
 
   useEffect(() => {
-    if (!state.assets.includes('sedan')) setDriving(false)
-  }, [state.assets])
+    if (!vehicle) setDriving(false)
+  }, [vehicle?.id])
 
   return (
     <main className="relative h-dvh w-full overflow-hidden bg-background select-none">
@@ -243,7 +246,7 @@ function World() {
         ) : (
           <CityScene
             state={state}
-            driving={driving && state.assets.includes('sedan')}
+            driving={driving && !!vehicle}
             navigationOverride={cityNavigation}
             onPositionChange={reportPosition}
             onFamilyEncounter={meetFamily}
@@ -257,10 +260,10 @@ function World() {
         <Hud
           focusedId={focusedId}
           onEnterBuilding={enterBuilding}
-          onOpenMap={() => setMapOpen(true)}
+          onOpenMap={() => { setDriving(false); setMapOpen(true) }}
           driving={driving}
           onDrive={() => {
-            if (state.assets.includes('sedan')) {
+            if (!!vehicle) {
               setDriving((value) => !value)
               setFocusedId(null)
             }

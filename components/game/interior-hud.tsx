@@ -4,6 +4,7 @@ import type { CityBuilding } from '@/lib/game/city'
 import type { BuyAmount } from '@/lib/game/engine'
 import { formatMoney } from '@/lib/game/format'
 import { FocusCard } from './focus-card'
+import { FleetPanel } from './fleet-panel'
 import { RivalPanel } from './rival-panel'
 import { TouchControls } from './touch-controls'
 import { useGame } from './game-provider'
@@ -44,7 +45,7 @@ export function InteriorHud({
           aria-label="Interior activities"
         >
           {building.kind === 'business' ? (
-            <FocusCard focusedId={building.id} buyAmount={buyAmount} onOpenSafeHouse={() => {}} />
+            <><FocusCard focusedId={building.id} buyAmount={buyAmount} onOpenSafeHouse={() => {}} />{building.id === 'garage' && <FleetPanel />}</>
           ) : building.kind === 'headquarters' ? (
             <RivalPanel familyId={building.family} />
           ) : (

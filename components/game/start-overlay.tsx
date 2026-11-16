@@ -50,7 +50,7 @@ export function StartOverlay({ onStart, onCharacter }: { onStart: () => void; on
             La Familia
           </h1>
           <p className="text-pretty text-sm text-muted-foreground">
-            Nine city blocks. Thirty-six enterable buildings. Eighteen businesses, fourteen homes, and three rival families. Build your crew and claim the city.
+            Twelve city blocks. Forty-eight enterable buildings. Twenty-six businesses, eighteen homes, and three rival families. Build your crew and claim the city.
           </p>
         </div>
 

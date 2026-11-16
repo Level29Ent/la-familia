@@ -8,6 +8,7 @@ import type { CharacterConfig } from '@/lib/game/character'
 import { DEFAULT_CHARACTER } from '@/lib/game/character'
 import { PlayerControls } from './player-controls'
 import { CharacterModel } from './character-model'
+import { EastsideFittings } from './eastside-fittings'
 import { WorldText } from './world-text'
 
 type Point = [number, number, number]
@@ -105,7 +106,7 @@ export const BuildingInterior = memo(function BuildingInterior({
       ) : (
         <group>
           <Shelf x={-4.8} />
-          {bar ? (
+          {['garage', 'taxidepot', 'florist', 'fishmarket', 'grocer', 'warehouse', 'jazz', 'radio'].includes(building.id) ? <EastsideFittings id={building.id} /> : bar ? (
             <group>
               {[-2, 0, 2].map((z) => (
                 <mesh key={z} position={[4.7, 0.6, z]}>

@@ -4,6 +4,7 @@ import { useEffect, useRef } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
 import { input, MOVE_KEYS } from '@/lib/game/input'
 import * as THREE from 'three'
+import type { VEHICLES } from '@/lib/game/vehicles'
 import { VintageCar } from './vintage-car'
 import { SEDAN_START, driveCar, carExit, type CarPose } from '@/lib/game/good-life'
 import { CharacterModel } from './character-model'
@@ -21,16 +22,19 @@ export function PlayerControls({
   driving = false,
   onVehicleUpdate,
   onPositionChange,
+  vehicle,
 }: {
   enabled: boolean
   navigation: Navigation
   character: CharacterConfig
+  vehicle?: typeof VEHICLES[number] | null
   assets?: string[]
   driving?: boolean
   onVehicleUpdate?: (pose: CarPose) => void
   onPositionChange?: (position: { x: number; z: number }) => void
   onFocusChange: (id: string | null) => void
 }) {
+  const hasVehicle = vehicle !== undefined ? !!vehicle : assets.includes('sedan')
   const { camera, gl } = useThree()
   const look = useRef({ yaw: 0, pitch: 0 })
   const focusedRef = useRef<string | null>(null)
@@ -173,7 +177,7 @@ export function PlayerControls({
     const len = Math.hypot(mx, mz)
     const moving = len > 0
     if (driving) {
-      car.current = driveCar(car.current, forward, strafe, k.has('Space'), dt, navigation.bounds, navigation.obstacles)
+      car.current = driveCar(car.current, forward, strafe, k.has('Space'), dt, navigation.bounds, navigation.obstacles, vehicle ?? undefined)
       position.current = { x: car.current.x, z: car.current.z }
       look.current.yaw = car.current.yaw - Math.PI
       if (carModel.current) {
@@ -218,7 +222,7 @@ export function PlayerControls({
     camera.lookAt(view.current.set(position.current.x, 1.25 * character.height, position.current.z))
 
     const nearCar =
-      assets.includes('sedan') &&
+      hasVehicle &&
       Math.hypot(position.current.x - car.current.x, position.current.z - car.current.z) < 3.2
     const best = driving ? null : nearCar ? 'sedan' : focusedTarget(position.current, yaw, navigation)
     if (best !== focusedRef.current) {
@@ -232,9 +236,9 @@ export function PlayerControls({
       <group ref={player}>
         <CharacterModel config={character} motion={motion} assets={assets} />
       </group>
-      {assets.includes('sedan') && (
+      {hasVehicle && (
         <group ref={carModel} position={[car.current.x, 0, car.current.z]} rotation={[0, car.current.yaw, 0]}>
-          <VintageCar position={[0, 0.18, 0]} color="#213f68" />
+          <VintageCar position={[0, 0.18, 0]} color={vehicle?.color ?? '#213f68'} kind={vehicle?.kind} />
         </group>
       )}
     </>

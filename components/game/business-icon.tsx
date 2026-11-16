@@ -1,5 +1,9 @@
 import {
   Croissant,
+  Flower2,
+  Fish,
+  Warehouse,
+  Radio,
   Shirt,
   Store,
   Scissors,
@@ -21,6 +25,10 @@ import {
 
 const ICONS: Record<string, LucideIcon> = {
   bread: Croissant,
+  flower: Flower2,
+  fish: Fish,
+  warehouse: Warehouse,
+  radio: Radio,
   shirt: Shirt,
   store: Store,
   scissors: Scissors,

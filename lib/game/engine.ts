@@ -1,3 +1,4 @@
+import { initialFleet, restoreFleet, type FleetState } from './vehicles'
 import { initialCity, restoreCity, tickCity, type CityState } from './rivals'
 import { DEFAULT_CHARACTER, restoreCharacter, type CharacterConfig } from './character'
 import { initialDecor } from './decor'
@@ -22,6 +23,7 @@ export type BusinessState = {
 }
 
 export type GameState = {
+  fleet: FleetState
   city: CityState
   cash: number
   character: CharacterConfig
@@ -54,6 +56,7 @@ export function createInitialState(respect = 0, lifetimeEarnings = 0, heists = 0
   }
   const now = Date.now()
   return {
+    fleet: initialFleet(),
     city: initialCity(),
     cash: 0,
     character: { ...DEFAULT_CHARACTER },
@@ -269,6 +272,7 @@ export function restoreState(saved: Partial<GameState>): GameState {
   return {
     ...fresh,
     ...saved,
+    fleet: restoreFleet(saved.fleet, Array.isArray(saved.assets) ? saved.assets : []),
     city: restoreCity(saved.city),
     businesses: { ...fresh.businesses, ...saved.businesses },
     safeHouse: restoreSafeHouse(saved.safeHouse),

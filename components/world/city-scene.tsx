@@ -13,6 +13,7 @@ import { STREET_NAVIGATION, STREET_RETURN_NAVIGATION } from './layout'
 import { PlayerControls } from './player-controls'
 import { CityStreets } from './city-streets'
 import { RivalCrews } from './rival-crews'
+import { activeVehicle } from '@/lib/game/vehicles'
 import { CITY_BUILDINGS, FAMILIES } from '@/lib/game/city'
 
 const CITY_STYLES = Object.fromEntries(
@@ -108,6 +109,8 @@ export function CityScene({
       })}
 
       <PlayerControls
+        key={activeVehicle(state)?.id ?? 'walking'}
+        vehicle={activeVehicle(state)}
         onPositionChange={onPositionChange}
         onVehicleUpdate={onVehicleUpdate}
         assets={state.assets}

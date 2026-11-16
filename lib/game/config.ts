@@ -206,6 +206,17 @@ BUSINESSES.push(
   { id: 'pharmacy', name: 'Pearl Pharmacy', description: 'An apothecary serving the whole ward.', icon: 'store', baseCost: 600, costGrowth: 1.12, baseRevenue: 90, cycleSeconds: 10, managerCost: 3000, managerName: 'Doc Pearl', managerTitle: 'Knows the regulars' },
   { id: 'printing', name: 'Union Printing Works', description: 'Posters, newspapers, and discreet late editions.', icon: 'film', baseCost: 1800, costGrowth: 1.12, baseRevenue: 260, cycleSeconds: 14, managerCost: 9000, managerName: 'Ink Sullivan', managerTitle: 'Controls the presses' },
 )
+export const EASTSIDE_BUSINESSES: BusinessConfig[] = [
+  { id: 'florist', name: 'Rose & Thorn Florist', description: 'Bouquets, wedding orders and quiet messages.', icon: 'flower', baseCost: 35, costGrowth: 1.1, baseRevenue: 8, cycleSeconds: 4, managerCost: 240, managerName: 'Rose Marino', managerTitle: 'Arranges every detail' },
+  { id: 'fishmarket', name: 'East River Fish Market', description: 'Fresh catches delivered before dawn.', icon: 'fish', baseCost: 280, costGrowth: 1.11, baseRevenue: 45, cycleSeconds: 7, managerCost: 1800, managerName: 'Sal Brine', managerTitle: 'Knows the docks' },
+  { id: 'garage', name: 'Eastside Motor Works', description: 'Tune-ups, spare parts and the family motor pool.', icon: 'car', baseCost: 900, costGrowth: 1.12, baseRevenue: 140, cycleSeconds: 11, managerCost: 5600, managerName: 'Nora Sparks', managerTitle: 'Keeps the fleet rolling' },
+  { id: 'jazz', name: 'Blue Note Jazz Club', description: 'Live brass, velvet booths and late-night crowds.', icon: 'music', baseCost: 3500, costGrowth: 1.12, baseRevenue: 540, cycleSeconds: 16, managerCost: 22000, managerName: 'Duke Reed', managerTitle: 'Sets the tempo' },
+  { id: 'grocer', name: 'Orchard Grocers', description: 'Produce, pantry staples and neighborhood deliveries.', icon: 'store', baseCost: 11000, costGrowth: 1.12, baseRevenue: 1800, cycleSeconds: 22, managerCost: 70000, managerName: 'Alma Green', managerTitle: 'Stocks every shelf' },
+  { id: 'taxidepot', name: 'Yellow Cab Depot', description: 'A dispatch office serving every avenue.', icon: 'car', baseCost: 48000, costGrowth: 1.12, baseRevenue: 7500, cycleSeconds: 28, managerCost: 290000, managerName: 'Benny Meter', managerTitle: 'Always another fare' },
+  { id: 'warehouse', name: 'Riverside Warehouse', description: 'Crates, freight contracts and guarded storage.', icon: 'warehouse', baseCost: 140000, costGrowth: 1.13, baseRevenue: 25000, cycleSeconds: 40, managerCost: 850000, managerName: 'Vera Dock', managerTitle: 'Moves the cargo' },
+  { id: 'radio', name: 'WBLN Radio Studio', description: 'News, music and sponsored evening broadcasts.', icon: 'radio', baseCost: 750000, costGrowth: 1.13, baseRevenue: 130000, cycleSeconds: 65, managerCost: 4200000, managerName: 'June Waves', managerTitle: 'The voice of the city' },
+]
+BUSINESSES.push(...EASTSIDE_BUSINESSES)
 BUSINESSES.sort((a, b) => a.baseCost - b.baseCost)
 
 export const MILESTONES = [25, 50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000]

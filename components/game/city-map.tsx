@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react'
 import { AVENUES, CITY_BUILDINGS, CROSS_STREETS, FAMILIES } from '@/lib/game/city'
+import { FleetPanel } from './fleet-panel'
 import { RivalPanel } from './rival-panel'
 
 export function CityMap({
@@ -35,7 +36,7 @@ export function CityMap({
             City atlas & rival families
           </h2>
           <p className="text-xs text-muted-foreground">
-            9 blocks · 36 enterable buildings · 18 businesses · 14 homes · 3 rival clubs
+            12 blocks · 48 enterable buildings · 26 businesses · 18 homes · 3 rival clubs
           </p>
         </div>
         <button type="button" onClick={onClose} className="rounded border border-border px-3 py-2">
@@ -45,7 +46,7 @@ export function CityMap({
       <div className="mt-4 grid gap-6 md:grid-cols-[1fr_0.8fr]">
         <section>
           <svg
-            viewBox="-48 -30 136 136"
+            viewBox="-48 -30 172 136"
             role="img"
             aria-label="City street grid with buildings; gold dot marks your position"
             className="w-full rounded-xl bg-[#192d31]"
@@ -54,7 +55,7 @@ export function CityMap({
               <path key={x} d={`M ${x} -26 V 98`} stroke="#52636a" strokeWidth="9" />
             ))}
             {CROSS_STREETS.map((z) => (
-              <path key={z} d={`M -44 ${-z} H 80`} stroke="#52636a" strokeWidth="9" />
+              <path key={z} d={`M -44 ${-z} H 116`} stroke="#52636a" strokeWidth="9" />
             ))}
             {CITY_BUILDINGS.map((b) => (
               <rect
@@ -99,7 +100,7 @@ export function CityMap({
             ))}
           </div>
         </section>
-        <RivalPanel />
+        <div><FleetPanel /><RivalPanel /></div>
       </div>
     </dialog>
   )

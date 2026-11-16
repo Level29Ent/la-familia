@@ -2,15 +2,15 @@
 
 import { memo } from 'react'
 import { AVENUES, CROSS_STREETS } from '@/lib/game/city'
-import { PARKED_CAR_POSITIONS } from '@/lib/game/good-life'
+import { PARKED_VEHICLES } from '@/lib/game/vehicles'
 import { VintageCar } from './vintage-car'
 import { WorldText } from './world-text'
 
 export const CityStreets = memo(function CityStreets() {
   return (
     <group>
-      <mesh position={[18, -0.2, -36]} rotation={[-Math.PI / 2, 0, 0]}>
-        <planeGeometry args={[138, 138]} />
+      <mesh position={[36, -0.2, -36]} rotation={[-Math.PI / 2, 0, 0]}>
+        <planeGeometry args={[174, 138]} />
         <meshStandardMaterial color="#89877b" />
       </mesh>
       {AVENUES.map((x) => (
@@ -29,8 +29,8 @@ export const CityStreets = memo(function CityStreets() {
       ))}
       {CROSS_STREETS.map((z, row) => (
         <group key={z}>
-          <mesh position={[18, 0, z]}>
-            <boxGeometry args={[138, 0.12, 10]} />
+          <mesh position={[36, 0, z]}>
+            <boxGeometry args={[174, 0.12, 10]} />
             <meshStandardMaterial color="#41474b" />
           </mesh>
           {AVENUES.map((x) => (
@@ -66,8 +66,8 @@ export const CityStreets = memo(function CityStreets() {
           ))}
         </group>
       ))}
-      {PARKED_CAR_POSITIONS.map(([x, z], i) => (
-        <VintageCar key={i} position={[x, 0.15, z]} color={['#274743', '#653e3c', '#354861'][i]} />
+      {PARKED_VEHICLES.map(({ x, z, kind, color }, i) => (
+        <VintageCar key={i} position={[x, 0.15, z]} color={color} kind={kind} />
       ))}
       {/* Low-rise boundary landscaping, not fake inaccessible building shells. */}
       {Array.from({ length: 16 }, (_, i) => (
@@ -82,8 +82,8 @@ export const CityStreets = memo(function CityStreets() {
           </mesh>
         </group>
       ))}
-      <mesh position={[18, -0.12, -106]} rotation={[-Math.PI / 2, 0, 0]}>
-        <planeGeometry args={[138, 12]} />
+      <mesh position={[36, -0.12, -106]} rotation={[-Math.PI / 2, 0, 0]}>
+        <planeGeometry args={[174, 12]} />
         <meshStandardMaterial color="#468095" metalness={0.3} roughness={0.3} />
       </mesh>
     </group>

@@ -1,3 +1,4 @@
+import { PARKED_VEHICLES } from './vehicles'
 import type { Bounds } from './navigation'
 
 export const ASSET_LOCATIONS: Record<string, string> = {
@@ -13,7 +14,7 @@ export const ASSET_LOCATIONS: Record<string, string> = {
 }
 export type CarPose = { x: number; z: number; yaw: number; speed: number }
 export const SEDAN_START: CarPose = { x: -3.4, z: 7, yaw: Math.PI, speed: 0 }
-export const PARKED_CAR_POSITIONS: [number, number][] = [[-33, 7], [39, -29], [69, -67]]
+export const PARKED_CAR_POSITIONS: [number, number][] = PARKED_VEHICLES.map((v) => [v.x, v.z])
 export const PARKED_CARS = PARKED_CAR_POSITIONS.map(([x, z]) => ({ minX: x - 1.7, maxX: x + 1.7, minZ: z - 3, maxZ: z + 3 }))
 export function driveCar(
   car: CarPose,
@@ -23,13 +24,14 @@ export function driveCar(
   dt: number,
   bounds: Bounds,
   obstacles: Bounds[] = [],
+  handling = { speed: 16, acceleration: 9, steering: 1.5 },
 ): CarPose {
   const step = Math.max(0, Math.min(dt, 0.05))
-  let speed = car.speed + throttle * 9 * step
+  let speed = car.speed + throttle * handling.acceleration * step
   speed *= Math.exp(-(brake ? 12 : throttle === 0 ? 2.2 : 0.35) * step)
-  speed = Math.max(-5, Math.min(16, speed))
+  speed = Math.max(-5, Math.min(handling.speed, speed))
   if (Math.abs(speed) < 0.02) speed = 0
-  const yaw = car.yaw - steering * 1.5 * step * Math.min(1, Math.abs(speed) / 3) * Math.sign(speed)
+  const yaw = car.yaw - steering * handling.steering * step * Math.min(1, Math.abs(speed) / 3) * Math.sign(speed)
   const x = car.x + Math.sin(yaw) * speed * step
   const z = car.z + Math.cos(yaw) * speed * step
   const blocked =
